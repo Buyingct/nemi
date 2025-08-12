@@ -1,3 +1,55 @@
-<h1>Nemi. A Personalized Team to help you reach homeownership</h1>
-<p>deployed at 2025-08-10 03:07:11 UTC</p>
-<!-- test deploy -->
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Nemi – Your Personalized Path to Homeownership</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-white text-slate-900">
+  <header class="max-w-5xl mx-auto px-6 py-8">
+    <h1 class="text-3xl md:text-5xl font-extrabold tracking-tight">Nemi.</h1>
+  </header>
+
+  <main class="max-w-5xl mx-auto px-6 pb-20">
+    <section class="mt-6 md:mt-10">
+      <h2 class="text-3xl md:text-5xl font-bold leading-tight">
+        A personalized team to help you reach homeownership
+      </h2>
+      <p class="mt-4 text-lg text-slate-600 max-w-2xl">
+        We map your path, match you with lenders & programs, and keep you on track—
+        from credit to keys.
+      </p>
+    </section>
+
+    <section class="mt-10 md:mt-12">
+      <div class="rounded-2xl border border-slate-200 p-6 md:p-8 shadow-sm">
+        <h3 class="text-xl font-semibold">Get early access</h3>
+        <p class="mt-2 text-slate-600">Tell us where to reach you—no spam, ever.</p>
+
+        <form class="mt-6 grid gap-4 md:grid-cols-2" method="post" action="/submit.php">
+          <input class="w-full rounded-xl border border-slate-300 px-4 py-3 focus:outline-none focus:ring-2 focus:ring-slate-400"
+                 type="text" name="name" placeholder="Your name" required />
+          <input class="w-full rounded-xl border border-slate-300 px-4 py-3 focus:outline-none focus:ring-2 focus:ring-slate-400"
+                 type="email" name="email" placeholder="you@email.com" required />
+          <textarea class="md:col-span-2 w-full rounded-xl border border-slate-300 px-4 py-3 h-28 focus:outline-none focus:ring-2 focus:ring-slate-400"
+                    name="message" placeholder="What are you hoping Nemi can help with?"></textarea>
+          <button class="md:col-span-2 inline-flex items-center justify-center rounded-xl bg-slate-900 text-white px-5 py-3 font-medium hover:bg-slate-800">
+            Request access
+          </button>
+        </form>
+
+        <p class="mt-3 text-sm text-slate-500">
+          By submitting, you agree to be contacted about Nemi. We’ll never sell your info.
+        </p>
+      </div>
+    </section>
+
+    <footer class="mt-16 text-sm text-slate-500">
+      © <span id="year"></span> Nemi • Built with love
+    </footer>
+  </main>
+
+  <script>document.getElementById('year').textContent = new Date().getFullYear()</script>
+</body>
+</html>
