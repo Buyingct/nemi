@@ -1,0 +1,18 @@
+.site-header {
+  background: #fff;
+  border-bottom: 1px solid #ddd;
+  position: sticky;
+  top: 0;
+  width: 100%;
+  z-index: 1000;
+}
+.site-header .head-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.5rem 1rem;
+}
+.logo { height: 40px; }
+.nav a { margin-left: 1rem; text-decoration: none; }
+.timeline-wrap { padding: 2rem; text-align: center; }
+.timeline-svg { width: 100%; height: 90vh; }

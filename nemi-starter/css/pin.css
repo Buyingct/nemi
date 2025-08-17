@@ -1,0 +1,12 @@
+.pin-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
+}
+.pin-inputs input {
+  width: 40px; height: 50px;
+  font-size: 2rem; text-align: center;
+  margin: 0.3rem;
+}
