@@ -7,28 +7,23 @@
   <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="bg-slate-100 flex items-center justify-center h-screen">
-  <form id="pinForm" class="bg-white p-6 rounded-2xl shadow-md">
-    <h1 class="text-2xl font-bold mb-4">Enter your PIN</h1>
-    <input type="password" maxlength="4" pattern="\d{4}"
-           class="w-full rounded-xl border border-slate-300 px-3 py-2 text-center text-2xl tracking-widest"
-           placeholder="••••" required>
-    <button type="submit"
-            class="mt-4 w-full rounded-xl bg-slate-900 text-white font-semibold py-2">
-      Unlock
-    </button>
-    <p id="error" class="mt-2 text-red-500 hidden">Wrong PIN</p>
-  </form>
-
-  <script>
-    document.getElementById('pinForm').addEventListener('submit', e => {
-      e.preventDefault();
-      const input = e.target.querySelector('input').value;
-      if (input === "1234") {   // test PIN
-        window.location.href = "/app/timeline.php";
-      } else {
-        document.getElementById('error').classList.remove('hidden');
-      }
-    });
-  </script>
+  <form method="post" action="login.php" id="pinForm">
+  <input type="hidden" name="client_id" value="12345">
+  <div class="pin-inputs">
+    <input inputmode="numeric" maxlength="1" name="d1">
+    <input inputmode="numeric" maxlength="1" name="d2">
+    <input inputmode="numeric" maxlength="1" name="d3">
+    <input inputmode="numeric" maxlength="1" name="d4">
+  </div>
+  <input type="hidden" name="pin" id="pin">
+  <button type="submit">Unlock</button>
+</form>
+<script>
+  const form = document.getElementById('pinForm');
+  form.addEventListener('submit', (e)=>{
+    const v = [...form.querySelectorAll('.pin-inputs input')].map(i=>i.value).join('');
+    document.getElementById('pin').value = v;
+  });
+</script>
 </body>
 </html>
