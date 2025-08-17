@@ -1,3 +1,8 @@
 {
-  "12345": { "name": "Sample Client", "pin_hash": "$2y$10$TKh8H1.Pdn3kk8.JwD.TnOBs/JlZkIXWnb4w3Qfo2iDhnYF8cL.Ee" }
+  "12345": {
+    "name": "Jane Doe",
+    "pin_hash": "$oEjieF7muEJDC1W7hlwtVOTqvRjjcX6I6w8aDE8BiAcpM1RmDa1vq",
+    "timeline_data": "data/clients/12345.json",
+    "svg": "assets/svgs/timeline.svg"
+  }
 }
