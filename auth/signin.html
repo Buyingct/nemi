@@ -6,24 +6,35 @@
   <title>Nemi – Sign In</title>
   <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body class="bg-slate-100 flex items-center justify-center h-screen">
-  <form method="post" action="login.php" id="pinForm">
-  <input type="hidden" name="client_id" value="12345">
-  <div class="pin-inputs">
-    <input inputmode="numeric" maxlength="1" name="d1">
-    <input inputmode="numeric" maxlength="1" name="d2">
-    <input inputmode="numeric" maxlength="1" name="d3">
-    <input inputmode="numeric" maxlength="1" name="d4">
+<body class="bg-slate-50 text-slate-900 flex items-center justify-center min-h-screen">
+
+  <div class="w-full max-w-md bg-white rounded-2xl shadow-md p-8">
+    <h1 class="text-2xl font-bold text-center">Sign in to Nemi</h1>
+    <p class="mt-2 text-sm text-slate-600 text-center">
+      Enter your email or phone to continue
+    </p>
+
+    <form action="/auth/start.php" method="post" class="mt-6 space-y-4">
+      <div>
+        <label for="email" class="block text-sm font-medium text-slate-700">Email</label>
+        <input id="email" name="email" type="email" required
+          class="mt-1 w-full rounded-lg border-slate-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500" />
+      </div>
+      <div>
+        <label for="phone" class="block text-sm font-medium text-slate-700">Phone (optional)</label>
+        <input id="phone" name="phone" type="tel"
+          class="mt-1 w-full rounded-lg border-slate-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500" />
+      </div>
+      <button type="submit"
+        class="w-full py-2 px-4 rounded-lg bg-indigo-600 text-white font-semibold hover:bg-indigo-700">
+        Continue
+      </button>
+    </form>
+
+    <p class="mt-6 text-xs text-slate-500 text-center">
+      By continuing, you agree to Nemi’s <a href="/terms.html" class="underline">Terms</a>.
+    </p>
   </div>
-  <input type="hidden" name="pin" id="pin">
-  <button type="submit">Unlock</button>
-</form>
-<script>
-  const form = document.getElementById('pinForm');
-  form.addEventListener('submit', (e)=>{
-    const v = [...form.querySelectorAll('.pin-inputs input')].map(i=>i.value).join('');
-    document.getElementById('pin').value = v;
-  });
-</script>
+
 </body>
 </html>
