@@ -1,0 +1,14 @@
+<!doctype html><meta charset="utf-8">
+<title>Verify code</title>
+<link rel="stylesheet" href="../css/pin.css">
+<main class="pin-wrap" style="max-width:420px;margin:8vh auto;padding:16px">
+  <h1 class="brand">Enter the 6-digit code</h1>
+  <form method="post" action="verify_otp.php" class="grid gap-3">
+    <input class="field" name="code" pattern="\d{6}" maxlength="6" inputmode="numeric" required placeholder="123456">
+    <button class="btn" type="submit">Continue</button>
+  </form>
+  <form method="post" action="resend_otp.php" style="margin-top:8px">
+    <button class="btn ghost" type="submit">Resend code</button>
+  </form>
+</main>
+<style>.field{padding:12px;border:1px solid #e5e7eb;border-radius:12px;width:100%}.btn.ghost{background:#fff;color:#0b1220}</style>

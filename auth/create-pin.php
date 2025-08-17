@@ -1,63 +1,35 @@
 <?php
-// /auth/create-pin.php
 session_start();
-header('Content-Type: text/html; charset=utf-8');
+if (empty($_SESSION['user_id']) || empty($_SESSION['device_id'])) { header('Location: start.html'); exit; }
 
-$clientId = $_GET['client'] ?? $_POST['client'] ?? '';
-$token    = $_GET['token']  ?? $_POST['token']  ?? '';
+$usrPath = __DIR__ . '/../data/users.json';
+$users = json_decode(file_get_contents($usrPath), true);
+$uid = $_SESSION['user_id']; $did = $_SESSION['device_id'];
+$err = '';
 
-$idxPath = __DIR__ . '/../data/clients.json';
-$index   = file_exists($idxPath) ? json_decode(file_get_contents($idxPath), true) : [];
-
-$client = $index[$clientId] ?? null;
-if (!$client || empty($token) || !hash_equals($client['pin_token'] ?? '', $token)) {
-  http_response_code(400);
-  echo "<h1>Invalid or expired link.</h1>";
-  exit;
-}
-
-// Handle POST → save PIN
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-  $pin1 = $_POST['pin1'] ?? '';
-  $pin2 = $_POST['pin2'] ?? '';
-  if (!preg_match('/^\d{4}$/', $pin1)) { $err = "PIN must be 4 digits."; }
-  elseif ($pin1 !== $pin2) { $err = "PINs do not match."; }
+if ($_SERVER['REQUEST_METHOD']==='POST') {
+  $p1 = $_POST['pin1'] ?? ''; $p2 = $_POST['pin2'] ?? '';
+  if (!preg_match('/^\d{4}$/', $p1)) $err="PIN must be 4 digits.";
+  elseif ($p1 !== $p2) $err="PINs do not match.";
   else {
-    // Hash + save; clear token so link can’t be reused
-    $index[$clientId]['pin_hash']  = password_hash($pin1, PASSWORD_DEFAULT);
-    $index[$clientId]['pin_token'] = null;
-    file_put_contents($idxPath, json_encode($index, JSON_PRETTY_PRINT|JSON_UNESCAPED_SLASHES));
-    header('Location: /auth/signin.html?set=1'); // success
-    exit;
+    $users[$uid]['devices'][$did]['pin_hash'] = password_hash($p1, PASSWORD_DEFAULT);
+    $users[$uid]['devices'][$did]['fail_count'] = 0;
+    $users[$uid]['devices'][$did]['locked_until'] = 0;
+    file_put_contents($usrPath, json_encode($users, JSON_PRETTY_PRINT|JSON_UNESCAPED_SLASHES));
+    header('Location: ../app/timeline.php'); exit;
   }
 }
 ?>
-<!doctype html>
-<html lang="en">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Create your Nemi PIN</title>
+<!doctype html><meta charset="utf-8">
+<title>Create device PIN</title>
 <link rel="stylesheet" href="../css/pin.css">
-</head>
-<body>
 <main class="pin-wrap" style="max-width:420px;margin:8vh auto;padding:16px">
-  <h1 class="brand">Create your 4-digit PIN</h1>
-  <?php if (!empty($err)) echo "<p style='color:#b91c1c'><b>$err</b></p>"; ?>
-  <form method="post">
-    <input type="hidden" name="client" value="<?php echo htmlspecialchars($clientId); ?>">
-    <input type="hidden" name="token"  value="<?php echo htmlspecialchars($token); ?>">
-
-    <label class="hint">Choose a 4-digit PIN</label>
-    <div class="pin-row">
-      <input name="pin1" inputmode="numeric" pattern="\d{4}" maxlength="4" placeholder="1234" required>
-    </div>
-    <label class="hint">Confirm PIN</label>
-    <div class="pin-row">
-      <input name="pin2" inputmode="numeric" pattern="\d{4}" maxlength="4" placeholder="1234" required>
-    </div>
+  <h1 class="brand">Create a 4-digit PIN</h1>
+  <?php if($err) echo "<p style='color:#b91c1c'><b>$err</b></p>"; ?>
+  <form method="post" class="grid gap-3">
+    <input name="pin1" class="field" inputmode="numeric" pattern="\d{4}" maxlength="4" placeholder="1234" required>
+    <input name="pin2" class="field" inputmode="numeric" pattern="\d{4}" maxlength="4" placeholder="1234" required>
     <button class="btn" type="submit">Save PIN</button>
   </form>
 </main>
-</body>
-</html>
+<style>.field{padding:12px;border:1px solid #e5e7eb;border-radius:12px;width:100%}</style>
