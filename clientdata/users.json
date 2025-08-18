@@ -1,7 +1,7 @@
 {
   "u_12345": {
-    "email": "jane@example.com",
-    "phone": "+12035550123",
+    "email": "v.rocharealtor@gmail.com",
+    "phone": "+12039102125",
     "devices": {
       "d_abc123": { "name": "iPhone 14", "pin_hash": "$2y$...", "created_at": 1734444000, "locked_until": 0, "fail_count": 0 }
     },
