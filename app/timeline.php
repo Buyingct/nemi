@@ -117,7 +117,13 @@ $svg      = file_exists($svgPath) ? file_get_contents($svgPath) : '<!-- missing 
   const forgot  = document.getElementById('forgotPin');
 
   // Show the PIN gate (you can make this conditional later)
+  const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+const hasDeviceCookie = document.cookie.includes('nemi_device=');
+
+// Show PIN gate only for mobile AND when device cookie exists
+if (isMobile && hasDeviceCookie) {
   gate.removeAttribute('aria-hidden');
+}
 
   // Auto-advance behavior
   pins.forEach((el,i)=>{
