@@ -40,19 +40,10 @@ if (!$hash || !password_verify($pass, $hash)) {
 // success: set session
 $_SESSION['user_id'] = $uid;
 
-// ensure device cookie exists (for PIN quick-unlock)
-if (empty($_COOKIE['nemi_device'])) {
-  $did = 'd_' . bin2hex(random_bytes(6));
-  setcookie('nemi_device', $uid . ':' . $did, time() + 60*60*24*365, '/', '', true, true);
-  if (!isset($users[$uid]['devices'])) $users[$uid]['devices'] = [];
-  if (!isset($users[$uid]['devices'][$did])) {
-    $users[$uid]['devices'][$did] = [
-      'name' => $_SERVER['HTTP_USER_AGENT'] ?? 'Device',
-      'pin_hash' => null, 'fail_count'=>0, 'locked_until'=>0, 'created_at'=>time()
-    ];
-    file_put_contents($usrPath, json_encode($users, JSON_PRETTY_PRINT|JSON_UNESCAPED_SLASHES));
-  }
-}
+// ensure device PIN cookie is cleared on web
+setcookie('nemi_device', '', time() - 3600, '/', '', true, true);
+
+
 
 // go to timeline
 header('Location: /app/timeline.php');
