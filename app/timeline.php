@@ -1,15 +1,11 @@
 <?php
 session_start();
+if (empty($_SESSION['user_id'])) { header('Location: /auth/login.html'); exit; }
 
-// Guard: require login
-if (empty($_SESSION['user_id'])) {
-  header('Location: /auth/login.html');
-  exit;
-}
+$userId  = $_SESSION['user_id'];
+$showPin = false; // ← disable PIN on web
 
-$userId = $_SESSION['user_id'];
-
-// Resolve client assets (fallback-safe)
+// Resolve client assets
 $clientsJson = __DIR__ . '/../data/clients.json';
 $client = [
   'svg'           => 'assets/svgs/timeline.svg',
@@ -67,7 +63,8 @@ $svg      = file_exists($svgPath) ? file_get_contents($svgPath) : '<!-- missing 
     </div>
   </div>
 
-  <!-- PIN / OTP overlay -->
+  <?php if ($showPin): ?>
+  <!-- PIN / OTP overlay (rendered only if $showPin === true) -->
   <div id="pinGate" class="pin-gate-backdrop" aria-hidden="true">
     <div class="pin-gate-card">
       <h3 class="title">Unlock with your PIN</h3>
@@ -84,48 +81,47 @@ $svg      = file_exists($svgPath) ? file_get_contents($svgPath) : '<!-- missing 
         <p class="sub"><a href="#" id="forgotPin">Forgot PIN?</a></p>
       </form>
 
-      <!-- OTP step (hidden until needed) -->
+
       <form id="otpForm" class="otp-form hide" method="post" action="/auth/verify_otp.php">
         <p>We sent a 6-digit code to your email/phone.</p>
         <input class="field" name="code" pattern="\d{6}" maxlength="6" inputmode="numeric" placeholder="123456" required>
         <div class="row">
           <button class="btn" type="submit">Verify</button>
-          <!-- no nested form; this button will call /auth/resend_otp.php via fetch -->
+
           <button id="resendOtp" class="btn ghost" type="button">Resend</button>
         </div>
         <p id="otpErr" class="err hide">Invalid or expired code.</p>
       </form>
     </div>
   </div>
+  <?php endif; ?>
 </main>
 
+<!-- Always load timeline data & script -->
 <script>
-  // Data for timeline.js
-  window.NEMI = {
+
+window.NEMI = {
     userId: "<?= htmlspecialchars($userId) ?>",
     states: <?= json_encode($states) ?>,
     notes:  <?= json_encode($notes)  ?>
   };
 </script>
 <script src="../js/timeline.js" defer></script>
+
+<?php if ($showPin): ?>
 <script>
 (function(){
-  const gate   = document.getElementById('pinGate');
-  const pinErr = document.getElementById('pinErr');
-  const pins   = Array.from(document.querySelectorAll('#pinForm .pin'));
+  const gate    = document.getElementById('pinGate');
+  const pinErr  = document.getElementById('pinErr');
+  const pins    = Array.from(document.querySelectorAll('#pinForm .pin'));
   const otpForm = document.getElementById('otpForm');
   const forgot  = document.getElementById('forgotPin');
 
-  // Show the PIN gate (you can make this conditional later)
+  // Only show on mobile AND when cookie exists
   const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
-const hasDeviceCookie = document.cookie.includes('nemi_device=');
+  const hasDeviceCookie = document.cookie.includes('nemi_device=');
+  if (isMobile && hasDeviceCookie) gate.removeAttribute('aria-hidden');
 
-// Show PIN gate only for mobile AND when device cookie exists
-if (isMobile && hasDeviceCookie) {
-  gate.removeAttribute('aria-hidden');
-}
-
-  // Auto-advance behavior
   pins.forEach((el,i)=>{
     el.addEventListener('input', ()=>{
       el.value = el.value.replace(/\D/g,'').slice(0,1);
@@ -136,7 +132,7 @@ if (isMobile && hasDeviceCookie) {
     });
   });
 
-  // Submit PIN → /auth/verify_pin.php
+
   document.getElementById('pinForm').addEventListener('submit', async (e)=>{
     e.preventDefault();
     const pin = pins.map(i=>i.value).join('');
@@ -150,10 +146,7 @@ if (isMobile && hasDeviceCookie) {
         body: new URLSearchParams({pin})
       });
       const j = await res.json().catch(()=>({ok:false}));
-      if (j.ok) {
-        gate.style.display = 'none'; // unlocked
-        return;
-      }
+      if (j.ok) { gate.style.display = 'none'; return; }
       if (j.locked || (j.fail_count && j.fail_count >= 5)) {
         document.getElementById('pinForm').classList.add('hide');
         otpForm.classList.remove('hide');
@@ -161,13 +154,14 @@ if (isMobile && hasDeviceCookie) {
       }
       pinErr.classList.remove('hide');
       pins.forEach(p=>p.value=''); pins[0].focus();
-    } catch(err) {
-      pinErr.classList.remove('hide');
-    }
+    } catch(e){ pinErr.classList.remove('hide'); }
   });
 
-  // Forgot PIN → switch to OTP mode and send new code
-  forgot.addEventListener('click', async (e)=>{
+  document.getElementById('resendOtp')?.addEventListener('click', async ()=>{
+    try { await fetch('/auth/resend_otp.php', {method:'POST'}); } catch(e){}
+  });
+
+  document.getElementById('forgotPin').addEventListener('click', async (e)=>{
     e.preventDefault();
     document.getElementById('pinForm').classList.add('hide');
     otpForm.classList.remove('hide');
@@ -175,12 +169,9 @@ if (isMobile && hasDeviceCookie) {
     try { await fetch('/auth/resend_otp.php', {method:'POST'}); } catch(e){}
   });
 
-  // Resend OTP button
-  document.getElementById('resendOtp')?.addEventListener('click', async ()=>{
-    try { await fetch('/auth/resend_otp.php', {method:'POST'}); } catch(e){}
-  });
+
 })();
 </script>
-
+<?php endif; ?>
 </body>
 </html>
