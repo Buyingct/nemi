@@ -1,34 +1,49 @@
 <?php
-error_log("LOGIN_POST=" . json_encode($_POST));
+// /auth/login.php — email + password login
+declare(strict_types=1);
 session_start();
 
-$idxPath = __DIR__.'/../data/user_index.json';
-$usrPath = __DIR__.'/../data/users.json';
+$idxPath = __DIR__ . '/../data/user_index.json';
+$usrPath = __DIR__ . '/../data/users.json';
 
 $email = strtolower(trim($_POST['email'] ?? ''));
 $pass  = $_POST['password'] ?? '';
 
-if (!$email || !$pass) { http_response_code(400); echo "Missing email or password"; exit; }
+if ($email === '' || $pass === '') {
+  http_response_code(400);
+  echo "Missing email or password";
+  exit;
+}
 
-$index = file_exists($idxPath)? json_decode(file_get_contents($idxPath), true): [];
-$users = file_exists($usrPath)? json_decode(file_get_contents($usrPath), true): [];
+// load stores
+$index = file_exists($idxPath) ? json_decode(file_get_contents($idxPath), true) : [];
+$users = file_exists($usrPath) ? json_decode(file_get_contents($usrPath), true) : [];
 
-$uid = $index['email:'.$email] ?? null;
-if (!$uid || empty($users[$uid])) { http_response_code(403); echo "Invalid credentials"; exit; }
+// map email -> user id
+$uid = $index['email:' . $email] ?? null;
+if (!$uid || empty($users[$uid])) {
+  http_response_code(403);
+  echo "Invalid credentials";
+  exit;
+}
 
 $user = $users[$uid];
 
-if (empty($user['password_hash']) || !password_verify($pass, $user['password_hash'])) {
-  http_response_code(403); echo "Invalid credentials"; exit;
+// verify password
+$hash = $user['password_hash'] ?? null;
+if (!$hash || !password_verify($pass, $hash)) {
+  http_response_code(403);
+  echo "Invalid credentials";
+  exit;
 }
 
-// ok: set session
+// success: set session
 $_SESSION['user_id'] = $uid;
 
-// ensure a device id + cookie (so mobile PIN can work)
+// ensure device cookie exists (for PIN quick-unlock)
 if (empty($_COOKIE['nemi_device'])) {
-  $did = 'd_'.bin2hex(random_bytes(6));
-  setcookie('nemi_device', $uid.':'.$did, time()+60*60*24*365, '/', '', true, true);
+  $did = 'd_' . bin2hex(random_bytes(6));
+  setcookie('nemi_device', $uid . ':' . $did, time() + 60*60*24*365, '/', '', true, true);
   if (!isset($users[$uid]['devices'])) $users[$uid]['devices'] = [];
   if (!isset($users[$uid]['devices'][$did])) {
     $users[$uid]['devices'][$did] = [
@@ -39,5 +54,6 @@ if (empty($_COOKIE['nemi_device'])) {
   }
 }
 
+// go to timeline
 header('Location: /app/timeline.php');
 exit;

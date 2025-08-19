@@ -1,18 +1,35 @@
 <?php
 session_start();
-if (!isset($_SESSION['client_id'])) { header('Location: ../auth/login.html'); exit; }
 
-$clientId = $_SESSION['client_id'];
-$idx = json_decode(file_get_contents(__DIR__ . '/../data/clients.json'), true);
-$client = $idx[$clientId];
+// Use the session we actually set in login.php
+if (empty($_SESSION['user_id'])) {
+  header('Location: /auth/login.html');
+  exit;
+}
 
-$svgPath  = __DIR__ . '/../' . $client['svg'];                // assets/svgs/timeline.svg
-$dataPath = __DIR__ . '/../' . $client['timeline_data'];      // data/clients/12345.json
+$userId = $_SESSION['user_id'];
 
-$timeline = json_decode(file_get_contents($dataPath), true);
-$states = $timeline['states'] ?? [];
-$notes  = $timeline['notes'] ?? [];
-$svg    = file_get_contents($svgPath);
+// Load client mapping (if you have one). Fall back safely.
+$clientsJson = __DIR__ . '/../data/clients.json';
+$client = [
+  'svg'           => 'assets/svgs/timeline.svg',
+  'timeline_data' => 'data/clients/default.json'
+];
+
+if (file_exists($clientsJson)) {
+  $all = json_decode(file_get_contents($clientsJson), true) ?: [];
+  if (!empty($all[$userId])) {
+    $client = array_merge($client, $all[$userId]);
+  }
+}
+
+$svgPath  = __DIR__ . '/../' . $client['svg'];                // e.g. assets/svgs/timeline.svg
+$dataPath = __DIR__ . '/../' . $client['timeline_data'];      // e.g. data/clients/12345.json
+
+$timeline = file_exists($dataPath) ? (json_decode(file_get_contents($dataPath), true) ?: []) : [];
+$states   = $timeline['states'] ?? [];
+$notes    = $timeline['notes'] ?? [];
+$svg      = file_exists($svgPath) ? file_get_contents($svgPath) : '<!-- missing SVG -->';
 ?>
 <!doctype html>
 <html>
