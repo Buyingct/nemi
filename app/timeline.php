@@ -1,7 +1,7 @@
 <?php
 session_start();
 
-// Use the session we actually set in login.php
+// Guard: require login
 if (empty($_SESSION['user_id'])) {
   header('Location: /auth/login.html');
   exit;
@@ -9,7 +9,7 @@ if (empty($_SESSION['user_id'])) {
 
 $userId = $_SESSION['user_id'];
 
-// Load client mapping (if you have one). Fall back safely.
+// Resolve client assets (fallback-safe)
 $clientsJson = __DIR__ . '/../data/clients.json';
 $client = [
   'svg'           => 'assets/svgs/timeline.svg',
@@ -18,13 +18,11 @@ $client = [
 
 if (file_exists($clientsJson)) {
   $all = json_decode(file_get_contents($clientsJson), true) ?: [];
-  if (!empty($all[$userId])) {
-    $client = array_merge($client, $all[$userId]);
-  }
+  if (!empty($all[$userId])) $client = array_merge($client, $all[$userId]);
 }
 
-$svgPath  = __DIR__ . '/../' . $client['svg'];                // e.g. assets/svgs/timeline.svg
-$dataPath = __DIR__ . '/../' . $client['timeline_data'];      // e.g. data/clients/12345.json
+$svgPath  = __DIR__ . '/../' . $client['svg'];
+$dataPath = __DIR__ . '/../' . $client['timeline_data'];
 
 $timeline = file_exists($dataPath) ? (json_decode(file_get_contents($dataPath), true) ?: []) : [];
 $states   = $timeline['states'] ?? [];
@@ -57,69 +55,71 @@ $svg      = file_exists($svgPath) ? file_get_contents($svgPath) : '<!-- missing 
     <?php echo $svg; ?>  <!-- inline SVG so we can add click handlers -->
   </section>
 
-  <!-- bottom sheet -->
+  <!-- bottom sheet (for step details) -->
   <div id="nt_sheet" aria-hidden="true">
     <div class="grab"></div>
     <h3 id="nt_title">Step</h3>
     <div class="meta" id="nt_meta">—</div>
     <div id="nt_body">—</div>
     <div class="row" style="margin-top:12px;">
-      <button class="btn" id="nt_close">Close</button>
-      <button class="btn primary" id="nt_done">Mark Done</button>
+      <button class="btn" id="nt_close" type="button">Close</button>
+      <button class="btn primary" id="nt_done" type="button">Mark Done</button>
     </div>
   </div>
-<!-- PIN Overlay -->
-<div id="pinGate" class="pin-gate-backdrop" aria-hidden="true">
-  <div class="pin-gate-card">
-    <h3 class="title">Unlock with your PIN</h3>
 
-    <form id="pinForm" class="pin-form">
-      <div class="pin-row">
-        <input inputmode="numeric" maxlength="1" class="pin" />
-        <input inputmode="numeric" maxlength="1" class="pin" />
-        <input inputmode="numeric" maxlength="1" class="pin" />
-        <input inputmode="numeric" maxlength="1" class="pin" />
-      </div>
-      <button class="btn primary" type="submit">Unlock</button>
-      <p id="pinErr" class="err hide">Wrong PIN. Try again.</p>
-      <p class="sub"><a href="#" id="forgotPin">Forgot PIN?</a></p>
-    </form>
+  <!-- PIN / OTP overlay -->
+  <div id="pinGate" class="pin-gate-backdrop" aria-hidden="true">
+    <div class="pin-gate-card">
+      <h3 class="title">Unlock with your PIN</h3>
 
-    <!-- OTP step (hidden until needed) -->
-    <form id="otpForm" class="otp-form hide" method="post" action="/auth/verify_otp.php">
-      <p>We sent a 6-digit code to your email/phone.</p>
-      <input class="field" name="code" pattern="\d{6}" maxlength="6" inputmode="numeric" placeholder="123456" required>
-      <div class="row">
-        <button class="btn" type="submit">Verify</button>
-        <form method="post" action="/auth/resend_otp.php"><button class="btn ghost" type="submit">Resend</button></form>
-      </div>
-      <p id="otpErr" class="err hide">Invalid or expired code.</p>
-    </form>
+      <form id="pinForm" class="pin-form">
+        <div class="pin-row">
+          <input inputmode="numeric" maxlength="1" class="pin" />
+          <input inputmode="numeric" maxlength="1" class="pin" />
+          <input inputmode="numeric" maxlength="1" class="pin" />
+          <input inputmode="numeric" maxlength="1" class="pin" />
+        </div>
+        <button class="btn primary" type="submit">Unlock</button>
+        <p id="pinErr" class="err hide">Wrong PIN. Try again.</p>
+        <p class="sub"><a href="#" id="forgotPin">Forgot PIN?</a></p>
+      </form>
+
+      <!-- OTP step (hidden until needed) -->
+      <form id="otpForm" class="otp-form hide" method="post" action="/auth/verify_otp.php">
+        <p>We sent a 6-digit code to your email/phone.</p>
+        <input class="field" name="code" pattern="\d{6}" maxlength="6" inputmode="numeric" placeholder="123456" required>
+        <div class="row">
+          <button class="btn" type="submit">Verify</button>
+          <!-- no nested form; this button will call /auth/resend_otp.php via fetch -->
+          <button id="resendOtp" class="btn ghost" type="button">Resend</button>
+        </div>
+        <p id="otpErr" class="err hide">Invalid or expired code.</p>
+      </form>
+    </div>
   </div>
-</div>
-
 </main>
 
 <script>
+  // Data for timeline.js
   window.NEMI = {
-    clientId: "<?php echo htmlspecialchars($clientId); ?>",
-    states: <?php echo json_encode($states); ?>,
-    notes:  <?php echo json_encode($notes); ?>
+    userId: "<?= htmlspecialchars($userId) ?>",
+    states: <?= json_encode($states) ?>,
+    notes:  <?= json_encode($notes)  ?>
   };
 </script>
 <script src="../js/timeline.js" defer></script>
 <script>
 (function(){
-  const gate = document.getElementById('pinGate');
-  const pins = Array.from(document.querySelectorAll('#pinForm .pin'));
+  const gate   = document.getElementById('pinGate');
   const pinErr = document.getElementById('pinErr');
+  const pins   = Array.from(document.querySelectorAll('#pinForm .pin'));
   const otpForm = document.getElementById('otpForm');
-  const forgot = document.getElementById('forgotPin');
+  const forgot  = document.getElementById('forgotPin');
 
-  // Always show gate for remembered devices (simple rule).
+  // Show the PIN gate (you can make this conditional later)
   gate.removeAttribute('aria-hidden');
 
-  // Auto-advance
+  // Auto-advance behavior
   pins.forEach((el,i)=>{
     el.addEventListener('input', ()=>{
       el.value = el.value.replace(/\D/g,'').slice(0,1);
@@ -134,44 +134,45 @@ $svg      = file_exists($svgPath) ? file_get_contents($svgPath) : '<!-- missing 
   document.getElementById('pinForm').addEventListener('submit', async (e)=>{
     e.preventDefault();
     const pin = pins.map(i=>i.value).join('');
-    if (pin.length!==4) return;
+    if (pin.length !== 4) return;
     pinErr.classList.add('hide');
 
-    const res = await fetch('/auth/verify_pin.php', {
-      method:'POST',
-      headers:{'Content-Type':'application/x-www-form-urlencoded'},
-      body: new URLSearchParams({pin})
-    });
-    const j = await res.json().catch(()=>({ok:false}));
-
-    if (j.ok) {
-      gate.style.display = 'none';  // unlock
-      return;
+    try {
+      const res = await fetch('/auth/verify_pin.php', {
+        method:'POST',
+        headers:{'Content-Type':'application/x-www-form-urlencoded'},
+        body: new URLSearchParams({pin})
+      });
+      const j = await res.json().catch(()=>({ok:false}));
+      if (j.ok) {
+        gate.style.display = 'none'; // unlocked
+        return;
+      }
+      if (j.locked || (j.fail_count && j.fail_count >= 5)) {
+        document.getElementById('pinForm').classList.add('hide');
+        otpForm.classList.remove('hide');
+        return;
+      }
+      pinErr.classList.remove('hide');
+      pins.forEach(p=>p.value=''); pins[0].focus();
+    } catch(err) {
+      pinErr.classList.remove('hide');
     }
-    // locked flow OR too many fails
-    if (j.locked || (j.fail_count && j.fail_count>=5)) {
-      // flip to OTP form
-      document.getElementById('pinForm').classList.add('hide');
-      otpForm.classList.remove('hide');
-      return;
-    }
-    // normal wrong pin
-    pinErr.classList.remove('hide');
-    pins.forEach(p=>p.value=''); pins[0].focus();
   });
 
-  // Forgot PIN → go straight to OTP mode (we’ll reuse verify_otp.php)
+  // Forgot PIN → switch to OTP mode and send new code
   forgot.addEventListener('click', async (e)=>{
     e.preventDefault();
     document.getElementById('pinForm').classList.add('hide');
     otpForm.classList.remove('hide');
-    // Optionally trigger a fresh OTP here by POSTing to /auth/resend_otp.php
+
     try { await fetch('/auth/resend_otp.php', {method:'POST'}); } catch(e){}
   });
 
-  // When OTP is verified, verify_otp.php will redirect:
-  // - If device has no PIN → /auth/create-pin.php (set a new PIN)
-  // - Else → /app/timeline.php (and we’ll show gate again to enter PIN)
+  // Resend OTP button
+  document.getElementById('resendOtp')?.addEventListener('click', async ()=>{
+    try { await fetch('/auth/resend_otp.php', {method:'POST'}); } catch(e){}
+  });
 })();
 </script>
 
