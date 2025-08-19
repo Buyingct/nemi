@@ -1,20 +1,42 @@
 <?php
 session_start();
-function back(){ header('Location: signin.html?err=1'); exit; }
 
-$clientId = $_POST['client_id'] ?? '';            // include a hidden field or choose client by email/phone in future
-$pin      = $_POST['pin'] ?? ($_POST['digit1'].$_POST['digit2'].$_POST['digit3'].$_POST['digit4'] ?? '');
+$idxPath = __DIR__.'/../data/user_index.json';
+$usrPath = __DIR__.'/../data/users.json';
 
-if (!$clientId || !preg_match('/^\d{4}$/', $pin)) back();
+$email = strtolower(trim($_POST['email'] ?? ''));
+$pass  = $_POST['password'] ?? '';
 
-$idxPath = __DIR__ . '/../data/clients.json';
-$index   = json_decode(file_get_contents($idxPath), true);
-$client  = $index[$clientId] ?? null;
-if (!$client || empty($client['pin_hash'])) back();
+if (!$email || !$pass) { http_response_code(400); echo "Missing email or password"; exit; }
 
-if (!password_verify($pin, $client['pin_hash'])) back();
+$index = file_exists($idxPath)? json_decode(file_get_contents($idxPath), true): [];
+$users = file_exists($usrPath)? json_decode(file_get_contents($usrPath), true): [];
 
-$_SESSION['client_id']   = $clientId;
-$_SESSION['client_name'] = $client['name'] ?? 'Client';
-header('Location: ../app/timeline.php');
+$uid = $index['email:'.$email] ?? null;
+if (!$uid || empty($users[$uid])) { http_response_code(403); echo "Invalid credentials"; exit; }
+
+$user = $users[$uid];
+
+if (empty($user['password_hash']) || !password_verify($pass, $user['password_hash'])) {
+  http_response_code(403); echo "Invalid credentials"; exit;
+}
+
+// ok: set session
+$_SESSION['user_id'] = $uid;
+
+// ensure a device id + cookie (so mobile PIN can work)
+if (empty($_COOKIE['nemi_device'])) {
+  $did = 'd_'.bin2hex(random_bytes(6));
+  setcookie('nemi_device', $uid.':'.$did, time()+60*60*24*365, '/', '', true, true);
+  if (!isset($users[$uid]['devices'])) $users[$uid]['devices'] = [];
+  if (!isset($users[$uid]['devices'][$did])) {
+    $users[$uid]['devices'][$did] = [
+      'name' => $_SERVER['HTTP_USER_AGENT'] ?? 'Device',
+      'pin_hash' => null, 'fail_count'=>0, 'locked_until'=>0, 'created_at'=>time()
+    ];
+    file_put_contents($usrPath, json_encode($users, JSON_PRETTY_PRINT|JSON_UNESCAPED_SLASHES));
+  }
+}
+
+header('Location: /app/timeline.php');
 exit;

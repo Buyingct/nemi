@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Nemi – Create account</title>
+<script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-slate-50 min-h-screen flex items-center justify-center">
+  <div class="w-full max-w-md bg-white rounded-2xl shadow p-8">
+    <h1 class="text-2xl font-bold text-center">Create your Nemi account</h1>
+    <form class="mt-6 space-y-4" method="post" action="/auth/register.php">
+      <div>
+        <label class="block text-sm font-medium">Email</label>
+        <input name="email" type="email" required class="mt-1 w-full rounded-lg border-slate-300 shadow-sm">
+      </div>
+      <div>
+        <label class="block text-sm font-medium">Password</label>
+        <input name="password" type="password" required minlength="8" class="mt-1 w-full rounded-lg border-slate-300 shadow-sm">
+      </div>
+      <button class="w-full rounded-lg bg-indigo-600 text-white font-semibold py-2">Create account</button>
+    </form>
+    <p class="mt-4 text-sm"><a class="underline" href="/auth/login.html">Have an account? Sign in</a></p>
+  </div>
+</body>
+</html>
