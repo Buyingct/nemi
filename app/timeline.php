@@ -1,6 +1,6 @@
 <?php
 session_start();
-if (!isset($_SESSION['client_id'])) { header('Location: ../auth/signin.html'); exit; }
+if (!isset($_SESSION['client_id'])) { header('Location: ../auth/login.html'); exit; }
 
 $clientId = $_SESSION['client_id'];
 $idx = json_decode(file_get_contents(__DIR__ . '/../data/clients.json'), true);
