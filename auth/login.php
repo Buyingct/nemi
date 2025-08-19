@@ -1,4 +1,5 @@
 <?php
+error_log("LOGIN_POST=" . json_encode($_POST));
 session_start();
 
 $idxPath = __DIR__.'/../data/user_index.json';
