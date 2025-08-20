@@ -45,6 +45,19 @@ setcookie('nemi_device', '', time() - 3600, '/', '', true, true);
 
 
 
-// go to timeline
-header('Location: /app/timeline.php');
+// decide landing by cases
+$assign = @json_decode(@file_get_contents(__DIR__.'/../data/cases/user_cases.json'), true) ?: [];
+$userCases = $assign[$uid] ?? [];
+
+if ($userCases) {
+  // If the user is a client on any case, send to that case’s timeline
+  foreach ($userCases as $caseId) {
+    // If you want to check role precisely, you can also read case_index.json here
+    header('Location: /app/client/timeline.php?case=' . urlencode($caseId));
+    exit;
+  }
+}
+
+// fallback (no cases yet)
+header('Location: /app/empty.php'); // create a simple "No cases yet" page if you like
 exit;

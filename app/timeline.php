@@ -99,14 +99,18 @@ $svg      = file_exists($svgPath) ? file_get_contents($svgPath) : '<!-- missing 
 
 <!-- Always load timeline data & script -->
 <script>
-
-window.NEMI = {
+  window.NEMI = {
     userId: "<?= htmlspecialchars($userId) ?>",
     states: <?= json_encode($states) ?>,
-    notes:  <?= json_encode($notes)  ?>
+    notes:  <?= json_encode($notes)  ?>,
+    map:    <?= json_encode(
+               json_decode(@file_get_contents(__DIR__ . '/../data/timeline_map_buyer.json'), true)
+               ?: new stdClass()
+             ) ?>
   };
 </script>
 <script src="../js/timeline.js" defer></script>
+
 
 <?php if ($showPin): ?>
 <script>

@@ -18,3 +18,12 @@
 .err{color:#b91c1c; margin-top:8px}
 .hide{display:none}
 .sub{margin-top:8px; font-size:12px; color:#6b7280; text-align:center}
+
+
+[ data-step ], [ data-note ] { cursor: pointer; }
+.nemi-done { opacity:.35; }
+.nemi-glow { filter: drop-shadow(0 0 6px rgba(56,189,248,.9)) drop-shadow(0 0 14px rgba(56,189,248,.5)); }
+@keyframes twinkle { 0%,100%{opacity:1;transform:scale(1);} 50%{opacity:.55;transform:scale(1.06);} }
+.nemi-star { animation: twinkle 2.2s ease-in-out infinite; transform-origin: center; }
+@keyframes slowspin { to { transform: rotate(360deg); } }
+.nemi-key { animation: slowspin 8s linear infinite; transform-origin: center; }
