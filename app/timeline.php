@@ -107,12 +107,16 @@ if (is_readable($mapPath)) {
   if (is_array($tmp)) $map = $tmp;
 }
 ?>
+
 <script>
   window.NEMI = {
     userId: "<?= htmlspecialchars($userId) ?>",
     states: <?= json_encode($states) ?>,
     notes:  <?= json_encode($notes)  ?>,
-    map:    <?= json_encode($map) ?>
+    map:    <?= json_encode(json_decode(
+                @file_get_contents(__DIR__ . '/../data/timeline_map_buyer.json'),
+                true
+              ) ?: new stdClass(), JSON_UNESCAPED_SLASHES) ?>
   };
 </script>
 <script src="../js/timeline.js" defer></script>
