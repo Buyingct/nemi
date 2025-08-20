@@ -46,10 +46,32 @@ $_SESSION['user_id'] = $uid;
 // Clear any device PIN cookie for web (keep flags secure/httponly)
 setcookie('nemi_device', '', time() - 3600, '/', '', true, true);
 
-// Decide landing by cases (optional)
+// decide landing by cases (file may not exist yet)
+$assign = [];
 $assignPath = __DIR__ . '/../data/cases/user_cases.json';
-$assign     = json_decode(@file_get_contents($assignPath) ?: '[]', true) ?: [];
-$userCases  = $assign[$uid] ?? [];
+if (is_file($assignPath)) {
+    $txt = file_get_contents($assignPath);
+    if ($txt !== false && $txt !== '') {
+        $tmp = json_decode($txt, true);
+        if (is_array($tmp)) {
+            $assign = $tmp;
+        }
+    }
+}
+
+$userCases = $assign[$uid] ?? [];
+
+if (!empty($userCases)) {
+    // send to first case timeline for now
+    $caseId = $userCases[0];
+    header('Location: /app/client/timeline.php?case=' . urlencode($caseId));
+    exit;
+}
+
+// fallback (no cases yet)
+header('Location: /app/empty.php'); // simple “No cases yet” page
+exit;
+
 
 // If user has at least one case, send to client timeline for that case
 if (!empty($userCases)) {
