@@ -3,6 +3,9 @@
 declare(strict_types=1);
 session_start();
 
+// Always regenerate on login to prevent session fixation
+session_regenerate_id(true);
+
 $idxPath = __DIR__ . '/../data/user_index.json';
 $usrPath = __DIR__ . '/../data/users.json';
 
@@ -11,53 +14,50 @@ $pass  = $_POST['password'] ?? '';
 
 if ($email === '' || $pass === '') {
   http_response_code(400);
-  echo "Missing email or password";
+  echo 'Missing email or password';
   exit;
 }
 
-// load stores
-$index = file_exists($idxPath) ? json_decode(file_get_contents($idxPath), true) : [];
-$users = file_exists($usrPath) ? json_decode(file_get_contents($usrPath), true) : [];
+// Load stores (robust against missing/empty files)
+$index = json_decode(@file_get_contents($idxPath) ?: '[]', true) ?: [];
+$users = json_decode(@file_get_contents($usrPath) ?: '[]', true) ?: [];
 
-// map email -> user id
+// Email -> user id
 $uid = $index['email:' . $email] ?? null;
 if (!$uid || empty($users[$uid])) {
   http_response_code(403);
-  echo "Invalid credentials";
+  echo 'Invalid credentials';
   exit;
 }
 
-$user = $users[$uid];
+$user = $users[$uid] ?? [];
 
-// verify password
+// Verify password
 $hash = $user['password_hash'] ?? null;
 if (!$hash || !password_verify($pass, $hash)) {
   http_response_code(403);
-  echo "Invalid credentials";
+  echo 'Invalid credentials';
   exit;
 }
 
-// success: set session
+// Success: set session
 $_SESSION['user_id'] = $uid;
 
-// ensure device PIN cookie is cleared on web
+// Clear any device PIN cookie for web (keep flags secure/httponly)
 setcookie('nemi_device', '', time() - 3600, '/', '', true, true);
 
+// Decide landing by cases (optional)
+$assignPath = __DIR__ . '/../data/cases/user_cases.json';
+$assign     = json_decode(@file_get_contents($assignPath) ?: '[]', true) ?: [];
+$userCases  = $assign[$uid] ?? [];
 
-
-// decide landing by cases
-$assign = @json_decode(@file_get_contents(__DIR__.'/../data/cases/user_cases.json'), true) ?: [];
-$userCases = $assign[$uid] ?? [];
-
-if ($userCases) {
-  // If the user is a client on any case, send to that case’s timeline
-  foreach ($userCases as $caseId) {
-    // If you want to check role precisely, you can also read case_index.json here
-    header('Location: /app/client/timeline.php?case=' . urlencode($caseId));
-    exit;
-  }
+// If user has at least one case, send to client timeline for that case
+if (!empty($userCases)) {
+  $caseId = $userCases[0]; // or choose by role/most-recent
+  header('Location: /app/timeline.php?case=' . rawurlencode($caseId));
+  exit;
 }
 
-// fallback (no cases yet)
-header('Location: /app/empty.php'); // create a simple "No cases yet" page if you like
+// Fallback when no cases yet
+header('Location: /app/timeline.php');
 exit;
