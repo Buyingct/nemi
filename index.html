@@ -1,3 +1,13 @@
+<?php // [NEMI:L0 landing index.php]
+/*
+  - Uses Tailwind from CDN
+  - Header: Nemi logo (left) + primary Sign-in button (right)
+  - Hero: headline + one row of CTAs (Sign in, Request Access, Demo)
+  - Access form posts to /auth/access_request.php (not login.php)
+  - Includes CSRF via /auth/common.php
+*/
+require __DIR__ . '/auth/common.php';
+?>
 <!doctype html>
 <html lang="en">
 <head>
@@ -7,43 +17,77 @@
   <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="bg-white text-slate-900">
-<header class="max-w-5xl mx-auto px-6 py-8 flex items-center justify-between">
-  <h1 class="text-3xl md:text-5xl font-extrabold tracking-tight">Nemi.</h1>
-  <a href="/auth/login.html"
-     class="inline-flex items-center rounded-xl border border-slate-300 px-4 py-2 text-sm font-semibold
-            text-slate-800 hover:bg-slate-50 active:bg-slate-100">
-    Sign In
-  </a>
-</header>
 
-<!-- somewhere in your header/nav/hero -->
-<a href="/auth/login.html" class="btn">Sign In</a>
+  <!-- [NEMI:L1 Header with logo + primary Sign-in] -->
+  <header class="max-w-5xl mx-auto px-6 py-6 flex items-center justify-between">
+    <a href="/" class="flex items-center gap-3" aria-label="Nemi home">
+      <!-- Use your PNG/SVG logo -->
+      <img
+        src="/fileadmin/Buyingct_site/Contents/Nemi/Realtor/nemi-logo.png"
+        alt="Nemi"
+        onerror="this.onerror=null;this.src='/fileadmin/Buyingct_site/Contents/Nemi/Realtor/nemi-logo-fallback.png';"
+        class="h-10 w-auto object-contain"
+      />
+      <span class="sr-only">Nemi</span>
+    </a>
+
+    <a href="/auth/login.html"
+       class="inline-flex items-center rounded-xl border border-slate-300 px-4 py-2 text-sm font-semibold
+              text-slate-800 hover:bg-slate-50 active:bg-slate-100">
+      Sign in
+    </a>
+  </header>
 
   <main class="max-w-5xl mx-auto px-6 pb-20">
+    <!-- [NEMI:L2 Hero] -->
     <section class="mt-6 md:mt-10">
-      <h2 class="text-3xl md:text-5xl font-bold leading-tight">
+      <h1 class="text-3xl md:text-5xl font-extrabold tracking-tight">
         A personalized team to help you reach homeownership
-      </h2>
+      </h1>
       <p class="mt-4 text-lg text-slate-600 max-w-2xl">
-        Map your progress, and keep you on track—
-        from credit to keys.
+        Map your progress and keep on track—from credit to keys.
+      </p>
+
+      <!-- CTA row: primary Sign-in, Request Access, Demo -->
+      <div class="mt-6 flex flex-wrap gap-3">
+        <a href="/auth/login.html"
+           class="inline-flex items-center rounded-xl bg-slate-900 px-4 py-2 text-white font-semibold hover:opacity-90">
+          Sign in
+        </a>
+        <a href="/auth/access_request.html"
+           class="inline-flex items-center rounded-xl border border-slate-300 px-4 py-2 font-semibold text-slate-800 hover:bg-slate-50">
+          Request Nemi Access
+        </a>
+        <a href="/auth/demo_login.php"
+           class="inline-flex items-center rounded-xl border border-slate-300 px-4 py-2 font-semibold text-slate-800 hover:bg-slate-50">
+          Try the Demo
+        </a>
+      </div>
+
+      <!-- Secondary text sign-in (accessible, not styled as a button) -->
+      <p class="mt-3 text-sm text-slate-500">
+        Already have an account?
+        <a href="/auth/login.html" class="underline decoration-slate-300 hover:decoration-slate-600">Sign in</a>
       </p>
     </section>
 
+    <!-- [NEMI:L3 Early Access card (wired to access_request.php)] -->
     <section class="mt-10 md:mt-12">
       <div class="rounded-2xl border border-slate-200 p-6 md:p-8 shadow-sm">
-        <h3 class="text-xl font-semibold">Get early access</h3>
+        <h2 class="text-xl font-semibold">Get early access</h2>
         <p class="mt-2 text-slate-600">Tell us where to reach you—no spam, ever.</p>
 
-<form action="/login.php" method="post" class="mt-4 grid gap-3 sm:grid-cols-2">
-  <input class="w-full rounded-xl border border-slate-300 px-3 py-2" type="text"  name="name"  placeholder="Your name" required>
-  <input class="w-full rounded-xl border border-slate-300 px-3 py-2" type="email" name="email" placeholder="Your email" required>
-  <textarea class="sm:col-span-2 w-full rounded-xl border border-slate-300 px-3 py-2" name="message" placeholder="How can we help?"></textarea>
-  <button class="sm:col-span-2 inline-flex justify-center rounded-xl bg-slate-900 px-4 py-2 text-white font-semibold hover:opacity-90" type="submit">
-    Send
-  </button>
-</form>
-
+        <!-- IMPORTANT: this is NOT login. It posts to access_request.php and includes CSRF -->
+        <form action="/auth/access_request.php" method="post" class="mt-4 grid gap-3 sm:grid-cols-2">
+          <input class="w-full rounded-xl border border-slate-300 px-3 py-2" type="text"  name="name"  placeholder="Your name" required>
+          <input class="w-full rounded-xl border border-slate-300 px-3 py-2" type="email" name="email" placeholder="Your email" required>
+          <textarea class="sm:col-span-2 w-full rounded-xl border border-slate-300 px-3 py-2" name="phone" placeholder="Phone (optional)"></textarea>
+          <!-- CSRF -->
+          <input type="hidden" name="csrf" value="<?php echo htmlspecialchars(nemi_csrf_token(), ENT_QUOTES); ?>">
+          <button class="sm:col-span-2 inline-flex justify-center rounded-xl bg-slate-900 px-4 py-2 text-white font-semibold hover:opacity-90" type="submit">
+            Send
+          </button>
+        </form>
 
         <p class="mt-3 text-sm text-slate-500">
           By submitting, you agree to be contacted about Nemi. We’ll never sell your info.
@@ -51,6 +95,7 @@
       </div>
     </section>
 
+    <!-- [NEMI:L4 Footer] -->
     <footer class="mt-16 text-sm text-slate-500">
       © <span id="year"></span> Nemi • Built with love
     </footer>
