@@ -27,6 +27,37 @@
     </a>
   </header>
 
+<!-- Mobile artboard hero (local asset) -->
+<section class="md:hidden mx-auto w-[min(520px,96vw)] aspect-[414/896] relative">
+  <link rel="preload" as="image" href="./assets/svgs/nemimobilesignindesign.svg">
+  <img
+    src="./assets/svgs/nemimobilesignindesign.svg"
+    alt="Nemi mobile background"
+    class="absolute inset-0 h-full w-full object-contain pointer-events-none select-none"
+  />
+
+  <div
+    class="absolute border-2 border-slate-800/90 rounded-2xl bg-white/95 shadow-xl p-4 sm:p-5 flex flex-col gap-3"
+    style="left:15.44%; top:19.48%; width:69.11%; height:61.04%;"
+  >
+    <a href="/auth/login.html"
+       class="inline-flex justify-center rounded-full bg-slate-900 px-4 py-2 text-white font-semibold hover:opacity-90">Sign in</a>
+
+    <p class="text-center text-sm text-slate-600">Already a Nemi Member?</p>
+
+    <form action="/auth/login.php" method="post" class="grid gap-3">
+      <input class="w-full rounded-full border border-slate-300 px-3 py-2" type="email" name="email" placeholder="Email" required>
+      <input class="w-full rounded-full border border-slate-300 px-3 py-2" type="password" name="password" placeholder="Password" required>
+      <button class="inline-flex justify-center rounded-full bg-yellow-400 px-4 py-2 font-semibold border border-slate-800/80">🔒 Login</button>
+    </form>
+
+    <p class="text-center text-sm">
+      <a href="/auth/forgot.php" class="underline decoration-slate-300 hover:decoration-slate-600">Forgot Password?</a>
+    </p>
+  </div>
+</section>
+
+  
   <main class="max-w-5xl mx-auto px-6 pb-20">
     <!-- [NEMI:L2 Hero] -->
     <section class="mt-6 md:mt-10">
