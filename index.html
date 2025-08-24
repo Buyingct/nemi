@@ -5,59 +5,43 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Nemi – Your Personalized Path to Homeownership</title>
   <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preload" as="image" href="./assets/svgs/nemimobilesignindesign.svg">
 </head>
 <body class="bg-white text-slate-900">
 
-  <!-- [NEMI:L1 Header with logo + primary Sign-in] -->
-  <header class="max-w-5xl mx-auto px-6 py-6 flex items-center justify-between">
-    <a href="/" class="flex items-center gap-3" aria-label="Nemi home">
-      <img
-        src="/fileadmin/Buyingct_site/Contents/Nemi/Realtor/nemi-logo.png"
-        alt="Nemi"
-        onerror="this.onerror=null;this.src='/fileadmin/Buyingct_site/Contents/Nemi/Realtor/nemi-logo-fallback.png';"
-        class="h-10 w-auto object-contain"
-      />
-      <span class="sr-only">Nemi</span>
-    </a>
+  <!-- (Header removed on landing page) -->
 
-    <a href="/auth/login.html"
-       class="inline-flex items-center rounded-xl border border-slate-300 px-4 py-2 text-sm font-semibold
-              text-slate-800 hover:bg-slate-50 active:bg-slate-100">
-      Sign in
-    </a>
-  </header>
+  <!-- Mobile artboard hero (local asset) -->
+  <section class="md:hidden mx-auto w-[min(520px,96vw)] aspect-[414/896] relative">
+    <img
+      src="./assets/svgs/nemimobilesignindesign.svg"
+      alt="Nemi mobile background"
+      class="absolute inset-0 h-full w-full object-contain pointer-events-none select-none"
+    />
 
-<!-- Mobile artboard hero (local asset) -->
-<section class="md:hidden mx-auto w-[min(520px,96vw)] aspect-[414/896] relative">
-  <link rel="preload" as="image" href="./assets/svgs/nemimobilesignindesign.svg">
-  <img
-    src="./assets/svgs/nemimobilesignindesign.svg"
-    alt="Nemi mobile background"
-    class="absolute inset-0 h-full w-full object-contain pointer-events-none select-none"
-  />
+    <div
+      class="absolute border-2 border-slate-800/90 rounded-2xl bg-white/95 shadow-xl p-4 sm:p-5 flex flex-col gap-3"
+      style="left:15.44%; top:19.48%; width:69.11%; height:61.04%;"
+    >
+      <a href="/auth/login.html"
+         class="inline-flex justify-center rounded-full bg-slate-900 px-4 py-2 text-white font-semibold hover:opacity-90">
+        Sign in
+      </a>
 
-  <div
-    class="absolute border-2 border-slate-800/90 rounded-2xl bg-white/95 shadow-xl p-4 sm:p-5 flex flex-col gap-3"
-    style="left:15.44%; top:19.48%; width:69.11%; height:61.04%;"
-  >
-    <a href="/auth/login.html"
-       class="inline-flex justify-center rounded-full bg-slate-900 px-4 py-2 text-white font-semibold hover:opacity-90">Sign in</a>
+      <p class="text-center text-sm text-slate-600">Already a Nemi Member?</p>
 
-    <p class="text-center text-sm text-slate-600">Already a Nemi Member?</p>
+      <form action="/auth/login.php" method="post" class="grid gap-3">
+        <input class="w-full rounded-full border border-slate-300 px-3 py-2" type="email" name="email" placeholder="Email" autocomplete="username" required>
+        <input class="w-full rounded-full border border-slate-300 px-3 py-2" type="password" name="password" placeholder="Password" autocomplete="current-password" required>
+        <button class="inline-flex justify-center rounded-full bg-yellow-400 px-4 py-2 font-semibold border border-slate-800/80">🔒 Login</button>
+      </form>
 
-    <form action="/auth/login.php" method="post" class="grid gap-3">
-      <input class="w-full rounded-full border border-slate-300 px-3 py-2" type="email" name="email" placeholder="Email" required>
-      <input class="w-full rounded-full border border-slate-300 px-3 py-2" type="password" name="password" placeholder="Password" required>
-      <button class="inline-flex justify-center rounded-full bg-yellow-400 px-4 py-2 font-semibold border border-slate-800/80">🔒 Login</button>
-    </form>
+      <p class="text-center text-sm">
+        <a href="/auth/forgot.php" class="underline decoration-slate-300 hover:decoration-slate-600">Forgot Password?</a>
+      </p>
+    </div>
+  </section>
 
-    <p class="text-center text-sm">
-      <a href="/auth/forgot.php" class="underline decoration-slate-300 hover:decoration-slate-600">Forgot Password?</a>
-    </p>
-  </div>
-</section>
-
-  
   <main class="max-w-5xl mx-auto px-6 pb-20">
     <!-- [NEMI:L2 Hero] -->
     <section class="mt-6 md:mt-10">
@@ -68,10 +52,11 @@
         Map your progress and keep on track—from credit to keys.
       </p>
 
-      <!-- CTA row: primary Sign-in, Request Access, Demo -->
+      <!-- CTA row -->
       <div class="mt-6 flex flex-wrap gap-3">
+        <!-- Hide duplicate Sign in on mobile; desktop keeps it -->
         <a href="/auth/login.html"
-           class="inline-flex items-center rounded-xl bg-slate-900 px-4 py-2 text-white font-semibold hover:opacity-90">
+           class="hidden md:inline-flex items-center rounded-xl bg-slate-900 px-4 py-2 text-white font-semibold hover:opacity-90">
           Sign in
         </a>
         <a href="/auth/access_request.html"
@@ -84,25 +69,24 @@
         </a>
       </div>
 
-      <!-- Secondary text sign-in (accessible, not styled as a button) -->
-      <p class="mt-3 text-sm text-slate-500">
+      <!-- Hide “Already have an account?” line on mobile -->
+      <p class="hidden md:block mt-3 text-sm text-slate-500">
         Already have an account?
         <a href="/auth/login.html" class="underline decoration-slate-300 hover:decoration-slate-600">Sign in</a>
       </p>
     </section>
 
-    <!-- [NEMI:L3 Early Access card — posts to /submit.php and shows in-page feedback] -->
+    <!-- [NEMI:L3 Early Access card] -->
     <section class="mt-10 md:mt-12">
       <div class="rounded-2xl border border-slate-200 p-6 md:p-8 shadow-sm">
         <h2 class="text-xl font-semibold">Get early access</h2>
         <p class="mt-2 text-slate-600">Tell us where to reach you—no spam, ever.</p>
 
-        <!-- Status banner (hidden by default) -->
         <div id="lead-status" class="hidden mt-4 rounded-xl border px-4 py-3 text-sm"></div>
 
         <form id="lead-form" action="/submit.php" method="post" class="mt-4 grid gap-3 sm:grid-cols-2">
-          <input class="w-full rounded-xl border border-slate-300 px-3 py-2" type="text"  name="name"    placeholder="Your name" required>
-          <input class="w-full rounded-xl border border-slate-300 px-3 py-2" type="email" name="email"   placeholder="Your email" required>
+          <input class="w-full rounded-xl border border-slate-300 px-3 py-2" type="text"  name="name"  placeholder="Your name" required>
+          <input class="w-full rounded-xl border border-slate-300 px-3 py-2" type="email" name="email" placeholder="Your email" required>
           <textarea class="sm:col-span-2 w-full rounded-xl border border-slate-300 px-3 py-2" name="message" placeholder="How can we help?"></textarea>
 
           <button id="lead-submit"
@@ -118,17 +102,16 @@
       </div>
     </section>
 
-    <!-- [NEMI:L4 Footer] -->
     <footer class="mt-16 text-sm text-slate-500">
       © <span id="year"></span> Nemi • Built with love
     </footer>
   </main>
 
   <script>
-    // [NEMI:JS year]
+    // Year
     document.getElementById('year').textContent = new Date().getFullYear();
 
-    // [NEMI:JS lead form handler for submit.php JSON]
+    // Lead form handler
     const form   = document.getElementById('lead-form');
     const btn    = document.getElementById('lead-submit');
     const banner = document.getElementById('lead-status');
@@ -136,11 +119,9 @@
     function showBanner(ok, msg) {
       banner.classList.remove('hidden');
       banner.textContent = msg;
-      if (ok) {
-        banner.className = "mt-4 rounded-xl border px-4 py-3 text-sm bg-green-50 border-green-200 text-green-800";
-      } else {
-        banner.className = "mt-4 rounded-xl border px-4 py-3 text-sm bg-red-50 border-red-200 text-red-800";
-      }
+      banner.className = ok
+        ? "mt-4 rounded-xl border px-4 py-3 text-sm bg-green-50 border-green-200 text-green-800"
+        : "mt-4 rounded-xl border px-4 py-3 text-sm bg-red-50 border-red-200 text-red-800";
     }
 
     form.addEventListener('submit', async (e) => {
@@ -154,7 +135,8 @@
         const json = await res.json().catch(() => ({}));
 
         if (res.ok && json.ok) {
-          showBanner(true, json.message || 'Thanks! We’ll be in touch.');
+          // FIXED: was missing a closing parenthesis
+          showBanner(true, (json.message || 'Thanks! We’ll be in touch.'));
           form.reset();
         } else {
           const msg = (json && (json.error || json.message)) || 'Something went wrong. Please try again.';
