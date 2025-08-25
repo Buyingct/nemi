@@ -9,257 +9,175 @@
 </head>
 <body class="bg-white text-slate-900">
 
-  <!-- ===== MOBILE HERO (SVG-driven) ===== -->
-  <section id="nemiMobile"
-           class="md:hidden relative mx-auto w-[min(520px,96vw)] overflow-hidden invisible"
-           style="aspect-ratio: 9/16">
-    <!-- SVG injected here so we can read <rect id="..."> anchors -->
-    <div id="mobileArt" class="absolute inset-0"></div>
+  <!-- MOBILE: SVG-driven hero -->
+<section id="nemiMobile" class="md:hidden relative mx-auto w-[min(520px,96vw)] overflow-hidden invisible" style="aspect-ratio:9/16">
+  <div id="mobileArt" class="absolute inset-0"></div>
 
-    <!-- Slots (each fills its SVG rectangle) -->
-    <div id="slot-teamiconbox" class="absolute hidden">
-      <img src="./assets/img/teamicon" alt="Team" class="w-full h-full object-contain">
+  <!-- team icon fills its rect -->
+  <div id="slot-teamiconbox" class="absolute hidden">
+    <img src="./assets/img/teamicon.svg" alt="Team" class="w-full h-full object-contain">
+  </div>
+
+  <!-- TITLE: will be auto-fitted to titletextbox -->
+  <div id="slot-titletextbox" class="absolute hidden flex items-center">
+    <div class="titlecopy text-slate-900" style="--fs:22px;">
+      <h1 class="t1">Take Control of Your Homebuying Journey.</h1>
+      <p class="t2"><strong>One team.</strong> Every step, <em class="i">always</em> clear.</p>
+      <p class="t3">Your Realtor, Lender &amp; Attorney in One Hub.</p>
     </div>
+  </div>
 
-    <div id="slot-titletextbox" class="absolute hidden flex items-center">
-      <div class="leading-snug text-slate-900">
-        <div class="font-extrabold text-[18px]">Take Control of Your Homebuying Journey.</div>
-        <div class="text-[15px]">
-          <strong>One team.</strong> Every step, <strong>always</strong> clear.<br>
-          Your Realtor, Lender &amp; Attorney in One Hub.
-        </div>
-      </div>
-    </div>
+  <a id="slot-getstartedwithnemi" href="/signup"
+     class="absolute hidden inline-flex items-center justify-center rounded-full border-2 border-slate-800/90 bg-yellow-400 font-semibold text-slate-900">
+    Get Started With Nemi
+  </a>
 
-    <a id="slot-getstartedwithnemi" href="/signup"
-       class="absolute hidden inline-flex items-center justify-center rounded-full border-2 border-slate-800/90 bg-yellow-400 font-semibold text-slate-900">
-      Get Started With Nemi
-    </a>
+  <div id="slot-alreadyamember" class="absolute hidden flex items-center justify-center text-[12px] text-slate-600">
+    Already a Nemi Member?
+  </div>
 
-    <div id="slot-alreadyamember" class="absolute hidden flex items-center justify-center text-[12px] text-slate-600">
-      Already a Nemi Member?
-    </div>
+  <div id="slot-emailbox" class="absolute hidden">
+    <input class="w-full h-full rounded-full border-2 border-slate-300 px-3 text-[16px]" type="email" name="email" placeholder="Email" autocomplete="username">
+  </div>
+  <div id="slot-passwordbox" class="absolute hidden">
+    <input class="w-full h-full rounded-full border-2 border-slate-300 px-3 text-[16px]" type="password" name="password" placeholder="Password" autocomplete="current-password">
+  </div>
 
-    <div id="slot-emailbox" class="absolute hidden">
-      <input class="w-full h-full rounded-full border-2 border-slate-300 px-3 text-[16px]"
-             type="email" name="email" placeholder="Email" autocomplete="username">
-    </div>
+  <button id="slot-loginbar" class="absolute hidden rounded-full border-2 border-slate-800/80 bg-yellow-400 font-semibold">🔒 Login</button>
 
-    <div id="slot-passwordbox" class="absolute hidden">
-      <input class="w-full h-full rounded-full border-2 border-slate-300 px-3 text-[16px]"
-             type="password" name="password" placeholder="Password" autocomplete="current-password">
-    </div>
+  <a id="slot-forgotpassword" href="/auth/forgot.php" class="absolute hidden underline text-[12px] text-slate-700 text-center">Forgot Password?</a>
 
-    <button id="slot-loginbar"
-            class="absolute hidden rounded-full border-2 border-slate-800/80 bg-yellow-400 font-semibold">
-      🔒 Login
-    </button>
+  <a id="slot-appdownload" href="#" class="absolute hidden block" aria-label="Download on the App Store">
+    <img src="./assets/img/appstore.svg" class="w-full h-full object-contain" alt="">
+  </a>
+  <a id="slot-androiddownload" href="#" class="absolute hidden block" aria-label="Get it on Google Play">
+    <img src="./assets/img/googleplay.svg" class="w-full h-full object-contain" alt="">
+  </a>
 
-    <a id="slot-forgotpassword" href="/auth/forgot.php"
-       class="absolute hidden underline text-[12px] text-slate-700 text-center">
-      Forgot Password?
-    </a>
+  <a id="slot-explorenemibox" href="/features"
+     class="absolute hidden inline-flex items-center justify-center rounded-full border-2 border-slate-800/80 bg-white text-slate-900 font-semibold">
+    Explore Nemi Features
+  </a>
 
-    <a id="slot-appdownload" href="#" class="absolute hidden block" aria-label="Download on the App Store">
-      <img src="./assets/img/appstore.svg" class="w-full h-full object-contain" alt="">
-    </a>
+  <div id="slot-realtorapply" class="absolute hidden flex items-center justify-center text-[12px] text-slate-600 text-center">
+    Have what it takes to be a Nemi Pro?
+    &nbsp;<a href="/pros/apply" class="underline text-slate-800">Apply Here!</a>
+  </div>
+</section>
 
-    <a id="slot-androiddownload" href="#" class="absolute hidden block" aria-label="Get it on Google Play">
-      <img src="./assets/img/googleplay.svg" class="w-full h-full object-contain" alt="">
-    </a>
+<script>
+(async function(){
+  const section = document.getElementById('nemiMobile');
+  const host    = document.getElementById('mobileArt');
 
-    <a id="slot-explorenemibox" href="/features"
-       class="absolute hidden inline-flex items-center justify-center rounded-full border-2 border-slate-800/80 bg-white text-slate-900 font-semibold">
-      Explore Nemi Features
-    </a>
+  // Try extensionless and .svg (handles your server behavior)
+  const candidates = [
+    'assets/svgs/signinrenamed',           // extensionless, relative
+    '/assets/svgs/signinrenamed',          // extensionless, root
+    '/nemi/assets/svgs/signinrenamed',     // extensionless, under /nemi
+    'assets/svgs/signinrenamed.svg',
+    '/assets/svgs/signinrenamed.svg',
+    '/nemi/assets/svgs/signinrenamed.svg'
+  ];
 
-    <div id="slot-realtorapply" class="absolute hidden flex items-center justify-center text-[12px] text-slate-600 text-center">
-      Have what it takes to be a Nemi Pro?
-      &nbsp;<a href="/pros/apply" class="underline text-slate-800">Apply Here!</a>
-    </div>
-  </section>
+  let svgText = null;
+  for (const url of candidates) {
+    try {
+      const r = await fetch(url, { cache: 'no-cache' });
+      if (r.ok) { svgText = await r.text(); break; }
+    } catch(_) {}
+  }
+  if (!svgText) { section.classList.remove('invisible'); return; }
 
-  <!-- ===== DESKTOP CONTENT (hidden on mobile) ===== -->
-  <main class="hidden md:block max-w-5xl mx-auto px-6 pb-20">
-  
-    <section class="mt-6 md:mt-10">
-      <h1 class="text-3xl md:text-5xl font-extrabold tracking-tight">
-        A personalized team to help you reach homeownership
-      </h1>
-      <p class="mt-4 text-lg text-slate-600 max-w-2xl">
-        Map your progress and keep on track—from credit to keys.
-      </p>
+  // Inline the SVG so we can query its rect anchors
+  host.innerHTML = svgText.replace('<svg', '<svg id="mobileSVG" style="display:block;width:100%;height:100%;pointer-events:none"');
+  const svg = document.getElementById('mobileSVG');
 
-      <div class="mt-6 flex flex-wrap gap-3">
-        <a href="/auth/login.html"
-           class="inline-flex items-center rounded-xl bg-slate-900 px-4 py-2 text-white font-semibold hover:opacity-90">
-          Sign in
-        </a>
-        <a href="/auth/access_request.html"
-           class="inline-flex items-center rounded-xl border border-slate-300 px-4 py-2 font-semibold text-slate-800 hover:bg-slate-50">
-          Request Nemi Access
-        </a>
-        <a href="/auth/demo_login.php"
-           class="inline-flex items-center rounded-xl border border-slate-300 px-4 py-2 font-semibold text-slate-800 hover:bg-slate-50">
-          Try the Demo
-        </a>
-      </div>
-    </section>
+  // Keep container aspect ratio exactly matching the viewBox
+  const vb = svg.viewBox.baseVal;
+  if (vb && vb.width && vb.height) section.style.aspectRatio = vb.width + ' / ' + vb.height;
 
-   
-    <section class="mt-10 md:mt-12">
-      <div class="rounded-2xl border border-slate-200 p-6 md:p-8 shadow-sm">
-        <h2 class="text-xl font-semibold">Get early access</h2>
-        <p class="mt-2 text-slate-600">Tell us where to reach you—no spam, ever.</p>
+  // place() positions a slot to fill an SVG <rect>
+  function place(rectId, slotId, pad=0){
+    const rect = svg.querySelector('#'+rectId);
+    const slot = document.getElementById(slotId);
+    if(!rect || !slot){ if(!rect) console.warn('Missing anchor:', rectId); return; }
+    const hostBox = host.getBoundingClientRect();
+    const r = rect.getBoundingClientRect();
+    Object.assign(slot.style, {
+      position:'absolute',
+      left:  (r.left - hostBox.left + pad) + 'px',
+      top:   (r.top  - hostBox.top  + pad) + 'px',
+      width: (r.width  - pad*2) + 'px',
+      height:(r.height - pad*2) + 'px',
+      display:'block'
+    });
+  }
 
-        <div id="lead-status" class="hidden mt-4 rounded-xl border px-4 py-3 text-sm"></div>
+  // Auto-fit the headline to its box (binary search for --fs)
+  function fitTitle(){
+    const slot = document.getElementById('slot-titletextbox');
+    const copy = slot?.querySelector('.titlecopy');
+    if (!slot || !copy) return;
 
-        <form id="lead-form" action="/submit.php" method="post" class="mt-4 grid gap-3 sm:grid-cols-2">
-          <input class="w-full rounded-xl border border-slate-300 px-3 py-2" type="text"  name="name"  placeholder="Your name" required>
-          <input class="w-full rounded-xl border border-slate-300 px-3 py-2" type="email" name="email" placeholder="Your email" required>
-          <textarea class="sm:col-span-2 w-full rounded-xl border border-slate-300 px-3 py-2" name="message" placeholder="How can we help?"></textarea>
+    const maxPx = 24;    // upper bound for Line 1 base size
+    const minPx = 12;    // lower bound
+    let lo = minPx, hi = maxPx, best = minPx;
 
-          <button id="lead-submit"
-                  class="sm:col-span-2 inline-flex justify-center rounded-xl bg-slate-900 px-4 py-2 text-white font-semibold hover:opacity-90"
-                  type="submit">
-            Send
-          </button>
-        </form>
-
-        <p class="mt-3 text-sm text-slate-500">
-          By submitting, you agree to be contacted about Nemi. We’ll never sell your info.
-        </p>
-      </div>
-    </section>
-
-    <footer class="mt-16 text-sm text-slate-500">
-      © <span id="year"></span> Nemi • Built with love
-    </footer>
-  </main>
-
-  <!-- ===== SCRIPTS ===== -->
-  <script>
-    // Year (desktop footer)
-    const yr = document.getElementById('year'); if (yr) yr.textContent = new Date().getFullYear();
-
-    // Pair-load + anchor all mobile slots to SVG <rect> anchors
-    (async function(){
-      const section = document.getElementById('nemiMobile');
-      const host    = document.getElementById('mobileArt');
-
-      try {
-        const res = await fetch('./assets/svgs/signinrenamed.svg', { cache: 'no-cache' });
-        const svgText = await res.text();
-        host.innerHTML = svgText.replace('<svg', '<svg id="mobileSVG" style="display:block;width:100%;height:100%;pointer-events:none"');
-        const svg = document.getElementById('mobileSVG');
-
-        // Set section aspect ratio from viewBox so alignment is perfect
-        const vb = svg.viewBox.baseVal;
-        if (vb && vb.width && vb.height) {
-          section.style.aspectRatio = vb.width + ' / ' + vb.height;
-        }
-
-        function place(rectId, slotId, pad=0){
-          const rect = svg.querySelector('#'+rectId);
-          const slot = document.getElementById(slotId);
-          if(!rect || !slot){ if(!rect) console.warn('Missing anchor:', rectId); return; }
-          const hostBox = host.getBoundingClientRect();
-          const r = rect.getBoundingClientRect();
-          Object.assign(slot.style, {
-            position:'absolute',
-            left:  (r.left - hostBox.left + pad) + 'px',
-            top:   (r.top  - hostBox.top  + pad) + 'px',
-            width: (r.width  - pad*2) + 'px',
-            height:(r.height - pad*2) + 'px',
-            display:'block'
-          });
-        }
-
-        function layout(){
-          // headline cluster
-          place('teamiconbox',          'slot-teamiconbox');
-          place('titletextbox',         'slot-titletextbox', 6);
-
-          // card internals
-          place('getstartedwithnemi',   'slot-getstartedwithnemi');
-          place('alreadyamember',       'slot-alreadyamember');
-          place('emailbox',             'slot-emailbox');
-          place('passwordbox',          'slot-passwordbox');
-          place('loginbar',             'slot-loginbar');
-          place('forgotpassword',       'slot-forgotpassword');
-
-          // app badges + extras
-          place('appdownload',          'slot-appdownload');
-          place('androiddownload',      'slot-androiddownload');
-          place('explorenemibox',       'slot-explorenemibox');
-          place('realtorapply',         'slot-realtorapply');
-
-          // reveal only after initial placement to avoid BG-only flash
-          section.classList.remove('invisible');
-        }
-
-        window.addEventListener('resize', layout, { passive:true });
-        requestAnimationFrame(layout);
-      } catch (e) {
-        console.error('SVG load failed', e);
-        // Fail-open so page is visible even if SVG fails
-        section.classList.remove('invisible');
-      }
-    })();
-
-    // Lead form handler (desktop)
-    (function(){
-      const form   = document.getElementById('lead-form');
-      if (!form) return;
-      const btn    = document.getElementById('lead-submit');
-      const banner = document.getElementById('lead-status');
-
-      function showBanner(ok, msg) {
-        banner.classList.remove('hidden');
-        banner.textContent = msg;
-        banner.className = ok
-          ? "mt-4 rounded-xl border px-4 py-3 text-sm bg-green-50 border-green-200 text-green-800"
-          : "mt-4 rounded-xl border px-4 py-3 text-sm bg-red-50 border-red-200 text-red-800";
-      }
-
-      form.addEventListener('submit', async (e) => {
-        e.preventDefault();
-        btn.disabled = true;
-        const original = btn.textContent;
-        btn.textContent = 'Sending…';
-
-        try {
-          const res  = await fetch(form.action, { method: 'POST', body: new FormData(form) });
-          const json = await res.json().catch(() => ({}));
-
-          if (res.ok && json.ok) {
-            showBanner(true, (json.message || 'Thanks! We’ll be in touch.'));
-            form.reset();
-          } else {
-            const msg = (json && (json.error || json.message)) || 'Something went wrong. Please try again.';
-            showBanner(false, msg);
-          }
-        } catch (err) {
-          showBanner(false, 'Network error. Please try again.');
-        } finally {
-          btn.disabled = false;
-          btn.textContent = original;
-        }
-      });
-    })();
-  </script>
-
-  <style>
-    /* Mobile input focus look */
-    #nemiMobile input:focus {
-      outline: none;
-      border-color: #1c2c46;
-      box-shadow: 0 0 0 4px rgba(28,44,70,.12);
+    // while loop, ~12 steps is enough
+    for (let i=0; i<12; i++) {
+      const mid = (lo + hi) / 2;
+      copy.style.setProperty('--fs', mid + 'px');
+      // Give the browser a tick to layout
+      // (no await needed; sync measurement works well enough here)
+      const fits = (copy.scrollWidth <= slot.clientWidth + 0.5) &&
+                   (copy.scrollHeight <= slot.clientHeight + 0.5);
+      if (fits) { best = mid; lo = mid; } else { hi = mid; }
     }
-    /* Buttons scale nicely to their boxes */
-    #slot-getstartedwithnemi, #slot-loginbar, #slot-explorenemibox {
-      font-size: clamp(14px, 3.6vw, 18px);
-    }
-  </style>
+    copy.style.setProperty('--fs', Math.floor(best) + 'px');
+  }
+
+  function layout(){
+    // headline cluster (+ a little inner padding to breathe)
+    place('teamiconbox',          'slot-teamiconbox');
+    place('titletextbox',         'slot-titletextbox', 6);
+
+    // card internals
+    place('getstartedwithnemi',   'slot-getstartedwithnemi');
+    place('alreadyamember',       'slot-alreadyamember');
+    place('emailbox',             'slot-emailbox');
+    place('passwordbox',          'slot-passwordbox');
+    place('loginbar',             'slot-loginbar');
+    place('forgotpassword',       'slot-forgotpassword');
+
+    // app badges + extras
+    place('appdownload',          'slot-appdownload');
+    place('androiddownload',      'slot-androiddownload');
+    place('explorenemibox',       'slot-explorenemibox');
+    place('realtorapply',         'slot-realtorapply');
+
+    fitTitle();
+    section.classList.remove('invisible');
+  }
+
+  window.addEventListener('resize', layout, { passive:true });
+  requestAnimationFrame(layout);
+})();
+</script>
+
+<style>
+/* Headline styling to match your screenshot */
+#slot-titletextbox .titlecopy { text-align:left; line-height:1.15; text-wrap:balance; }
+#slot-titletextbox .titlecopy .t1 { font-weight:800; font-size:var(--fs); margin:0 0 4px 0; }
+#slot-titletextbox .titlecopy .t2 { font-size:calc(var(--fs) * .82); margin:0 0 2px 0; }
+#slot-titletextbox .titlecopy .t2 .i { font-style:italic; }
+#slot-titletextbox .titlecopy .t3 { font-size:calc(var(--fs) * .8); margin:0; color:#334155; }
+
+/* Inputs focus look */
+#nemiMobile input:focus { outline:none; border-color:#1c2c46; box-shadow:0 0 0 4px rgba(28,44,70,.12); }
+/* Buttons scale nicely to their boxes */
+#slot-getstartedwithnemi, #slot-loginbar, #slot-explorenemibox { font-size: clamp(14px, 3.6vw, 18px); }
+</style>
+
 </body>
 </html>
