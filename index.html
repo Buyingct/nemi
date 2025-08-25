@@ -5,45 +5,83 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Nemi – Your Personalized Path to Homeownership</title>
   <script src="https://cdn.tailwindcss.com"></script>
-  <link rel="preload" as="image" href="./assets/svgs/nemimobilesignindesign.svg">
+  <link rel="preload" as="image" href="./assets/svgs/signinrenamed.svg">
 </head>
 <body class="bg-white text-slate-900">
 
-  <!-- (Header removed on landing page) -->
+  <!-- ===== MOBILE HERO (SVG-driven) ===== -->
+  <section id="nemiMobile"
+           class="md:hidden relative mx-auto w-[min(520px,96vw)] overflow-hidden invisible"
+           style="aspect-ratio: 9/16">
+    <!-- SVG injected here so we can read <rect id="..."> anchors -->
+    <div id="mobileArt" class="absolute inset-0"></div>
 
-  <!-- Mobile artboard hero (local asset) -->
-  <section class="md:hidden mx-auto w-[min(520px,96vw)] aspect-[414/896] relative">
-    <img
-      src="./assets/svgs/nemimobilesignindesign.svg"
-      alt="Nemi mobile background"
-      class="absolute inset-0 h-full w-full object-contain pointer-events-none select-none"
-    />
+    <!-- Slots (each fills its SVG rectangle) -->
+    <div id="slot-teamiconbox" class="absolute hidden">
+      <img src="./assets/img/teamicon.svg" alt="Team" class="w-full h-full object-contain">
+    </div>
 
-    <div
-      class="absolute border-2 border-slate-800/90 rounded-2xl bg-white/95 shadow-xl p-4 sm:p-5 flex flex-col gap-3"
-      style="left:15.44%; top:19.48%; width:69.11%; height:61.04%;"
-    >
-      <a href="/auth/login.html"
-         class="inline-flex justify-center rounded-full bg-slate-900 px-4 py-2 text-white font-semibold hover:opacity-90">
-        Sign in
-      </a>
+    <div id="slot-titletextbox" class="absolute hidden flex items-center">
+      <div class="leading-snug text-slate-900">
+        <div class="font-extrabold text-[18px]">Take Control of Your Homebuying Journey.</div>
+        <div class="text-[15px]">
+          <strong>One team.</strong> Every step, <strong>always</strong> clear.<br>
+          Your Realtor, Lender &amp; Attorney in One Hub.
+        </div>
+      </div>
+    </div>
 
-      <p class="text-center text-sm text-slate-600">Already a Nemi Member?</p>
+    <a id="slot-getstartedwithnemi" href="/signup"
+       class="absolute hidden inline-flex items-center justify-center rounded-full border-2 border-slate-800/90 bg-yellow-400 font-semibold text-slate-900">
+      Get Started With Nemi
+    </a>
 
-      <form action="/auth/login.php" method="post" class="grid gap-3">
-        <input class="w-full rounded-full border border-slate-300 px-3 py-2" type="email" name="email" placeholder="Email" autocomplete="username" required>
-        <input class="w-full rounded-full border border-slate-300 px-3 py-2" type="password" name="password" placeholder="Password" autocomplete="current-password" required>
-        <button class="inline-flex justify-center rounded-full bg-yellow-400 px-4 py-2 font-semibold border border-slate-800/80">🔒 Login</button>
-      </form>
+    <div id="slot-alreadyamember" class="absolute hidden flex items-center justify-center text-[12px] text-slate-600">
+      Already a Nemi Member?
+    </div>
 
-      <p class="text-center text-sm">
-        <a href="/auth/forgot.php" class="underline decoration-slate-300 hover:decoration-slate-600">Forgot Password?</a>
-      </p>
+    <div id="slot-emailbox" class="absolute hidden">
+      <input class="w-full h-full rounded-full border-2 border-slate-300 px-3 text-[16px]"
+             type="email" name="email" placeholder="Email" autocomplete="username">
+    </div>
+
+    <div id="slot-passwordbox" class="absolute hidden">
+      <input class="w-full h-full rounded-full border-2 border-slate-300 px-3 text-[16px]"
+             type="password" name="password" placeholder="Password" autocomplete="current-password">
+    </div>
+
+    <button id="slot-loginbar"
+            class="absolute hidden rounded-full border-2 border-slate-800/80 bg-yellow-400 font-semibold">
+      🔒 Login
+    </button>
+
+    <a id="slot-forgotpassword" href="/auth/forgot.php"
+       class="absolute hidden underline text-[12px] text-slate-700 text-center">
+      Forgot Password?
+    </a>
+
+    <a id="slot-appdownload" href="#" class="absolute hidden block" aria-label="Download on the App Store">
+      <img src="./assets/img/appstore.svg" class="w-full h-full object-contain" alt="">
+    </a>
+
+    <a id="slot-androiddownload" href="#" class="absolute hidden block" aria-label="Get it on Google Play">
+      <img src="./assets/img/googleplay.svg" class="w-full h-full object-contain" alt="">
+    </a>
+
+    <a id="slot-explorenemibox" href="/features"
+       class="absolute hidden inline-flex items-center justify-center rounded-full border-2 border-slate-800/80 bg-white text-slate-900 font-semibold">
+      Explore Nemi Features
+    </a>
+
+    <div id="slot-realtorapply" class="absolute hidden flex items-center justify-center text-[12px] text-slate-600 text-center">
+      Have what it takes to be a Nemi Pro?
+      &nbsp;<a href="/pros/apply" class="underline text-slate-800">Apply Here!</a>
     </div>
   </section>
 
+  <!-- ===== DESKTOP CONTENT (hidden on mobile) ===== -->
   <main class="hidden md:block max-w-5xl mx-auto px-6 pb-20">
-    <!-- [NEMI:L2 Hero] -->
+  
     <section class="mt-6 md:mt-10">
       <h1 class="text-3xl md:text-5xl font-extrabold tracking-tight">
         A personalized team to help you reach homeownership
@@ -52,11 +90,9 @@
         Map your progress and keep on track—from credit to keys.
       </p>
 
-      <!-- CTA row -->
       <div class="mt-6 flex flex-wrap gap-3">
-        <!-- Hide duplicate Sign in on mobile; desktop keeps it -->
         <a href="/auth/login.html"
-           class="hidden md:inline-flex items-center rounded-xl bg-slate-900 px-4 py-2 text-white font-semibold hover:opacity-90">
+           class="inline-flex items-center rounded-xl bg-slate-900 px-4 py-2 text-white font-semibold hover:opacity-90">
           Sign in
         </a>
         <a href="/auth/access_request.html"
@@ -68,15 +104,9 @@
           Try the Demo
         </a>
       </div>
-
-      <!-- Hide “Already have an account?” line on mobile -->
-      <p class="hidden md:block mt-3 text-sm text-slate-500">
-        Already have an account?
-        <a href="/auth/login.html" class="underline decoration-slate-300 hover:decoration-slate-600">Sign in</a>
-      </p>
     </section>
 
-    <!-- [NEMI:L3 Early Access card] -->
+   
     <section class="mt-10 md:mt-12">
       <div class="rounded-2xl border border-slate-200 p-6 md:p-8 shadow-sm">
         <h2 class="text-xl font-semibold">Get early access</h2>
@@ -107,48 +137,129 @@
     </footer>
   </main>
 
+  <!-- ===== SCRIPTS ===== -->
   <script>
-    // Year
-    document.getElementById('year').textContent = new Date().getFullYear();
+    // Year (desktop footer)
+    const yr = document.getElementById('year'); if (yr) yr.textContent = new Date().getFullYear();
 
-    // Lead form handler
-    const form   = document.getElementById('lead-form');
-    const btn    = document.getElementById('lead-submit');
-    const banner = document.getElementById('lead-status');
-
-    function showBanner(ok, msg) {
-      banner.classList.remove('hidden');
-      banner.textContent = msg;
-      banner.className = ok
-        ? "mt-4 rounded-xl border px-4 py-3 text-sm bg-green-50 border-green-200 text-green-800"
-        : "mt-4 rounded-xl border px-4 py-3 text-sm bg-red-50 border-red-200 text-red-800";
-    }
-
-    form.addEventListener('submit', async (e) => {
-      e.preventDefault();
-      btn.disabled = true;
-      const original = btn.textContent;
-      btn.textContent = 'Sending…';
+    // Pair-load + anchor all mobile slots to SVG <rect> anchors
+    (async function(){
+      const section = document.getElementById('nemiMobile');
+      const host    = document.getElementById('mobileArt');
 
       try {
-        const res  = await fetch(form.action, { method: 'POST', body: new FormData(form) });
-        const json = await res.json().catch(() => ({}));
+        const res = await fetch('./assets/svgs/signinrenamed.svg', { cache: 'no-cache' });
+        const svgText = await res.text();
+        host.innerHTML = svgText.replace('<svg', '<svg id="mobileSVG" style="display:block;width:100%;height:100%;pointer-events:none"');
+        const svg = document.getElementById('mobileSVG');
 
-        if (res.ok && json.ok) {
-          // FIXED: was missing a closing parenthesis
-          showBanner(true, (json.message || 'Thanks! We’ll be in touch.'));
-          form.reset();
-        } else {
-          const msg = (json && (json.error || json.message)) || 'Something went wrong. Please try again.';
-          showBanner(false, msg);
+        // Set section aspect ratio from viewBox so alignment is perfect
+        const vb = svg.viewBox.baseVal;
+        if (vb && vb.width && vb.height) {
+          section.style.aspectRatio = vb.width + ' / ' + vb.height;
         }
-      } catch (err) {
-        showBanner(false, 'Network error. Please try again.');
-      } finally {
-        btn.disabled = false;
-        btn.textContent = original;
+
+        function place(rectId, slotId, pad=0){
+          const rect = svg.querySelector('#'+rectId);
+          const slot = document.getElementById(slotId);
+          if(!rect || !slot){ if(!rect) console.warn('Missing anchor:', rectId); return; }
+          const hostBox = host.getBoundingClientRect();
+          const r = rect.getBoundingClientRect();
+          Object.assign(slot.style, {
+            position:'absolute',
+            left:  (r.left - hostBox.left + pad) + 'px',
+            top:   (r.top  - hostBox.top  + pad) + 'px',
+            width: (r.width  - pad*2) + 'px',
+            height:(r.height - pad*2) + 'px',
+            display:'block'
+          });
+        }
+
+        function layout(){
+          // headline cluster
+          place('teamiconbox',          'slot-teamiconbox');
+          place('titletextbox',         'slot-titletextbox', 6);
+
+          // card internals
+          place('getstartedwithnemi',   'slot-getstartedwithnemi');
+          place('alreadyamember',       'slot-alreadyamember');
+          place('emailbox',             'slot-emailbox');
+          place('passwordbox',          'slot-passwordbox');
+          place('loginbar',             'slot-loginbar');
+          place('forgotpassword',       'slot-forgotpassword');
+
+          // app badges + extras
+          place('appdownload',          'slot-appdownload');
+          place('androiddownload',      'slot-androiddownload');
+          place('explorenemibox',       'slot-explorenemibox');
+          place('realtorapply',         'slot-realtorapply');
+
+          // reveal only after initial placement to avoid BG-only flash
+          section.classList.remove('invisible');
+        }
+
+        window.addEventListener('resize', layout, { passive:true });
+        requestAnimationFrame(layout);
+      } catch (e) {
+        console.error('SVG load failed', e);
+        // Fail-open so page is visible even if SVG fails
+        section.classList.remove('invisible');
       }
-    });
+    })();
+
+    // Lead form handler (desktop)
+    (function(){
+      const form   = document.getElementById('lead-form');
+      if (!form) return;
+      const btn    = document.getElementById('lead-submit');
+      const banner = document.getElementById('lead-status');
+
+      function showBanner(ok, msg) {
+        banner.classList.remove('hidden');
+        banner.textContent = msg;
+        banner.className = ok
+          ? "mt-4 rounded-xl border px-4 py-3 text-sm bg-green-50 border-green-200 text-green-800"
+          : "mt-4 rounded-xl border px-4 py-3 text-sm bg-red-50 border-red-200 text-red-800";
+      }
+
+      form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        btn.disabled = true;
+        const original = btn.textContent;
+        btn.textContent = 'Sending…';
+
+        try {
+          const res  = await fetch(form.action, { method: 'POST', body: new FormData(form) });
+          const json = await res.json().catch(() => ({}));
+
+          if (res.ok && json.ok) {
+            showBanner(true, (json.message || 'Thanks! We’ll be in touch.'));
+            form.reset();
+          } else {
+            const msg = (json && (json.error || json.message)) || 'Something went wrong. Please try again.';
+            showBanner(false, msg);
+          }
+        } catch (err) {
+          showBanner(false, 'Network error. Please try again.');
+        } finally {
+          btn.disabled = false;
+          btn.textContent = original;
+        }
+      });
+    })();
   </script>
+
+  <style>
+    /* Mobile input focus look */
+    #nemiMobile input:focus {
+      outline: none;
+      border-color: #1c2c46;
+      box-shadow: 0 0 0 4px rgba(28,44,70,.12);
+    }
+    /* Buttons scale nicely to their boxes */
+    #slot-getstartedwithnemi, #slot-loginbar, #slot-explorenemibox {
+      font-size: clamp(14px, 3.6vw, 18px);
+    }
+  </style>
 </body>
 </html>
