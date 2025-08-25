@@ -71,16 +71,24 @@
 </section>
 
 <style>
-  /* Adjustable opacity for the card background */
-#nemiMobile { --card-opacity: 0.95; }               /* ← change this number */
+/* Controls how see-through the card is */
+#nemiMobile { --card-opacity: 0.65; } /* try .55–.80 for best glassy look */
 
 #nemiMobile .slot-bg{
-  z-index: 6;                                       /* above SVG, below controls */
-  background: rgba(255,255,255,var(--card-opacity));
-  border-radius: 24px;                               /* fallback; JS will sync to SVG rx */
+  z-index: 6; /* above SVG, below controls */
+  background: rgba(255,255,255,var(--card-opacity)); /* must be translucent */
+  border-radius: 24px;
   box-shadow: 0 10px 30px rgba(20,35,58,0.15);
-  pointer-events: none;                              /* don’t block clicks on inputs */
+  pointer-events: none;
+
+  /* Frosted glass */
+  backdrop-filter: blur(8px) saturate(1.1);
+  -webkit-backdrop-filter: blur(8px) saturate(1.1); /* iOS Safari */
+
+  /* Optional: glass rim */
+  border: 1px solid rgba(255,255,255,0.35);
 }
+
 
   /* Slots above the SVG */
   #nemiMobile .slot { z-index: 10; }
