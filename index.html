@@ -9,17 +9,18 @@
 </head>
 <body class="bg-white text-slate-900">
 
-  <!-- MOBILE: SVG-driven hero -->
+<!-- MOBILE: SVG-driven hero (with z-index + auto-fit) -->
 <section id="nemiMobile" class="md:hidden relative mx-auto w-[min(520px,96vw)] overflow-hidden invisible" style="aspect-ratio:9/16">
-  <div id="mobileArt" class="absolute inset-0"></div>
+  <!-- SVG goes behind, slots go above -->
+  <div id="mobileArt" class="absolute inset-0" style="z-index:1;"></div>
 
-  <!-- team icon fills its rect -->
-  <div id="slot-teamiconbox" class="absolute hidden">
+  <!-- Slots (NOTE: all have class 'slot' for z-index) -->
+  <div id="slot-teamiconbox" class="slot absolute hidden">
     <img src="./assets/img/teamicon.svg" alt="Team" class="w-full h-full object-contain">
   </div>
 
-  <!-- TITLE: will be auto-fitted to titletextbox -->
-  <div id="slot-titletextbox" class="absolute hidden flex items-center">
+  <!-- Headline inside its rect, overflow clipped, auto-fit -->
+  <div id="slot-titletextbox" class="slot absolute hidden">
     <div class="titlecopy text-slate-900" style="--fs:22px;">
       <h1 class="t1">Take Control of Your Homebuying Journey.</h1>
       <p class="t2"><strong>One team.</strong> Every step, <em class="i">always</em> clear.</p>
@@ -28,53 +29,70 @@
   </div>
 
   <a id="slot-getstartedwithnemi" href="/signup"
-     class="absolute hidden inline-flex items-center justify-center rounded-full border-2 border-slate-800/90 bg-yellow-400 font-semibold text-slate-900">
-    Get Started With Nemi
-  </a>
+     class="slot absolute hidden inline-flex items-center justify-center rounded-full border-2 border-slate-800/90 bg-yellow-400 font-semibold text-slate-900">Get Started With Nemi</a>
 
-  <div id="slot-alreadyamember" class="absolute hidden flex items-center justify-center text-[12px] text-slate-600">
-    Already a Nemi Member?
-  </div>
+  <div id="slot-alreadyamember" class="slot absolute hidden flex items-center justify-center text-[12px] text-slate-600">Already a Nemi Member?</div>
 
-  <div id="slot-emailbox" class="absolute hidden">
+  <div id="slot-emailbox" class="slot absolute hidden">
     <input class="w-full h-full rounded-full border-2 border-slate-300 px-3 text-[16px]" type="email" name="email" placeholder="Email" autocomplete="username">
   </div>
-  <div id="slot-passwordbox" class="absolute hidden">
+  <div id="slot-passwordbox" class="slot absolute hidden">
     <input class="w-full h-full rounded-full border-2 border-slate-300 px-3 text-[16px]" type="password" name="password" placeholder="Password" autocomplete="current-password">
   </div>
 
-  <button id="slot-loginbar" class="absolute hidden rounded-full border-2 border-slate-800/80 bg-yellow-400 font-semibold">🔒 Login</button>
+  <button id="slot-loginbar" class="slot absolute hidden rounded-full border-2 border-slate-800/80 bg-yellow-400 font-semibold">🔒 Login</button>
 
-  <a id="slot-forgotpassword" href="/auth/forgot.php" class="absolute hidden underline text-[12px] text-slate-700 text-center">Forgot Password?</a>
+  <a id="slot-forgotpassword" href="/auth/forgot.php" class="slot absolute hidden underline text-[12px] text-slate-700 text-center">Forgot Password?</a>
 
-  <a id="slot-appdownload" href="#" class="absolute hidden block" aria-label="Download on the App Store">
+  <a id="slot-appdownload" href="#" class="slot absolute hidden block" aria-label="Download on the App Store">
     <img src="./assets/img/appstore.svg" class="w-full h-full object-contain" alt="">
   </a>
-  <a id="slot-androiddownload" href="#" class="absolute hidden block" aria-label="Get it on Google Play">
+  <a id="slot-androiddownload" href="#" class="slot absolute hidden block" aria-label="Get it on Google Play">
     <img src="./assets/img/googleplay.svg" class="w-full h-full object-contain" alt="">
   </a>
 
   <a id="slot-explorenemibox" href="/features"
-     class="absolute hidden inline-flex items-center justify-center rounded-full border-2 border-slate-800/80 bg-white text-slate-900 font-semibold">
-    Explore Nemi Features
-  </a>
+     class="slot absolute hidden inline-flex items-center justify-center rounded-full border-2 border-slate-800/80 bg-white text-slate-900 font-semibold">Explore Nemi Features</a>
 
-  <div id="slot-realtorapply" class="absolute hidden flex items-center justify-center text-[12px] text-slate-600 text-center">
-    Have what it takes to be a Nemi Pro?
-    &nbsp;<a href="/pros/apply" class="underline text-slate-800">Apply Here!</a>
+  <div id="slot-realtorapply" class="slot absolute hidden flex items-center justify-center text-[12px] text-slate-600 text-center">
+    Have what it takes to be a Nemi Pro? &nbsp;<a href="/pros/apply" class="underline text-slate-800">Apply Here!</a>
   </div>
 </section>
+
+<style>
+  /* Make sure slots always sit above the SVG */
+  #nemiMobile .slot { z-index: 10; }
+
+  /* Headline: hard-bound to the rect area */
+  #slot-titletextbox { overflow: hidden; }
+  #slot-titletextbox .titlecopy {
+    width: 100%; height: 100%;
+    display: block;
+    line-height: 1.15;
+    text-wrap: balance;
+  }
+  #slot-titletextbox .t1 { font-weight: 800; font-size: var(--fs); margin: 0 0 4px 0; }
+  #slot-titletextbox .t2 { font-size: calc(var(--fs) * .82); margin: 0 0 2px 0; }
+  #slot-titletextbox .t2 .i { font-style: italic; }
+  #slot-titletextbox .t3 { font-size: calc(var(--fs) * .80); margin: 0; color: #334155; }
+
+  /* Inputs focus look */
+  #nemiMobile input:focus { outline: none; border-color: #1c2c46; box-shadow: 0 0 0 4px rgba(28,44,70,.12); }
+
+  /* Buttons scale nicely to their boxes */
+  #slot-getstartedwithnemi, #slot-loginbar, #slot-explorenemibox { font-size: clamp(14px, 3.6vw, 18px); }
+</style>
 
 <script>
 (async function(){
   const section = document.getElementById('nemiMobile');
   const host    = document.getElementById('mobileArt');
 
-  // Try extensionless and .svg (handles your server behavior)
+  // Try extensionless and .svg (to handle your server behavior)
   const candidates = [
-    'assets/svgs/signinrenamed',           // extensionless, relative
-    '/assets/svgs/signinrenamed',          // extensionless, root
-    '/nemi/assets/svgs/signinrenamed',     // extensionless, under /nemi
+    'assets/svgs/signinrenamed',
+    '/assets/svgs/signinrenamed',
+    '/nemi/assets/svgs/signinrenamed',
     'assets/svgs/signinrenamed.svg',
     '/assets/svgs/signinrenamed.svg',
     '/nemi/assets/svgs/signinrenamed.svg'
@@ -82,28 +100,25 @@
 
   let svgText = null;
   for (const url of candidates) {
-    try {
-      const r = await fetch(url, { cache: 'no-cache' });
-      if (r.ok) { svgText = await r.text(); break; }
-    } catch(_) {}
+    try { const r = await fetch(url, { cache: 'no-cache' }); if (r.ok) { svgText = await r.text(); break; } } catch(_) {}
   }
   if (!svgText) { section.classList.remove('invisible'); return; }
 
-  // Inline the SVG so we can query its rect anchors
+  // Inject SVG inline (behind slots)
   host.innerHTML = svgText.replace('<svg', '<svg id="mobileSVG" style="display:block;width:100%;height:100%;pointer-events:none"');
   const svg = document.getElementById('mobileSVG');
 
-  // Keep container aspect ratio exactly matching the viewBox
+  // Keep container aspect ratio matching viewBox
   const vb = svg.viewBox.baseVal;
   if (vb && vb.width && vb.height) section.style.aspectRatio = vb.width + ' / ' + vb.height;
 
-  // place() positions a slot to fill an SVG <rect>
+  // Helper: position & size a slot to exactly fill an SVG <rect>
   function place(rectId, slotId, pad=0){
-    const rect = svg.querySelector('#'+rectId);
+    const rEl = svg.querySelector('#'+rectId);
     const slot = document.getElementById(slotId);
-    if(!rect || !slot){ if(!rect) console.warn('Missing anchor:', rectId); return; }
+    if(!rEl || !slot){ if(!rEl) console.warn('Missing anchor:', rectId); return; }
     const hostBox = host.getBoundingClientRect();
-    const r = rect.getBoundingClientRect();
+    const r = rEl.getBoundingClientRect();
     Object.assign(slot.style, {
       position:'absolute',
       left:  (r.left - hostBox.left + pad) + 'px',
@@ -114,22 +129,19 @@
     });
   }
 
-  // Auto-fit the headline to its box (binary search for --fs)
+  // Auto-fit the headline to its rect (runs after fonts load)
   function fitTitle(){
     const slot = document.getElementById('slot-titletextbox');
     const copy = slot?.querySelector('.titlecopy');
     if (!slot || !copy) return;
 
-    const maxPx = 24;    // upper bound for Line 1 base size
-    const minPx = 12;    // lower bound
+    const maxPx = 24, minPx = 12;
     let lo = minPx, hi = maxPx, best = minPx;
-
-    // while loop, ~12 steps is enough
+   
     for (let i=0; i<12; i++) {
       const mid = (lo + hi) / 2;
       copy.style.setProperty('--fs', mid + 'px');
-      // Give the browser a tick to layout
-      // (no await needed; sync measurement works well enough here)
+   
       const fits = (copy.scrollWidth <= slot.clientWidth + 0.5) &&
                    (copy.scrollHeight <= slot.clientHeight + 0.5);
       if (fits) { best = mid; lo = mid; } else { hi = mid; }
@@ -138,11 +150,11 @@
   }
 
   function layout(){
-    // headline cluster (+ a little inner padding to breathe)
+    // Headline cluster (add a hair of inner padding to breathe)
     place('teamiconbox',          'slot-teamiconbox');
     place('titletextbox',         'slot-titletextbox', 6);
 
-    // card internals
+    // Card internals
     place('getstartedwithnemi',   'slot-getstartedwithnemi');
     place('alreadyamember',       'slot-alreadyamember');
     place('emailbox',             'slot-emailbox');
@@ -150,7 +162,7 @@
     place('loginbar',             'slot-loginbar');
     place('forgotpassword',       'slot-forgotpassword');
 
-    // app badges + extras
+    // Badges + extras
     place('appdownload',          'slot-appdownload');
     place('androiddownload',      'slot-androiddownload');
     place('explorenemibox',       'slot-explorenemibox');
@@ -160,10 +172,13 @@
     section.classList.remove('invisible');
   }
 
+  // Wait for fonts (prevents early overspill on iOS), then layout
+  try { if (document.fonts && document.fonts.ready) await document.fonts.ready; } catch(_) {}
   window.addEventListener('resize', layout, { passive:true });
   requestAnimationFrame(layout);
 })();
 </script>
+ 
 
 <style>
 /* Headline styling to match your screenshot */
