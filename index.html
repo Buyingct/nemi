@@ -111,16 +111,21 @@
 }
 
 /* One-team = exactly 2 lines and centered */
-/* put this in your <style> block */
-#slot-oneteam{
-  display: flex !important;   /* overrides JS display:block */
-  align-items: flex-start;     /* TOP of the rect */
-  justify-content: center;     /* keeps it centered horizontally */
-  padding-top: 0;              /* tweak if you want a tiny offset */
-}
+
 #slot-oneteam .otcopy{
-  text-align: center;          /* center the two lines */
-  margin-top: 0;
+  width:100%; height:100%;
+  display:-webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  line-height:1.12;
+  font-size:var(--fsSub);
+  white-space:normal;
+  overflow:hidden;
+
+  /* center both lines */
+  text-align: center;
+ margin-top: 0;
 }
 
 
