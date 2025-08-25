@@ -5,32 +5,37 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Nemi – Your Personalized Path to Homeownership</title>
   <script src="https://cdn.tailwindcss.com"></script>
-  <link rel="preload" as="image" href="./assets/svgs/signinrenamed">
+  <!-- your server prefers extensionless SVG paths -->
+  <link rel="preload" as="image" href="./assets/svgs/signinrenamed" type="image/svg+xml">
 </head>
 <body class="bg-white text-slate-900">
 
-<!-- MOBILE: SVG-driven hero (with z-index + auto-fit) -->
+<!-- MOBILE: SVG-driven hero -->
 <section id="nemiMobile" class="md:hidden relative mx-auto w-[min(520px,96vw)] overflow-hidden invisible" style="aspect-ratio:9/16">
-  <!-- Card background (fills the SVG rect #loginbox) -->
-<div id="slot-loginboxbg" class="slot-bg absolute hidden" aria-hidden="true"></div>
-
-  <!-- SVG goes behind, slots go above -->
+  <!-- SVG (behind) -->
   <div id="mobileArt" class="absolute inset-0" style="z-index:1;"></div>
 
-  <!-- Slots (NOTE: all have class 'slot' for z-index) -->
+  <!-- Slots (above) -->
   <div id="slot-teamiconbox" class="slot absolute hidden">
     <img src="./assets/img/teamicon.svg" alt="Team" class="w-full h-full object-contain">
   </div>
 
-  <!-- Headline inside its rect, overflow clipped, auto-fit -->
+  <!-- Headline (exactly 2 lines, larger than oneteam) -->
   <div id="slot-titletextbox" class="slot absolute hidden">
-    <div class="titlecopy text-slate-900" style="--fs:22px;">
-      <h1 class="t1">Take Control of Your Homebuying Journey.</h1>
-      <p class="t2"><strong>One team.</strong> Every step, <em class="i">always</em> clear.</p>
-      <p class="t3">Your Realtor, Lender &amp; Attorney in One Hub.</p>
+    <div class="titlecopy text-slate-900" style="--fsTitle:22px;">
+      Take Control of Your Homebuying Journey.
     </div>
   </div>
 
+  <!-- One-team block (exactly 2 lines with emphasis) -->
+  <div id="slot-oneteam" class="slot absolute hidden">
+    <div class="otcopy text-slate-800" style="--fsSub:16px;">
+      <span>One <strong>team</strong>. Every step, <strong>always</strong> clear.</span><br>
+      <span>Your Realtor, Lender &amp; Attorney in <strong>One</strong> Hub.</span>
+    </div>
+  </div>
+
+  <!-- Form + actions -->
   <a id="slot-getstartedwithnemi" href="/signup"
      class="slot absolute hidden inline-flex items-center justify-center rounded-full border-2 border-slate-800/90 bg-yellow-400 font-semibold text-slate-900">Get Started With Nemi</a>
 
@@ -63,151 +68,150 @@
 </section>
 
 <style>
-  /* Make sure slots always sit above the SVG */
+  /* Slots above the SVG */
   #nemiMobile .slot { z-index: 10; }
 
-  /* Below other slots but above the SVG */
-#nemiMobile .slot-bg {
-  z-index: 6;                 /* SVG ~1, bg 6, interactive slots 10 */
-  background: rgba(255,255,255,0.92);  /* white with opacity */
-  border-radius: 24px;        /* match your card corners */
-  box-shadow: 0 10px 30px rgba(20,35,58,0.15);
-  pointer-events: none;       /* don't block clicks on inputs */
+  /* Title = exactly 2 lines */
+#slot-titletextbox .titlecopy{
+  width:100%; height:100%;
+  display:-webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;   /* vendor */
+  line-clamp: 2;           /* standard → fixes VS Code warning */
+  line-height:1.12;
+  font-weight:800;
+  font-size:var(--fsTitle);
+  white-space:normal;
+  overflow:hidden;
 }
 
-  /* Headline: hard-bound to the rect area */
-  #slot-titletextbox { overflow: hidden; }
-  #slot-titletextbox .titlecopy {
-    width: 100%; height: 100%;
-    display: block;
-    line-height: 1.15;
-    text-wrap: balance;
-  }
-  #slot-titletextbox .t1 { font-weight: 800; font-size: var(--fs); margin: 0 0 4px 0; }
-  #slot-titletextbox .t2 { font-size: calc(var(--fs) * .82); margin: 0 0 2px 0; }
-  #slot-titletextbox .t2 .i { font-style: italic; }
-  #slot-titletextbox .t3 { font-size: calc(var(--fs) * .80); margin: 0; color: #334155; }
+/* One-team = exactly 2 lines */
+#slot-oneteam .otcopy{
+  width:100%; height:100%;
+  display:-webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;   /* vendor */
+  line-clamp: 2;           /* standard */
+  line-height:1.12;
+  font-size:var(--fsSub);
+  white-space:normal;
+  overflow:hidden;
+}
+
 
   /* Inputs focus look */
-  #nemiMobile input:focus { outline: none; border-color: #1c2c46; box-shadow: 0 0 0 4px rgba(28,44,70,.12); }
+  #nemiMobile input:focus{ outline:none; border-color:#1c2c46; box-shadow:0 0 0 4px rgba(28,44,70,.12); }
 
   /* Buttons scale nicely to their boxes */
   #slot-getstartedwithnemi, #slot-loginbar, #slot-explorenemibox { font-size: clamp(14px, 3.6vw, 18px); }
 </style>
 
 <script>
-(async function(){
-  const section = document.getElementById('nemiMobile');
-  const host    = document.getElementById('mobileArt');
+(function(){
+  var section = document.getElementById('nemiMobile');
+  var host    = document.getElementById('mobileArt');
 
-  // Try extensionless and .svg (to handle your server behavior)
-  const candidates = [
-    'assets/svgs/signinrenamed',
-    '/assets/svgs/signinrenamed',
-    '/nemi/assets/svgs/signinrenamed',
-    'assets/svgs/signinrenamed.svg',
-    '/assets/svgs/signinrenamed.svg',
-    '/nemi/assets/svgs/signinrenamed.svg'
+  // Try extensionless and .svg
+  var srcs = [
+    'assets/svgs/signinrenamed','/assets/svgs/signinrenamed','/nemi/assets/svgs/signinrenamed',
+    'assets/svgs/signinrenamed.svg','/assets/svgs/signinrenamed.svg','/nemi/assets/svgs/signinrenamed.svg'
   ];
 
-  let svgText = null;
-  for (const url of candidates) {
-    try { const r = await fetch(url, { cache: 'no-cache' }); if (r.ok) { svgText = await r.text(); break; } } catch(_) {}
-  }
-  if (!svgText) { section.classList.remove('invisible'); return; }
-
-  // Inject SVG inline (behind slots)
-  host.innerHTML = svgText.replace('<svg', '<svg id="mobileSVG" style="display:block;width:100%;height:100%;pointer-events:none"');
-  const svg = document.getElementById('mobileSVG');
-
-  // Keep container aspect ratio matching viewBox
-  const vb = svg.viewBox.baseVal;
-  if (vb && vb.width && vb.height) section.style.aspectRatio = vb.width + ' / ' + vb.height;
-
-  // Helper: position & size a slot to exactly fill an SVG <rect>
-  function place(rectId, slotId, pad=0){
-    const rEl = svg.querySelector('#'+rectId);
-    const slot = document.getElementById(slotId);
-    if(!rEl || !slot){ if(!rEl) console.warn('Missing anchor:', rectId); return; }
-    const hostBox = host.getBoundingClientRect();
-    const r = rEl.getBoundingClientRect();
-    Object.assign(slot.style, {
-      position:'absolute',
-      left:  (r.left - hostBox.left + pad) + 'px',
-      top:   (r.top  - hostBox.top  + pad) + 'px',
-      width: (r.width  - pad*2) + 'px',
-      height:(r.height - pad*2) + 'px',
-      display:'block'
-    });
+  function fetchFirst(urls, done){
+    var i = 0;
+    (function next(){
+      if (i >= urls.length) return done(null);
+      fetch(urls[i], { cache: 'no-cache' })
+        .then(function(r){ if (!r.ok) throw new Error('not ok'); return r.text(); })
+        .then(function(txt){ done(txt); })
+        .catch(function(){ i++; next(); });
+    })();
   }
 
-  // Auto-fit the headline to its rect (runs after fonts load)
-  function fitTitle(){
-    const slot = document.getElementById('slot-titletextbox');
-    const copy = slot?.querySelector('.titlecopy');
-    if (!slot || !copy) return;
+  fetchFirst(srcs, function(svgText){
+    if (!svgText) { section.classList.remove('invisible'); return; }
 
-    const maxPx = 24, minPx = 12;
-    let lo = minPx, hi = maxPx, best = minPx;
-   
-    for (let i=0; i<12; i++) {
-      const mid = (lo + hi) / 2;
-      copy.style.setProperty('--fs', mid + 'px');
-   
-      const fits = (copy.scrollWidth <= slot.clientWidth + 0.5) &&
-                   (copy.scrollHeight <= slot.clientHeight + 0.5);
-      if (fits) { best = mid; lo = mid; } else { hi = mid; }
+    host.innerHTML = svgText.replace('<svg','<svg id="mobileSVG" style="display:block;width:100%;height:100%;pointer-events:none"');
+    var svg = document.getElementById('mobileSVG');
+
+    // Keep container aspect ratio matching viewBox
+    var vb = svg.viewBox.baseVal;
+    if (vb && vb.width && vb.height) section.style.aspectRatio = vb.width + ' / ' + vb.height;
+
+    // Helper: position & size a slot to exactly fill an SVG <rect>
+    function place(rectId, slotId, pad){
+      pad = pad || 0;
+      var rEl  = svg.querySelector('#'+rectId);
+      var slot = document.getElementById(slotId);
+      if (!rEl || !slot) { if (!rEl) console.warn('Missing anchor:', rectId); return; }
+      var hb = host.getBoundingClientRect();
+      var r  = rEl.getBoundingClientRect();
+      slot.style.position = 'absolute';
+      slot.style.display  = 'block';
+      slot.style.left   = (r.left - hb.left + pad) + 'px';
+      slot.style.top    = (r.top  - hb.top  + pad) + 'px';
+      slot.style.width  = (r.width  - pad*2) + 'px';
+      slot.style.height = (r.height - pad*2) + 'px';
     }
-    copy.style.setProperty('--fs', Math.floor(best) + 'px');
-  }
 
-  function layout(){
-    // Card background (pad a few px so we don't cover the SVG stroke)
-    place('loginbox', 'slot-loginboxbg', 3);
+    // Binary-search fit for a block’s CSS var (–fsTitle/–fsSub)
+    function fitVar(slotSel, blockSel, varName, minPx, maxPx){
+      var slot  = document.querySelector(slotSel);
+      var block = slot ? slot.querySelector(blockSel) : null;
+      if (!slot || !block) return minPx;
+      var lo=minPx, hi=maxPx, best=minPx;
+      for (var i=0;i<12;i++){
+        var mid=(lo+hi)/2;
+        block.style.setProperty(varName, mid+'px');
+        var fits = (block.scrollWidth <= slot.clientWidth + 0.5) &&
+                   (block.scrollHeight <= slot.clientHeight + 0.5);
+        if (fits) { best=mid; lo=mid; } else { hi=mid; }
+      }
+      block.style.setProperty(varName, Math.floor(best)+'px');
+      return best;
+    }
 
-    // Headline cluster (add a hair of inner padding to breathe)
-    place('teamiconbox',          'slot-teamiconbox');
-    place('titletextbox',         'slot-titletextbox', 6);
+    function layout(){
+      // Headline cluster
+      place('teamiconbox',  'slot-teamiconbox');
+      place('titletextbox', 'slot-titletextbox', 4);
+      place('oneteam',      'slot-oneteam', 2);
 
-    // Card internals
-    place('getstartedwithnemi',   'slot-getstartedwithnemi');
-    place('alreadyamember',       'slot-alreadyamember');
-    place('emailbox',             'slot-emailbox');
-    place('passwordbox',          'slot-passwordbox');
-    place('loginbar',             'slot-loginbar');
-    place('forgotpassword',       'slot-forgotpassword');
+      // Fit: oneteam first; title ~30% larger but still clamped to 2 lines
+      var subSize = fitVar('#slot-oneteam', '.otcopy', '--fsSub', 11, 18);
+      var wantedTitle = Math.min(28, subSize * 1.3);
+      fitVar('#slot-titletextbox', '.titlecopy', '--fsTitle', subSize+1, wantedTitle);
 
-    // Badges + extras
-    place('appdownload',          'slot-appdownload');
-    place('androiddownload',      'slot-androiddownload');
-    place('explorenemibox',       'slot-explorenemibox');
-    place('realtorapply',         'slot-realtorapply');
+      // Card internals
+      place('getstartedwithnemi','slot-getstartedwithnemi');
+      place('alreadyamember',    'slot-alreadyamember');
+      place('emailbox',          'slot-emailbox');
+      place('passwordbox',       'slot-passwordbox');
+      place('loginbar',          'slot-loginbar');
+      place('forgotpassword',    'slot-forgotpassword');
 
-    fitTitle();
-    section.classList.remove('invisible');
-  }
+      // Badges + extras
+      place('appdownload',       'slot-appdownload');
+      place('androiddownload',   'slot-androiddownload');
+      place('explorenemibox',    'slot-explorenemibox');
+      place('realtorapply',      'slot-realtorapply');
 
-  // Wait for fonts (prevents early overspill on iOS), then layout
-  try { if (document.fonts && document.fonts.ready) await document.fonts.ready; } catch(_) {}
-  window.addEventListener('resize', layout, { passive:true });
-  requestAnimationFrame(layout);
+      section.classList.remove('invisible');
+    }
+
+    // Wait for fonts if supported; otherwise layout immediately
+    if (document.fonts && document.fonts.ready && typeof document.fonts.ready.then === 'function') {
+      document.fonts.ready.then(layout);
+    } else {
+      layout();
+    }
+    window.addEventListener('resize', layout);
+  });
 })();
 </script>
- 
 
-<style>
-/* Headline styling to match your screenshot */
-#slot-titletextbox .titlecopy { text-align:left; line-height:1.15; text-wrap:balance; }
-#slot-titletextbox .titlecopy .t1 { font-weight:800; font-size:var(--fs); margin:0 0 4px 0; }
-#slot-titletextbox .titlecopy .t2 { font-size:calc(var(--fs) * .82); margin:0 0 2px 0; }
-#slot-titletextbox .titlecopy .t2 .i { font-style:italic; }
-#slot-titletextbox .titlecopy .t3 { font-size:calc(var(--fs) * .8); margin:0; color:#334155; }
 
-/* Inputs focus look */
-#nemiMobile input:focus { outline:none; border-color:#1c2c46; box-shadow:0 0 0 4px rgba(28,44,70,.12); }
-/* Buttons scale nicely to their boxes */
-#slot-getstartedwithnemi, #slot-loginbar, #slot-explorenemibox { font-size: clamp(14px, 3.6vw, 18px); }
-</style>
+
 
 </body>
 </html>
