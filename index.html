@@ -93,23 +93,18 @@
   /* Slots above the SVG */
   #nemiMobile .slot { z-index: 10; }
 
-  /* Title = exactly 2 lines */
+ /* Title = exactly 1 line, centered, no clipping */
 #slot-titletextbox .titlecopy{
   width:100%; height:100%;
-  display:-webkit-box;
-  -webkit-box-orient: vertical;
-  -webkit-line-clamp: 1;   /* vendor */
-  line-clamp: 1;           /* standard → fixes VS Code warning */
+  display:block;
+  white-space: nowrap;          /* one line */
+  overflow: hidden;             /* hide overflow if any */
+  text-align: center;           /* center horizontally */
   line-height:1.12;
   font-weight:800;
   font-size:var(--fsTitle);
-  white-space:normal;
-  overflow:hidden;
-    box-sizing: border-box;
-  padding-inline: 2px;  
-
-    /* center line */
-  text-align: center;
+  box-sizing: border-box;
+  padding-inline: 3px;          /* tiny breathing room at edges */
 }
 
 /* One-team = exactly 2 lines and centered */
@@ -205,6 +200,23 @@
       return best;
     }
 
+    function fitOneLine(slotSel, blockSel, varName, minPx, maxPx){
+  var slot  = document.querySelector(slotSel);
+  var block = slot ? slot.querySelector(blockSel) : null;
+  if (!slot || !block) return minPx;
+  var lo=minPx, hi=maxPx, best=minPx;
+  for (var i=0;i<12;i++){
+    var mid=(lo+hi)/2;
+    block.style.setProperty(varName, mid+'px');
+    var rect = block.getBoundingClientRect();
+    var fitsWidth  = block.scrollWidth <= (slot.clientWidth - 2);   // -2 for safety
+    var fitsHeight = rect.height <= slot.clientHeight;
+    if (fitsWidth && fitsHeight) { best=mid; lo=mid; } else { hi=mid; }
+  }
+  block.style.setProperty(varName, Math.floor(best)+'px');
+  return best;
+}
+
     function layout(){
      // White panel behind the form; small pad so it doesn't cover the SVG stroke
 place('loginbox', 'slot-loginboxbg', 3);
@@ -227,7 +239,7 @@ place('loginbox', 'slot-loginboxbg', 3);
       // Fit: oneteam first; title ~30% larger but still clamped to 2 lines
       var subSize = fitVar('#slot-oneteam', '.otcopy', '--fsSub', 11, 18);
       var wantedTitle = Math.min(28, subSize * 1.3);
-      fitVar('#slot-titletextbox', '.titlecopy', '--fsTitle', subSize+1, wantedTitle);
+      fitVar('#slot-titletextbox', '.titlecopy', '--fsTitle', subSize+1, 30);
 
       // Card internals
       place('getstartedwithnemi','slot-getstartedwithnemi');
