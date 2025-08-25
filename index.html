@@ -111,19 +111,16 @@
 }
 
 /* One-team = exactly 2 lines and centered */
+/* put this in your <style> block */
+#slot-oneteam{
+  display: flex !important;   /* overrides JS display:block */
+  align-items: flex-start;     /* TOP of the rect */
+  justify-content: center;     /* keeps it centered horizontally */
+  padding-top: 0;              /* tweak if you want a tiny offset */
+}
 #slot-oneteam .otcopy{
-  width:100%; height:100%;
-  display:-webkit-box;
-  -webkit-box-orient: vertical;
-  -webkit-line-clamp: 2;
-  line-clamp: 2;
-  line-height:1.12;
-  font-size:var(--fsSub);
-  white-space:normal;
-  overflow:hidden;
-
-  /* center both lines */
-  text-align: center;
+  text-align: center;          /* center the two lines */
+  margin-top: 0;
 }
 
 
@@ -217,7 +214,7 @@ place('loginbox', 'slot-loginboxbg', 3);
       // Headline cluster
       place('teamiconbox',  'slot-teamiconbox');
       place('titletextbox', 'slot-titletextbox', 4);
-      place('oneteam',      'slot-oneteam', 2);
+      place('oneteam', 'slot-oneteam', 0);
 
       // Fit: oneteam first; title ~30% larger but still clamped to 2 lines
       var subSize = fitVar('#slot-oneteam', '.otcopy', '--fsSub', 11, 18);
