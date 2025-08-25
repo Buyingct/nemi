@@ -107,18 +107,22 @@
   overflow:hidden;
 }
 
-/* One-team = exactly 2 lines */
+/* One-team = exactly 2 lines and centered */
 #slot-oneteam .otcopy{
   width:100%; height:100%;
   display:-webkit-box;
   -webkit-box-orient: vertical;
-  -webkit-line-clamp: 2;   /* vendor */
-  line-clamp: 2;           /* standard */
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
   line-height:1.12;
   font-size:var(--fsSub);
   white-space:normal;
   overflow:hidden;
+
+  /* center both lines */
+  text-align: center;
 }
+
 
 
   /* Inputs focus look */
