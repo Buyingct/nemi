@@ -105,6 +105,8 @@
   font-size:var(--fsTitle);
   white-space:normal;
   overflow:hidden;
+    box-sizing: border-box;
+  padding-inline: 2px;  
 
     /* center line */
   text-align: center;
@@ -219,7 +221,7 @@ place('loginbox', 'slot-loginboxbg', 3);
 
       // Headline cluster
       place('teamiconbox',  'slot-teamiconbox');
-      place('titletextbox', 'slot-titletextbox', 4);
+      place('titletextbox', 'slot-titletextbox', 6);
       place('oneteam', 'slot-oneteam', 0);
 
       // Fit: oneteam first; title ~30% larger but still clamped to 2 lines
