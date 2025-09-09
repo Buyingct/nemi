@@ -93,7 +93,7 @@
   /* Slots above the SVG */
   #nemiMobile .slot { z-index: 10; }
 
- /* Title = exactly 1 line, centered, no clipping */
+/* Title = exactly 1 line, centered, no clipping */
 #slot-titletextbox .titlecopy{
   width:100%; height:100%;
   display:block;
@@ -240,6 +240,9 @@ place('loginbox', 'slot-loginboxbg', 3);
       var subSize = fitVar('#slot-oneteam', '.otcopy', '--fsSub', 11, 18);
       var wantedTitle = Math.min(28, subSize * 1.3);
       fitVar('#slot-titletextbox', '.titlecopy', '--fsTitle', subSize+1, 30);
+
+      // Make title a bit larger but still one-line & inside its box
+     fitOneLine('#slot-titletextbox', '.titlecopy', '--fsTitle', subSize+1, 30);
 
       // Card internals
       place('getstartedwithnemi','slot-getstartedwithnemi');
