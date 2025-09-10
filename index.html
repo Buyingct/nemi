@@ -111,7 +111,7 @@
     /* ---------- Quick knobs (edit these often) ---------- */
     #nemiMobile{
       --card-opacity: .65;          /* frosted card opacity (.55–.80 looks best) */
-      --oneteam-nudge-y: 1px;      /* tiny vertical nudge for the oneteam copy */
+      --oneteam-nudge-y: 2px;      /* tiny vertical nudge for the oneteam copy */
     }
 
     /* Frosted card (background for form) */
@@ -141,7 +141,7 @@
   font-size:var(--fsTitle);
   box-sizing:border-box;
   padding-inline:10px;
-  letter-spacing:-0.1px;
+  letter-spacing:-0.15px;
 }
 
     /* ---- One-team (in rect id="oneteam") — exactly 2 centered lines ---- */
@@ -212,19 +212,20 @@
   cardGrowX: 10,
   cardGrowY: 0,
 
-  /* title + oneteam sizing (made smaller so both fit) */
-  titlePadPx: 6,
-  titleFontMax: 28,     // was 30
+  /* title + oneteam sizing (smaller so both fit comfortably) */
+  titlePadPx: 10,      // narrower usable width => smaller chosen size
+  titleFontMax: 26,    // was 30/28
   oneteamPadPx: 0,
   oneteamFontMin: 11,
-  oneteamFontMax: 16,   // was 18
+  oneteamFontMax: 16,  // was 18
 
-  /* CTA: wider only; also nudge it DOWN a hair to make room */
+  /* CTA: only wider, not taller; move it down a bit to free space */
   ctaInset:  { l:-10, r:-10, t:0, b:0 },
-  ctaNudgeY: 6,         // move CTA down by 6px (keeps same height)
+  ctaNudgeY: 10,       // push CTA down ~10px
   ctaFontMin: 14,
-  ctaFontMax: 22        // slightly smaller label
+  ctaFontMax: 20
 };
+
   
 
     var section = document.getElementById('nemiMobile');
@@ -361,8 +362,9 @@
   l: CFG.ctaInset.l - CFG.cardGrowX,
   r: CFG.ctaInset.r - CFG.cardGrowX,
   t: CFG.ctaInset.t + CFG.ctaNudgeY,  // shift down
-  b: CFG.ctaInset.b - CFG.ctaNudgeY   // preserve height
+  b: CFG.ctaInset.b - CFG.ctaNudgeY   // keep same height
 });
+
 
         scaleCta('slot-getstartedwithnemi', CFG.ctaFontMin, CFG.ctaFontMax);
 
