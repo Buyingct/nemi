@@ -111,7 +111,7 @@
     /* ---------- Quick knobs (edit these often) ---------- */
     #nemiMobile{
       --card-opacity: .65;          /* frosted card opacity (.55–.80 looks best) */
-      --oneteam-nudge-y: -1px;      /* tiny vertical nudge for the oneteam copy */
+      --oneteam-nudge-y: 1px;      /* tiny vertical nudge for the oneteam copy */
     }
 
     /* Frosted card (background for form) */
@@ -209,23 +209,23 @@
   ],
 
   /* widen the whole card */
-  cardGrowX: 10,   // try 8–12 until it feels right
+  cardGrowX: 10,
   cardGrowY: 0,
 
-  /* title + oneteam sizing */
-   titlePadPx: 6,
-   titleFontMax: 30,
-   oneteamPadPx: 0,
-   oneteamFontMin: 11,
-   oneteamFontMax: 18,
+  /* title + oneteam sizing (made smaller so both fit) */
+  titlePadPx: 6,
+  titleFontMax: 28,     // was 30
+  oneteamPadPx: 0,
+  oneteamFontMin: 11,
+  oneteamFontMax: 16,   // was 18
 
-  /* CTA: grow only left/right (no vertical so it won’t cover oneteam) */
-  ctaInset: { l:-10, r:-10, t:0, b:0 },
+  /* CTA: wider only; also nudge it DOWN a hair to make room */
+  ctaInset:  { l:-10, r:-10, t:0, b:0 },
+  ctaNudgeY: 6,         // move CTA down by 6px (keeps same height)
   ctaFontMin: 14,
-  ctaFontMax: 24
+  ctaFontMax: 22        // slightly smaller label
 };
-
-
+  
 
     var section = document.getElementById('nemiMobile');
     var host    = document.getElementById('mobileArt');
@@ -325,13 +325,13 @@
 
 
       // [NEMI:scaleCta] set CTA font relative to pill height
-      function scaleCta(slotId, minPx, maxPx){
-   var el = document.getElementById(slotId);
-   if(!el) return;
-   var h  = el.clientHeight || 0;
-   var fs = Math.max(minPx, Math.min(maxPx, Math.floor(h * 0.38))); // was 0.42
-   el.style.fontSize = fs + 'px';
-   el.style.lineHeight = '1';
+     function scaleCta(slotId, minPx, maxPx){
+  var el = document.getElementById(slotId);
+  if(!el) return;
+  var h  = el.clientHeight || 0;
+  var fs = Math.max(minPx, Math.min(maxPx, Math.floor(h * 0.36))); // was 0.42
+  el.style.fontSize = fs + 'px';
+  el.style.lineHeight = '1';
 }
 
       // ------------ single layout pass ------------
@@ -360,9 +360,10 @@
         placeInset('getstartedwithnemi','slot-getstartedwithnemi',{
   l: CFG.ctaInset.l - CFG.cardGrowX,
   r: CFG.ctaInset.r - CFG.cardGrowX,
-  t: CFG.ctaInset.t,
-  b: CFG.ctaInset.b
+  t: CFG.ctaInset.t + CFG.ctaNudgeY,  // shift down
+  b: CFG.ctaInset.b - CFG.ctaNudgeY   // preserve height
 });
+
         scaleCta('slot-getstartedwithnemi', CFG.ctaFontMin, CFG.ctaFontMax);
 
         /* Form + extras (exact to rects) */
