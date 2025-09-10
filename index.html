@@ -208,9 +208,11 @@
         'assets/svgs/signinrenamed','/assets/svgs/signinrenamed','/nemi/assets/svgs/signinrenamed',
         'assets/svgs/signinrenamed.svg','/assets/svgs/signinrenamed.svg','/nemi/assets/svgs/signinrenamed.svg'
       ],
-      titlePadPx: 8,                               // extra inner pad to avoid clipping
+      titlePadPx: 8,
+      titlePadPx: 12,                               // extra inner pad to avoid clipping
       oneteamPadPx: 0,                             // usually 0 (we nudge via CSS var)
       titleFontMax: 34,                            // upper bound for title
+      titleFontMax: 32,
       oneteamFontMin: 11, oneteamFontMax: 18,      // bounds for oneteam
       ctaInset: { l:-6, r:-6, t:-3, b:-3 },        // negative grows the pill box
       ctaFontMin: 14, ctaFontMax: 24               // CTA label font bounds
@@ -303,6 +305,7 @@
           block.style.setProperty(varName, mid+'px');
           var rect = block.getBoundingClientRect();
           var fitsWidth  = block.scrollWidth <= (slot.clientWidth - 6);  // safety
+          var fitsWidth  = block.scrollWidth <= (slot.clientWidth - 12); // extra safety for iOS rounding
           var fitsHeight = rect.height <= slot.clientHeight;
           if (fitsWidth && fitsHeight) { best=mid; lo=mid; } else { hi=mid; }
         }
