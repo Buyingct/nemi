@@ -261,10 +261,34 @@ function scaleCta(slotId, minPx, maxPx){
   el.style.lineHeight = '1';     // crisp vertical centering
 }
 
+// put next to your other helpers
+function placeInset(rectId, slotId, inset){ // inset: {l,t,r,b} (px; negative grows)
+  inset = inset || {};
+  var rEl = svg.querySelector('#'+rectId);
+  var slot = document.getElementById(slotId);
+  if(!rEl || !slot) return;
+  var hb = host.getBoundingClientRect();
+  var r  = rEl.getBoundingClientRect();
+  var l = inset.l||0, t = inset.t||0, rr = inset.r||0, b = inset.b||0;
+  slot.style.position = 'absolute';
+  slot.style.display  = 'block';
+  slot.style.left   = (r.left - hb.left + l) + 'px';
+  slot.style.top    = (r.top  - hb.top  + t) + 'px';
+  slot.style.width  = (r.width  - l - rr) + 'px';
+  slot.style.height = (r.height - t - b) + 'px';
+}
 
     function layout(){
      // White panel behind the form; small pad so it doesn't cover the SVG stroke
 place('loginbox', 'slot-loginboxbg', 3);
+// old:
+// place('getstartedwithnemi','slot-getstartedwithnemi');
+
+// new: grow 4px wider and 2px taller
+placeInset('getstartedwithnemi','slot-getstartedwithnemi',{l:-4, r:-4, t:-2, b:-2});
+
+// keep your scaler so the label grows with the pill
+scaleCta('slot-getstartedwithnemi', 14, 24);
 
 // Match the SVG <rect rx/ry> rounded corners if present
 (function syncRadius(){
