@@ -111,7 +111,7 @@
     /* ---------- Quick knobs (edit these often) ---------- */
     #nemiMobile{
       --card-opacity: .65;          /* frosted card opacity (.55–.80 looks best) */
-      --oneteam-nudge-y: -3px;      /* tiny vertical nudge for the oneteam copy */
+      --oneteam-nudge-y: -1px;      /* tiny vertical nudge for the oneteam copy */
     }
 
     /* Frosted card (background for form) */
@@ -207,15 +207,24 @@
     'assets/svgs/signinrenamed','/assets/svgs/signinrenamed','/nemi/assets/svgs/signinrenamed',
     'assets/svgs/signinrenamed.svg','/assets/svgs/signinrenamed.svg','/nemi/assets/svgs/signinrenamed.svg'
   ],
-  titlePadPx: 6,
-  oneteamPadPx: 0,
-  titleFontMax: 30,
-  oneteamFontMin: 11,
-  oneteamFontMax: 18,
-  ctaInset: { l:-6, r:-6, t:-3, b:-3 },
+
+  /* widen the whole card */
+  cardGrowX: 10,   // try 8–12 until it feels right
+  cardGrowY: 0,
+
+  /* title + oneteam sizing */
+   titlePadPx: 6,
+   titleFontMax: 30,
+   oneteamPadPx: 0,
+   oneteamFontMin: 11,
+   oneteamFontMax: 18,
+
+  /* CTA: grow only left/right (no vertical so it won’t cover oneteam) */
+  ctaInset: { l:-10, r:-10, t:0, b:0 },
   ctaFontMin: 14,
   ctaFontMax: 24
 };
+
 
 
     var section = document.getElementById('nemiMobile');
@@ -317,13 +326,13 @@
 
       // [NEMI:scaleCta] set CTA font relative to pill height
       function scaleCta(slotId, minPx, maxPx){
-        var el = document.getElementById(slotId);
-        if(!el) return;
-        var h  = el.clientHeight || 0;
-        var fs = Math.max(minPx, Math.min(maxPx, Math.floor(h * 0.42)));
-        el.style.fontSize = fs + 'px';
-        el.style.lineHeight = '1';
-      }
+   var el = document.getElementById(slotId);
+   if(!el) return;
+   var h  = el.clientHeight || 0;
+   var fs = Math.max(minPx, Math.min(maxPx, Math.floor(h * 0.38))); // was 0.42
+   el.style.fontSize = fs + 'px';
+   el.style.lineHeight = '1';
+}
 
       // ------------ single layout pass ------------
       function layout(){
@@ -348,7 +357,12 @@
         fitOneLine('#slot-titletextbox', '.titlecopy', '--fsTitle', Math.max(12, subSize+1), CFG.titleFontMax);
 
         /* GET STARTED pill — grow beyond rect a bit */
-        placeInset('getstartedwithnemi','slot-getstartedwithnemi', CFG.ctaInset);
+        placeInset('getstartedwithnemi','slot-getstartedwithnemi',{
+  l: CFG.ctaInset.l - CFG.cardGrowX,
+  r: CFG.ctaInset.r - CFG.cardGrowX,
+  t: CFG.ctaInset.t,
+  b: CFG.ctaInset.b
+});
         scaleCta('slot-getstartedwithnemi', CFG.ctaFontMin, CFG.ctaFontMax);
 
         /* Form + extras (exact to rects) */
