@@ -133,6 +133,40 @@
 
   /* Buttons scale nicely to their boxes */
   #slot-getstartedwithnemi, #slot-loginbar, #slot-explorenemibox { font-size: clamp(14px, 3.6vw, 18px); }
+
+  /* GET STARTED pill */
+#slot-getstartedwithnemi{
+  z-index: 12;                  /* above stars/swooshes */
+  display:flex !important;
+  align-items:center;
+  justify-content:center;
+  width:100%; height:100%;
+  border-radius: 9999px;
+  text-decoration: none;
+  font-weight: 800;
+  letter-spacing: .2px;
+  color:#0f1e3a;                /* deep navy text */
+  border: 3px solid #1c2c46;    /* navy rim */
+  background: linear-gradient(#f6d768, #e3be32); /* rich gold */
+  box-shadow:
+    0 3px 0 #1c2c46,            /* pressed rim */
+    0 6px 18px rgba(28,44,70,.25), /* outer glow */
+    inset 0 2px 0 rgba(255,255,255,.65); /* top highlight */
+}
+
+/* interaction */
+#slot-getstartedwithnemi:hover { filter: brightness(1.02); }
+#slot-getstartedwithnemi:active { transform: translateY(1px); box-shadow:
+    0 1px 0 #1c2c46,
+    0 4px 12px rgba(28,44,70,.22),
+    inset 0 1px 0 rgba(255,255,255,.55);
+}
+#slot-getstartedwithnemi:focus-visible {
+  outline: 3px solid #0ea5e9;   /* cyan focus ring */
+  outline-offset: 2px;
+}
+
+
 </style>
 
 <script>
@@ -216,6 +250,17 @@
   block.style.setProperty(varName, Math.floor(best)+'px');
   return best;
 }
+// get started with nemi text; 
+function scaleCta(slotId, minPx, maxPx){
+  var el = document.getElementById(slotId);
+  if(!el) return;
+  // target ~42% of slot height, clamped
+  var h  = el.clientHeight || 0;
+  var fs = Math.max(minPx, Math.min(maxPx, Math.floor(h * 0.42)));
+  el.style.fontSize = fs + 'px';
+  el.style.lineHeight = '1';     // crisp vertical centering
+}
+
 
     function layout(){
      // White panel behind the form; small pad so it doesn't cover the SVG stroke
@@ -246,6 +291,10 @@ place('loginbox', 'slot-loginboxbg', 3);
 
       // Card internals
       place('getstartedwithnemi','slot-getstartedwithnemi');
+     place('getstartedwithnemi','slot-getstartedwithnemi'); // keep this
+
+    scaleCta('slot-getstartedwithnemi', 14, 22); // tune if you want larger/smaller text
+
       place('alreadyamember',    'slot-alreadyamember');
       place('emailbox',          'slot-emailbox');
       place('passwordbox',       'slot-passwordbox');
