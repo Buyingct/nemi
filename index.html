@@ -131,18 +131,18 @@
 
     /* ---- Title (in rect id="titletextbox") — one centered line, no clip ---- */
     #slot-titletextbox .titlecopy{
-      width:100%; height:100%;
-      display:block;
-      white-space: nowrap;     /* single line */
-      overflow:hidden;
-      text-align:center;
-      line-height:1.12;
-      font-weight:800;
-      font-size:var(--fsTitle);
-      box-sizing:border-box;
-      padding-inline:4px;      /* edge breathing room */
-      padding-block:8px;       /* helps iOS asc/desc */
-    }
+  width:100%; height:100%;
+  display:block;
+  white-space:nowrap;
+  overflow:hidden;
+  text-align:center;
+  line-height:1.12;
+  font-weight:800;
+  font-size:var(--fsTitle);
+  box-sizing:border-box;
+  padding-inline:10px;
+  letter-spacing:-0.1px;
+}
 
     /* ---- One-team (in rect id="oneteam") — exactly 2 centered lines ---- */
     #slot-oneteam .otcopy{
@@ -203,20 +203,20 @@
        [NEMI:CONFIG KNOBS]
        --------------------------- */
     var CFG = {
-      // Try these in order (some servers require extensionless SVG)
-      svgCandidates: [
-        'assets/svgs/signinrenamed','/assets/svgs/signinrenamed','/nemi/assets/svgs/signinrenamed',
-        'assets/svgs/signinrenamed.svg','/assets/svgs/signinrenamed.svg','/nemi/assets/svgs/signinrenamed.svg'
-      ],
-      titlePadPx: 8,
-      titlePadPx: 12,                               // extra inner pad to avoid clipping
-      oneteamPadPx: 0,                             // usually 0 (we nudge via CSS var)
-      titleFontMax: 34,                            // upper bound for title
-      titleFontMax: 32,
-      oneteamFontMin: 11, oneteamFontMax: 18,      // bounds for oneteam
-      ctaInset: { l:-6, r:-6, t:-3, b:-3 },        // negative grows the pill box
-      ctaFontMin: 14, ctaFontMax: 24               // CTA label font bounds
-    };
+  svgCandidates: [
+    'assets/svgs/signinrenamed','/assets/svgs/signinrenamed','/nemi/assets/svgs/signinrenamed',
+    'assets/svgs/signinrenamed.svg','/assets/svgs/signinrenamed.svg','/nemi/assets/svgs/signinrenamed.svg'
+  ],
+  titlePadPx: 6,
+  oneteamPadPx: 0,
+  titleFontMax: 30,
+  oneteamFontMin: 11,
+  oneteamFontMax: 18,
+  ctaInset: { l:-6, r:-6, t:-3, b:-3 },
+  ctaFontMin: 14,
+  ctaFontMax: 24
+};
+
 
     var section = document.getElementById('nemiMobile');
     var host    = document.getElementById('mobileArt');
@@ -296,22 +296,24 @@
 
       // [NEMI:fitOneLine] binary-search fit for single-line (nowrap) title
       function fitOneLine(slotSel, blockSel, varName, minPx, maxPx){
-        var slot  = document.querySelector(slotSel);
-        var block = slot ? slot.querySelector(blockSel) : null;
-        if (!slot || !block) return minPx;
-        var lo=minPx, hi=maxPx, best=minPx;
-        for (var i=0;i<12;i++){
-          var mid=(lo+hi)/2;
-          block.style.setProperty(varName, mid+'px');
-          var rect = block.getBoundingClientRect();
-          var fitsWidth  = block.scrollWidth <= (slot.clientWidth - 6);  // safety
-          var fitsWidth  = block.scrollWidth <= (slot.clientWidth - 12); // extra safety for iOS rounding
-          var fitsHeight = rect.height <= slot.clientHeight;
-          if (fitsWidth && fitsHeight) { best=mid; lo=mid; } else { hi=mid; }
-        }
-        block.style.setProperty(varName, Math.floor(best)+'px');
-        return best;
-      }
+  var slot  = document.querySelector(slotSel);
+  var block = slot ? slot.querySelector(blockSel) : null;
+  if (!slot || !block) return minPx;
+
+  var SAFETY = 20; // extra px so iOS never shaves last glyph
+  var lo=minPx, hi=maxPx, best=minPx;
+  for (var i=0;i<12;i++){
+    var mid=(lo+hi)/2;
+    block.style.setProperty(varName, mid+'px');
+    var wBlock = block.getBoundingClientRect().width; // includes padding
+    var fitsWidth  = wBlock <= (slot.clientWidth - SAFETY);
+    var fitsHeight = block.getBoundingClientRect().height <= slot.clientHeight;
+    if (fitsWidth && fitsHeight) { best=mid; lo=mid; } else { hi=mid; }
+  }
+  block.style.setProperty(varName, Math.max(minPx, Math.floor(best)-1)+'px'); // 1px cushion
+  return best;
+}
+
 
       // [NEMI:scaleCta] set CTA font relative to pill height
       function scaleCta(slotId, minPx, maxPx){
