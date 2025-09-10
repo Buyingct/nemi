@@ -305,23 +305,23 @@
       }
 
       // [NEMI:fitOneLine] binary-search fit for single-line (nowrap) title
-      function fitOneLine(slotSel, blockSel, varName, minPx, maxPx){
+     function fitOneLine(slotSel, blockSel, varName, minPx, maxPx){
   var slot  = document.querySelector(slotSel);
   var block = slot ? slot.querySelector(blockSel) : null;
   if (!slot || !block) return minPx;
 
-  var SAFETY = 20; // extra px so iOS never shaves last glyph
+  var SAFETY = 20; // iOS buffer
   var lo=minPx, hi=maxPx, best=minPx;
   for (var i=0;i<12;i++){
     var mid=(lo+hi)/2;
     block.style.setProperty(varName, mid+'px');
-    var wBlock = block.getBoundingClientRect().width; // includes padding
-    var fitsWidth  = wBlock <= (slot.clientWidth - SAFETY);
-    var fitsHeight = block.getBoundingClientRect().height <= slot.clientHeight;
-    if (fitsWidth && fitsHeight) { best=mid; lo=mid; } else { hi=mid; }
+    var w = block.getBoundingClientRect().width;
+    var fitsW = w <= (slot.clientWidth - SAFETY);
+    var fitsH = block.getBoundingClientRect().height <= slot.clientHeight;
+    if (fitsW && fitsH) { best=mid; lo=mid; } else { hi=mid; }
   }
-  block.style.setProperty(varName, Math.max(minPx, Math.floor(best)-1)+'px'); // 1px cushion
-  return best;
+  block.style.setProperty(varName, Math.max(minPx, Math.floor(best)-1)+'px');
+  return best; 
 }
 
 
