@@ -165,7 +165,7 @@
 #slot-oneteam{ z-index:11; }     /* bg=6, other slots=10, CTA=12 */
 #slot-getstartedwithnemi{ z-index:12; }
 /* optional: tiny vertical nudge */
-#nemiMobile{ --oneteam-nudge-y: 1px; }  /* 0–3px is typical */
+#nemiMobile{ --oneteam-nudge-y: -4px; }  /* 0–3px is typical */
 
 #slot-oneteam{ outline:1px dashed rgba(255,0,0,.35); }
 
@@ -224,14 +224,14 @@
 
   /* title + oneteam sizing (smaller so both fit comfortably) */
   titlePadPx: 4,      // narrower usable width => smaller chosen size
-  titleFontMax: 15,    // was 30/28
+  titleFontMax: 22,    // was 30/28
   oneteamPadPx: 2,
   oneteamFontMin: 11,
-  oneteamFontMax: 15,  // was 18
+  oneteamFontMax: 14,  // was 18
 
   /* CTA: only wider, not taller; move it down a bit to free space */
   ctaInset:  { l:-10, r:-10, t:0, b:0 },
-  ctaNudgeY: 10,       // push CTA down ~10px
+  ctaNudgeY: 14,       // push CTA down ~10px
   ctaFontMin: 14,
   ctaFontMax: 20
 };
