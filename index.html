@@ -131,13 +131,22 @@
 
     /* ---- Title (in rect id="titletextbox") — one centered line, no clip ---- */
     /* The slots themselves center their child vertically + horizontally */
-#slot-titletextbox,
+/* Title slot centers content inside its SVG rect */
+#slot-titletextbox{
+  display:flex;
+  align-items:center;      /* vertical center */
+  justify-content:center;  /* horizontal center */
+  overflow:hidden;
+}
 #slot-oneteam{
   display:flex;
   align-items:center;      /* vertical center */
   justify-content:center;  /* horizontal center */
   overflow:hidden;         /* never spill outside the rect */
 }
+
+/* One line title; allow a tiny optical nudge down */
+#nemiMobile{ --title-nudge-y: 2px; }   /* try 1–3px */
 
 /* ---- Title (1 line) ---- */
 #slot-titletextbox .titlecopy{
@@ -152,6 +161,7 @@
   box-sizing:border-box;
   padding-inline:10px;     /* tiny breathing room */
   letter-spacing:-0.15px;
+  transform: translateY(var(--title-nudge-y));
 }
 
 /* ---- One-team (2 lines max) ---- */
@@ -233,7 +243,7 @@
   cardGrowY: 0,
 
   /* title + oneteam sizing (smaller so both fit comfortably) */
-  titlePadPx: 4,      // narrower usable width => smaller chosen size
+  titlePadPx: 6,      // narrower usable width => smaller chosen size
   titleFontMax: 30,    // was 30/28
   oneteamPadPx: 2,
   oneteamFontMin: 11,
@@ -241,7 +251,7 @@
 
   /* CTA: only wider, not taller; move it down a bit to free space */
   ctaInset:  { l:-10, r:-10, t:0, b:0 },
-  ctaNudgeY: 12,       // push CTA down ~10px
+  ctaNudgeY: 6,       // push CTA down ~10px
   ctaFontMin: 14,
   ctaFontMax: 20
 };
