@@ -130,40 +130,50 @@
     #nemiMobile .slot { z-index: 10; }
 
     /* ---- Title (in rect id="titletextbox") — one centered line, no clip ---- */
-    #slot-titletextbox .titlecopy{
-  width:100%; height:100%;
-  display:block;
-  white-space:nowrap;
+    /* The slots themselves center their child vertically + horizontally */
+#slot-titletextbox,
+#slot-oneteam{
+  display:flex;
+  align-items:center;      /* vertical center */
+  justify-content:center;  /* horizontal center */
+  overflow:hidden;         /* never spill outside the rect */
+}
+
+/* ---- Title (1 line) ---- */
+#slot-titletextbox .titlecopy{
+  /* natural height so flex can center it vertically */
+  height:auto; width:100%;
+  white-space:nowrap;      /* force 1 line */
   overflow:hidden;
   text-align:center;
-  line-height:1.12;
-  font-weight:700;
-  font-size:var(--fsTitle);
+  line-height:1.08;
+  font-weight:800;
+  font-size:var(--fsTitle);/* JS sets this to fit */
   box-sizing:border-box;
-  padding-inline:10px;
+  padding-inline:10px;     /* tiny breathing room */
   letter-spacing:-0.15px;
 }
 
-#slot-titletextbox .titlecopy{ font-size: 14px !important; }
+/* ---- One-team (2 lines max) ---- */
+#slot-oneteam .otcopy{
+  height:auto; width:100%;
+  text-align:center;
+  line-height:1.15;
+  font-size:var(--fsSub);  /* JS sets this range */
+  display:-webkit-box;
+  -webkit-box-orient:vertical;
+  -webkit-line-clamp:2;    /* vendor */
+  line-clamp:2;            /* standard */
+  overflow:hidden;
+  padding-inline:10px;
+}
 
-    /* ---- One-team (in rect id="oneteam") — exactly 2 centered lines ---- */
-    #slot-oneteam .otcopy{
-      width:100%; height:100%;
-      display:-webkit-box;
-      -webkit-box-orient: vertical;
-      -webkit-line-clamp: 2;   /* vendor */
-      line-clamp: 2;           /* standard */
-      line-height:1.12;
-      font-size:var(--fsSub);
-      text-align:center;
-      white-space:normal;
-      overflow:hidden;
-      transform: translateY(var(--oneteam-nudge-y)); /* tiny upward nudge */
-    }
-
-    /* keep your existing .otcopy rules */
-#slot-oneteam{ z-index:11; }     /* bg=6, other slots=10, CTA=12 */
+/* Stacking: subtext above panel, CTA still on top */
+#slot-oneteam{ z-index:11; }
 #slot-getstartedwithnemi{ z-index:12; }
+
+
+
 /* optional: tiny vertical nudge */
 #nemiMobile{ --oneteam-nudge-y: -4px; }  /* 0–3px is typical */
 
