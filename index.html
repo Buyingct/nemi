@@ -161,6 +161,14 @@
       transform: translateY(var(--oneteam-nudge-y)); /* tiny upward nudge */
     }
 
+    /* keep your existing .otcopy rules */
+#slot-oneteam{ z-index:11; }     /* bg=6, other slots=10, CTA=12 */
+#slot-getstartedwithnemi{ z-index:12; }
+/* optional: tiny vertical nudge */
+#nemiMobile{ --oneteam-nudge-y: 1px; }  /* 0–3px is typical */
+
+#slot-oneteam{ outline:1px dashed rgba(255,0,0,.35); }
+
     /* Inputs: nicer focus ring */
     #nemiMobile input:focus{ outline:none; border-color:#1c2c46; box-shadow:0 0 0 4px rgba(28,44,70,.12); }
 
@@ -217,19 +225,18 @@
   /* title + oneteam sizing (smaller so both fit comfortably) */
   titlePadPx: 4,      // narrower usable width => smaller chosen size
   titleFontMax: 15,    // was 30/28
-  oneteamPadPx: 4,
+  oneteamPadPx: 2,
   oneteamFontMin: 11,
-  oneteamFontMax: 16,  // was 18
+  oneteamFontMax: 15,  // was 18
 
   /* CTA: only wider, not taller; move it down a bit to free space */
   ctaInset:  { l:-10, r:-10, t:0, b:0 },
-  ctaNudgeY: 12,       // push CTA down ~10px
+  ctaNudgeY: 10,       // push CTA down ~10px
   ctaFontMin: 14,
   ctaFontMax: 20
 };
 
   
-
     var section = document.getElementById('nemiMobile');
     var host    = document.getElementById('mobileArt');
 
