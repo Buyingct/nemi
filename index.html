@@ -131,51 +131,50 @@
 
     /* ---- Title (in rect id="titletextbox") — one centered line, no clip ---- */
     /* The slots themselves center their child vertically + horizontally */
-/* Title slot centers content inside its SVG rect */
-#slot-titletextbox{
-  display:flex;
-  align-items:center;      /* vertical center */
-  justify-content:center;  /* horizontal center */
-  overflow:hidden;
-}
+
+/* ---------- Title & One-team layout ---------- */
+#slot-titletextbox,
 #slot-oneteam{
   display:flex;
-  align-items:center;      /* vertical center */
+  align-items:center;      /* vertical center in the rect */
   justify-content:center;  /* horizontal center */
-  overflow:hidden;         /* never spill outside the rect */
+  overflow:hidden;
 }
 
-/* One line title; allow a tiny optical nudge down */
-#nemiMobile{ --title-nudge-y: 2px; }   /* try 1–3px */
+/* optional nudges */
+#nemiMobile{
+  --title-nudge-y: 2px;      /* +down / -up */
+  --oneteam-nudge-y: 0px;
+}
 
-/* ---- Title (1 line) ---- */
+/* Title: one centered line that auto-fits */
 #slot-titletextbox .titlecopy{
-  /* natural height so flex can center it vertically */
-  height:auto; width:100%;
-  white-space:nowrap;      /* force 1 line */
-  overflow:hidden;
-  text-align:center;
-  line-height:2;
-  font-weight:900;
-  font-size:var(--fsTitle);/* JS sets this to fit */
-  box-sizing:border-box;
-  padding-inline:4px;     /* tiny breathing room */
-  letter-spacing:-0.15px;
+  width:100%; height:auto;
+  white-space: nowrap;       /* force a single line */
+  overflow: hidden;
+  text-align: center;
+  line-height: 1.14;
+  font-weight: 900;
+  font-size: var(--fsTitle) !important;  /* ← forces the fitted size to win */
+  box-sizing: border-box;
+  padding-inline: 6px;       /* tiny breathing room */
+  letter-spacing: -0.15px;
   transform: translateY(var(--title-nudge-y));
 }
 
-/* ---- One-team (2 lines max) ---- */
+/* One-team: exactly 2 centered lines */
 #slot-oneteam .otcopy{
-  height:auto; width:100%;
-  text-align:center;
-  line-height:1.15;
-  font-size:var(--fsSub);  /* JS sets this range */
-  display:-webkit-box;
-  -webkit-box-orient:vertical;
-  -webkit-line-clamp:2;    /* vendor */
-  line-clamp:2;            /* standard */
-  overflow:hidden;
-  padding-inline:10px;
+  width:100%; height:auto;
+  text-align: center;
+  line-height: 1.15;
+  font-size: var(--fsSub);   /* set by JS */
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;     /* vendor */
+  line-clamp: 2;             /* standard */
+  overflow: hidden;
+  padding-inline: 8px;
+  transform: translateY(var(--oneteam-nudge-y));
 }
 
 /* Stacking: subtext above panel, CTA still on top */
@@ -238,20 +237,20 @@
     'assets/svgs/signinrenamed.svg','/assets/svgs/signinrenamed.svg','/nemi/assets/svgs/signinrenamed.svg'
   ],
 
-  /* widen the whole card */
+  /* widen the whole card (purely visual; doesn’t alter the SVG) */
   cardGrowX: 10,
   cardGrowY: 0,
 
-  /* title + oneteam sizing (smaller so both fit comfortably) */
-  titlePadPx: 4,      // narrower usable width => smaller chosen size
-  titleFontMax: 50,    // was 30/28
+  /* title + oneteam sizing */
+  titlePadPx: 0,
+  titleFontMax: 42,    /* raise/lower to taste */
   oneteamPadPx: 2,
   oneteamFontMin: 11,
-  oneteamFontMax: 20,  // was 18
+  oneteamFontMax: 18,
 
-  /* CTA: only wider, not taller; move it down a bit to free space */
-  ctaInset:  { l:-10, r:-10, t:0, b:0 },
-  ctaNudgeY: 10,       // push CTA down ~10px
+  /* CTA: make wider, not taller; nudge down a bit */
+  ctaInset:  { l: -10, r: -10, t: 0, b: 0 },
+  ctaNudgeY: 8,
   ctaFontMin: 14,
   ctaFontMax: 20
 };
@@ -339,7 +338,7 @@
   var block = slot ? slot.querySelector(blockSel) : null;
   if (!slot || !block) return minPx;
 
-  var SAFETY = 20; // iOS buffer
+  var SAFETY = 10; // was 20 – allows the title to grow closer to rect edge
   var lo=minPx, hi=maxPx, best=minPx;
   for (var i=0;i<12;i++){
     var mid=(lo+hi)/2;
@@ -349,8 +348,8 @@
     var fitsH = block.getBoundingClientRect().height <= slot.clientHeight;
     if (fitsW && fitsH) { best=mid; lo=mid; } else { hi=mid; }
   }
-  block.style.setProperty(varName, Math.max(minPx, Math.floor(best)-1)+'px');
-  return best; 
+  block.style.setProperty(varName, Math.max(minPx, Math.floor(best))+'px');
+  return best;
 }
 
 
@@ -379,7 +378,7 @@
 
         /* Heading cluster */
         place('teamiconbox',  'slot-teamiconbox');
-        placeInset('titletextbox', 'slot-titletextbox', { l: -4, r: -4, t: 0, b: 0 }); // small negative inset widens the box
+        placeInset('titletextbox', 'slot-titletextbox', { l: -10, r: -10, t: 0, b: 0 });
 
 
         place('oneteam',      'slot-oneteam', CFG.oneteamPadPx);
@@ -389,7 +388,7 @@
        const subSize = fitVar('#slot-oneteam', '.otcopy', '--fsSub', CFG.oneteamFontMin, CFG.oneteamFontMax);
 
        // TITLE — single line, use your config cap
-       fitOneLine('#slot-titletextbox', '.titlecopy', '--fsTitle', 18, CFG.titleFontMax);
+       fitOneLine('#slot-titletextbox', '.titlecopy', '--fsTitle', Math.max(18, subSize+1), CFG.titleFontMax);
 
         /* GET STARTED pill — grow beyond rect a bit */
         placeInset('getstartedwithnemi','slot-getstartedwithnemi',{
