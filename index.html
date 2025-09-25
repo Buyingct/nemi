@@ -159,7 +159,7 @@
   font-weight:700;
   font-size:var(--fsTitle);/* JS sets this to fit */
   box-sizing:border-box;
-  padding-inline:10px;     /* tiny breathing room */
+  padding-inline:6px;     /* tiny breathing room */
   letter-spacing:-0.15px;
   transform: translateY(var(--title-nudge-y));
 }
@@ -251,7 +251,7 @@
 
   /* CTA: only wider, not taller; move it down a bit to free space */
   ctaInset:  { l:-10, r:-10, t:0, b:0 },
-  ctaNudgeY: 12,       // push CTA down ~10px
+  ctaNudgeY: 10,       // push CTA down ~10px
   ctaFontMin: 14,
   ctaFontMax: 20
 };
@@ -379,7 +379,13 @@
 
         /* Heading cluster */
         place('teamiconbox',  'slot-teamiconbox');
-        place('titletextbox', 'slot-titletextbox', CFG.titlePadPx);
+        placeInset('titletextbox','slot-titletextbox', {
+  l: CFG.titlePadPx || 0,
+  r: CFG.titlePadPx || 0,
+  t: 0,
+  b: 0
+});
+
         place('oneteam',      'slot-oneteam', CFG.oneteamPadPx);
 
         // Fit oneteam (2 lines) then title (single line)
