@@ -226,6 +226,15 @@
         inset 0 1px 0 rgba(255,255,255,.55);
     }
     #slot-getstartedwithnemi:focus-visible { outline:3px solid #0ea5e9; outline-offset:2px; }
+  
+  #slot-alreadyamember{
+  display:flex; align-items:center; justify-content:center; text-align:center;
+  }
+  #slot-alreadyamember .amcopy{
+  font-size: clamp(12px, 2.8vw, 14px);
+  transform: translateY(-4px);   /* negative = UP; tweak -2 … -8px */
+ }
+
   </style>
 
   <!-- ================
@@ -411,6 +420,8 @@ function scaleCta(slotId, minPx, maxPx){
   t: CFG.ctaInset.t + CFG.ctaNudgeY,  // shift down
   b: CFG.ctaInset.b - CFG.ctaNudgeY   // keep same height
 });
+        // layout()
+       placeInset('alreadyamember','slot-alreadyamember', { t:-3, b:3 }); // up 3px, keep height
 
 
         scaleCta('slot-getstartedwithnemi', CFG.ctaFontMin, CFG.ctaFontMax);
