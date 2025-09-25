@@ -153,8 +153,8 @@
   white-space: nowrap;       /* force a single line */
   overflow: hidden;
   text-align: center;
-  line-height: 1.14;
-  font-weight: 900;
+  line-height: 2;
+  font-weight: 800;
   font-size: var(--fsTitle) !important;  /* ← forces the fitted size to win */
   box-sizing: border-box;
   padding-inline: 6px;       /* tiny breathing room */
@@ -243,7 +243,7 @@
 
   /* title + oneteam sizing */
   titlePadPx: 0,
-  titleFontMax: 42,     // bump up if you want even larger/* raise/lower to taste */
+  titleFontMax: 22,     // bump up if you want even larger/* raise/lower to taste */
   oneteamPadPx: 2,
   oneteamFontMin: 11,
   oneteamFontMax: 18,
@@ -388,7 +388,7 @@
        const subSize = fitVar('#slot-oneteam', '.otcopy', '--fsSub', CFG.oneteamFontMin, CFG.oneteamFontMax);
 
        // TITLE — single line, use your config cap
-       fitOneLine('#slot-titletextbox', '.titlecopy', '--fsTitle', Math.max(25, subSize+1), CFG.titleFontMax);
+       fitOneLine('#slot-titletextbox', '.titlecopy', '--fsTitle', Math.max(22, subSize+1), CFG.titleFontMax);
 
         /* GET STARTED pill — grow beyond rect a bit */
         placeInset('getstartedwithnemi','slot-getstartedwithnemi',{
