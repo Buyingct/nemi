@@ -379,18 +379,17 @@
 
         /* Heading cluster */
         place('teamiconbox',  'slot-teamiconbox');
-        placeInset('titletextbox','slot-titletextbox', {
-  l: CFG.titlePadPx || 0,
-  r: CFG.titlePadPx || 0,
-  t: 0,
-  b: 0
-});
+        placeInset('titletextbox', 'slot-titletextbox', { l: -4, r: -4, t: 0, b: 0 }); // small negative inset widens the box
+
 
         place('oneteam',      'slot-oneteam', CFG.oneteamPadPx);
 
         // Fit oneteam (2 lines) then title (single line)
-        var subSize = fitVar('#slot-oneteam', '.otcopy', '--fsSub', CFG.oneteamFontMin, CFG.oneteamFontMax);
-        fitOneLine('#slot-titletextbox', '.titlecopy', '--fsTitle', Math.max(12, subSize+1), CFG.titleFontMax);
+       // subtext first (unchanged)
+       const subSize = fitVar('#slot-oneteam', '.otcopy', '--fsSub', CFG.oneteamFontMin, CFG.oneteamFontMax);
+
+       // TITLE — single line, use your config cap
+       fitOneLine('#slot-titletextbox', '.titlecopy', '--fsTitle', 18, CFG.titleFontMax);
 
         /* GET STARTED pill — grow beyond rect a bit */
         placeInset('getstartedwithnemi','slot-getstartedwithnemi',{
