@@ -16,9 +16,10 @@
   <!-- =========================================================
        [NEMI:MOBILE HERO] SVG-driven layout (anchors in SVG <rect>)
        ========================================================= -->
-  <section id="nemiMobile"
-           class="md:hidden relative mx-auto w-[min(520px,96vw)] overflow-hidden invisible"
-           style="aspect-ratio:9/16">
+  <!-- was: class="md:hidden relative mx-auto w-[min(520px,96vw)] overflow-hidden invisible" -->
+<section id="nemiMobile"
+  class="relative mx-auto w-[min(520px,96vw)] overflow-hidden invisible"
+  style="aspect-ratio:9/16">
 
     <!-- [NEMI:SLOT] Semi-transparent frosted card behind the form.
          Anchors to SVG rect id="loginbox". -->
@@ -111,6 +112,10 @@
        [NEMI:STYLES]
        ================== -->
   <style>
+    /* Prevent iOS/Safari text inflation that breaks our measured fit */
+ html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
+
+    
     /* ---------- Quick knobs (edit these often) ---------- */
     #nemiMobile{
       --card-opacity: .65;          /* frosted card opacity (.55–.80 looks best) */
@@ -351,23 +356,26 @@
 
       // [NEMI:fitOneLine] binary-search fit for single-line (nowrap) title
      function fitOneLine(slotSel, blockSel, varName, minPx, maxPx){
-  var slot  = document.querySelector(slotSel);
-  var block = slot ? slot.querySelector(blockSel) : null;
+  const slot  = document.querySelector(slotSel);
+  const block = slot ? slot.querySelector(blockSel) : null;
   if (!slot || !block) return minPx;
 
-  var SAFETY = 6; // was bigger; smaller = can grow closer to rect edge
-  var lo=minPx, hi=maxPx, best=minPx;
-  for (var i=0;i<12;i++){
-    var mid=(lo+hi)/2;
-    block.style.setProperty(varName, mid+'px');
-    var w = block.getBoundingClientRect().width;
-    var fitsW = w <= (slot.clientWidth - SAFETY);
-    var fitsH = block.getBoundingClientRect().height <= slot.clientHeight;
-    if (fitsW && fitsH) { best=mid; lo=mid; } else { hi=mid; }
+  const SAFETY = 24; // wider buffer for iOS/zoom rounding
+  let lo = minPx, hi = maxPx, best = minPx;
+
+  for (let i = 0; i < 12; i++) {
+    const mid = (lo + hi) / 2;
+    block.style.setProperty(varName, mid + 'px');
+    const w = block.getBoundingClientRect().width;
+    const h = block.getBoundingClientRect().height;
+    const fits = (w <= slot.clientWidth - SAFETY) && (h <= slot.clientHeight);
+    if (fits) { best = mid; lo = mid; } else { hi = mid; }
   }
-  block.style.setProperty(varName, Math.max(minPx, Math.floor(best))+'px');
+  // lock one pixel smaller than the best we saw
+  block.style.setProperty(varName, Math.floor(best) - 1 + 'px');
   return best;
-}
+ }
+
 
 
       // [NEMI:scaleCta] set CTA font relative to pill height
@@ -403,7 +411,12 @@ function scaleCta(slotId, minPx, maxPx){
       });
 
         place('oneteam',      'slot-oneteam', CFG.oneteamPadPx);
-       // NEW — move the slot up without changing its height
+       
+       // Size them:
+       fitVar('#slot-oneteam', '.otcopy', '--fsSub', 11, 20);                 // subtext: 2 lines
+       fitOneLine('#slot-titletextbox', '.titlecopy', '--fsTitle', 16, 36); 
+
+        // NEW — move the slot up without changing its height
         placeInset('oneteam','slot-oneteam', { t: -CFG.oneteamBumpUp, b: CFG.oneteamBumpUp });
 
         // Fit oneteam (2 lines) then title (single line)
@@ -447,7 +460,18 @@ function scaleCta(slotId, minPx, maxPx){
         layout();
       }
       window.addEventListener('resize', layout);
+      // Add these directly below it:
+     window.addEventListener('orientationchange', layout, { passive: true });
+     window.addEventListener('pageshow',           layout, { passive: true }); // iOS bfcache
+ 
+      // Re-run layout if the SVG host size changes:
+     new ResizeObserver(() => layout())
+     .observe(document.getElementById('mobileArt'));
+
+      // One extra pass after paint (fonts/images can shift metrics slightly)
+     requestAnimationFrame(() => setTimeout(layout, 50));
     });
+ 
   })();
   </script>
 </body>
