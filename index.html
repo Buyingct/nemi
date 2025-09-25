@@ -383,6 +383,8 @@
 
 
         place('oneteam',      'slot-oneteam', CFG.oneteamPadPx);
+       // NEW — move the slot up without changing its height
+        placeInset('oneteam','slot-oneteam', { t: -CFG.oneteamBumpUp, b: CFG.oneteamBumpUp });
 
         // Fit oneteam (2 lines) then title (single line)
        // subtext first (unchanged)
