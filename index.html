@@ -368,9 +368,9 @@
       // ------------ single layout pass ------------
       function layout(){
         /* Card background */
-        place('logintext', 'slot-logintext', 3);
+        place('loginbox', 'slot-loginbox', 3);
         (function syncRadius(){
-          var rEl = svg.querySelector('#logintext');
+          var rEl = svg.querySelector('#loginbox');
           if (!rEl) return;
           var rx = parseFloat(rEl.getAttribute('rx') || 0);
           var ry = parseFloat(rEl.getAttribute('ry') || rx || 0);
