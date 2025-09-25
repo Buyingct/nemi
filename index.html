@@ -374,7 +374,7 @@
           if (!rEl) return;
           var rx = parseFloat(rEl.getAttribute('rx') || 0);
           var ry = parseFloat(rEl.getAttribute('ry') || rx || 0);
-          var bg = document.getElementById('slot-loginboxbg');
+          var bg = document.getElementById('slot-loginbox');
           if (bg && (rx || ry)) bg.style.borderRadius = Math.max(rx, ry) + 'px';
         })();
 
