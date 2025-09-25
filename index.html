@@ -116,6 +116,10 @@
       --card-opacity: .65;          /* frosted card opacity (.55–.80 looks best) */
       --oneteam-nudge-y: 2px;      /* tiny vertical nudge for the oneteam copy */
     }
+   
+    #nemiMobile{ --title-nudge-y: 2px; }   /* +down / -up */
+    #slot-titletextbox .titlecopy{ transform: translateY(var(--title-nudge-y)); }
+
 
     /* Frosted card (background for form) */
     #nemiMobile .slot-bg{
@@ -186,8 +190,8 @@
 
 
 
-/* optional: tiny vertical nudge */
-#nemiMobile{ --oneteam-nudge-y: -4px; }  /* 0–3px is typical */
+/* optional: tiny vertical nudge the text inside */
+#nemiMobile{ --oneteam-nudge-y: -2px; }  /* was -4 closer to title 0–3px is typical */
 
 
     /* Inputs: nicer focus ring */
@@ -245,18 +249,18 @@
 
   /* title + oneteam sizing */
   titlePadPx: 0,
-  titleFontMax: 22,     // bump up if you want even larger/* raise/lower to taste */
+  titleFontMax: 22,   // bump up if you want even larger/* raise/lower to taste */
   oneteamPadPx: 2,
   oneteamFontMin: 11,
   oneteamFontMax: 20,
-  oneteamBumpUp: 8,   // ↑ how many px to move the oneteam block UP (try 6–12)
+  oneteamBumpUp: 6,   // ↑ how many px to move the oneteam block UP (try 6–12)
 
-  /* CTA: make wider, not taller; nudge down a bit */
+  /* CTA:"get started..."" make wider, not taller; nudge down a bit */
     // CTA pill
   ctaInset:  { l:-10, r:-10, t:0, b:0 },
-  ctaNudgeY: -8,          // <— raise the pill (negative = up). Try -6…-12
+  ctaNudgeY: -8,   // <— raise the pill (negative = up). positive=down
   ctaFontMin: 14,
-  ctaFontMax: 26          // <— allow larger CTA text
+  ctaFontMax: 26  // <— allow larger cta pill text
 };
 
   
@@ -358,12 +362,12 @@
 
 
       // [NEMI:scaleCta] set CTA font relative to pill height
-    function scaleCta(slotId, minPx, maxPx){
-  var el = document.getElementById(slotId);
-  if(!el) return;
-  var h  = el.clientHeight || 0;
-  var fs = Math.max(minPx, Math.min(maxPx, Math.floor(h * 0.44))); // bigger text
-  el.style.fontSize = fs + 'px';
+function scaleCta(slotId, minPx, maxPx){
+  const el = document.getElementById(slotId);
+  if (!el) return;
+  const h  = el.clientHeight || 0;
+  const fs = Math.max(minPx, Math.min(maxPx, Math.floor(h * 0.44))); // 0.44 = larger label
+  el.style.fontSize  = fs + 'px';
   el.style.lineHeight = '1';
 }
 
@@ -382,8 +386,12 @@
 
         /* Heading cluster */
         place('teamiconbox',  'slot-teamiconbox');
-        placeInset('titletextbox', 'slot-titletextbox', { l: -12, r: -12, t: 0, b: 0 });
-
+        placeInset('titletextbox','slot-titletextbox', {
+       l: -12,   // more negative = wider to the left
+       r: -12,   // more negative = wider to the right
+       t:  0,    // negative = move the whole slot UP
+       b:  0     // positive +t keeps height the same (mirror t)
+      });
 
         place('oneteam',      'slot-oneteam', CFG.oneteamPadPx);
        // NEW — move the slot up without changing its height
