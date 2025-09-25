@@ -250,10 +250,11 @@
   oneteamBumpUp: 8,   // ↑ how many px to move the oneteam block UP (try 6–12)
 
   /* CTA: make wider, not taller; nudge down a bit */
-  ctaInset:  { l: -10, r: -10, t: 0, b: 0 },
-  ctaNudgeY: 6,
+    // CTA pill
+  ctaInset:  { l:-10, r:-10, t:0, b:0 },
+  ctaNudgeY: -8,          // <— raise the pill (negative = up). Try -6…-12
   ctaFontMin: 14,
-  ctaFontMax: 20
+  ctaFontMax: 26          // <— allow larger CTA text
 };
 
   
@@ -355,11 +356,11 @@
 
 
       // [NEMI:scaleCta] set CTA font relative to pill height
-     function scaleCta(slotId, minPx, maxPx){
+    function scaleCta(slotId, minPx, maxPx){
   var el = document.getElementById(slotId);
   if(!el) return;
   var h  = el.clientHeight || 0;
-  var fs = Math.max(minPx, Math.min(maxPx, Math.floor(h * 0.36))); // was 0.42
+  var fs = Math.max(minPx, Math.min(maxPx, Math.floor(h * 0.44))); // bigger text
   el.style.fontSize = fs + 'px';
   el.style.lineHeight = '1';
 }
