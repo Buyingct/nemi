@@ -203,7 +203,11 @@
     #nemiMobile input:focus{ outline:none; border-color:#1c2c46; box-shadow:0 0 0 4px rgba(28,44,70,.12); }
 
     /* Buttons scale to slot height */
-    #slot-getstartedwithnemi, #slot-loginbar, #slot-explorenemibox { font-size: clamp(18px, 3.6vw, 20px); }
+   #slot-loginbar, #slot-explorenemibox { font-size: clamp(18px, 3.6vw, 20px); }
+
+     /* CTA font-size is controlled by JS */
+    #slot-getstartedwithnemi { font-size: inherit; }   /* or: --note: 'set in JS'; */
+
 
     /* ---- GET STARTED pill look ---- */
     #slot-getstartedwithnemi{
@@ -273,8 +277,8 @@
     // CTA pill
   ctaInset:  { l:-10, r:-10, t:0, b:0 },
   ctaNudgeY: 3,   // <— raise the pill (negative = up). positive=down
-  ctaFontMin: 14,
-  ctaFontMax: 26  // <— allow larger cta pill text
+  ctaFontMin: 16,
+  ctaFontMax: 28  // <— allow larger cta pill text
 };
 
   
@@ -379,14 +383,19 @@
 
 
       // [NEMI:scaleCta] set CTA font relative to pill height
-function scaleCta(slotId, minPx, maxPx){
+function scaleCta(slotId){
   const el = document.getElementById(slotId);
   if (!el) return;
   const h  = el.clientHeight || 0;
-  const fs = Math.max(minPx, Math.min(maxPx, Math.floor(h * 0.44))); // 0.44 = larger label
+  const fs = Math.max(
+    CFG.ctaFontMin,
+    Math.min(CFG.ctaFontMax, Math.floor(h * (CFG.ctaScale || 0.5)))
+  );
   el.style.fontSize  = fs + 'px';
-  el.style.lineHeight = '1';
+  el.style.lineHeight = '1';          // keeps text vertically centered
+  el.style.whiteSpace = 'nowrap';     // never wrap inside the pill
 }
+
 
       // ------------ single layout pass ------------
       function layout(){
