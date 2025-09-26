@@ -113,38 +113,42 @@
        ================== -->
   <style>
     /* Prevent iOS/Safari text inflation that breaks our measured fit */
- html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
+ 
+    /* ===============================
+   NEMI — MOBILE HERO (CLEAN CSS)
+   =============================== */
 
-    
-    /* ---------- Quick knobs (edit these often) ---------- */
-    #nemiMobile{
-      --card-opacity: .65;          /* frosted card opacity (.55–.80 looks best) */
-      --oneteam-nudge-y: 2px;      /* tiny vertical nudge for the oneteam copy */
-    }
-   
-    #nemiMobile{ --title-nudge-y: 2px; }   /* +down / -up */
-    #slot-titletextbox .titlecopy{ transform: translateY(var(--title-nudge-y)); }
+/* iOS text zoom guard */
+html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
 
+/* ---- Quick knobs (edit numbers only) ---- */
+#nemiMobile{
+  --card-opacity: .65;     /* frosted card opacity (.55–.80) */
+  --title-nudge-y: 2px;    /* +down / -up (title) */
+  --oneteam-nudge-y: -2px; /* +down / -up (subtext block) */
+  --oneteam-gap: 6px;      /* space between the two subtext lines */
+}
 
-    /* Frosted card (background for form) */
-    #nemiMobile .slot-bg{
-      z-index: 6; /* above SVG, below interactive slots */
-      background: rgba(255,255,255,var(--card-opacity));
-      border-radius: 24px;           /* JS syncs to SVG corner radius if present */
-      box-shadow: 0 10px 30px rgba(20,35,58,0.15);
-      pointer-events: none;
-      backdrop-filter: blur(8px) saturate(1.1);
-      -webkit-backdrop-filter: blur(8px) saturate(1.1);
-      border: 1px solid rgba(255,255,255,0.35);
-    }
+/* ---- Frosted card (fills rect id="loginbox") ---- */
+#nemiMobile .slot-bg{
+  z-index: 6; /* above SVG, below interactive slots */
+  background: rgba(255,255,255,var(--card-opacity));
+  border-radius: 24px;           /* JS syncs to SVG rx if present */
+  box-shadow: 0 10px 30px rgba(20,35,58,0.15);
+  pointer-events: none;
+  backdrop-filter: blur(8px) saturate(1.1);
+  -webkit-backdrop-filter: blur(8px) saturate(1.1);
+  border: 1px solid rgba(255,255,255,0.35);
+}
 
-    /* All overlay slots sit above the SVG artwork */
-    #nemiMobile .slot { z-index: 10; }
+/* All overlay slots sit above the SVG artwork */
+#nemiMobile .slot { z-index: 10; }
 
-    /* ---- Title (in rect id="titletextbox") — one centered line, no clip ---- */
-    /* The slots themselves center their child vertically + horizontally */
+/* -----------------------------------------
+   Title + Subtext (rects: titletextbox, oneteam)
+   ----------------------------------------- */
 
-/* ---------- Title & One-team layout ---------- */
+/* Centers the child content inside each SVG-anchored rect */
 #slot-titletextbox,
 #slot-oneteam{
   display:flex;
@@ -153,111 +157,110 @@
   overflow:hidden;
 }
 
-/* 0) Fine-tune nudges (edit just the numbers) */
-#nemiMobile{
-  --title-nudge-y: 2px;   /* +down / -up */
-  --oneteam-nudge-y: -2px;/* +down / -up */
-}
-
-/* Title: one centered line that auto-fits */
+/* Title: one centered line; size is set by JS via --fsTitle */
 #slot-titletextbox .titlecopy{
   width:100%; height:auto;
-  white-space: nowrap;       /* force a single line */
-  overflow: hidden;
-  text-align: center;
-  line-height: 2;
-  font-weight: 700;
-  font-size: var(--fsTitle) !important;  /* ← forces the fitted size to win */
-  box-sizing: border-box;
-  padding-inline: 6px;       /* tiny breathing room */
-  letter-spacing: -0.15px;
+  white-space:nowrap;      /* force a single line */
+  overflow:hidden;
+  text-align:center;
+  line-height:1.15;
+  font-weight:700;
+  font-size:var(--fsTitle) !important;  /* JS fitter wins */
+  box-sizing:border-box;
+  padding-inline:6px;      /* tiny breathing room */
+  letter-spacing:-0.15px;
   transform: translateY(var(--title-nudge-y));
 }
 
-/* 3) One-team — exactly 2 centered lines with adjustable gap */
+/* Subtext: exactly two lines (two <span>), centered, adjustable gap */
 #slot-oneteam .otcopy{
   width:100%; height:auto;
-  display:flex;                /* stack two sentences */
+  display:flex;
   flex-direction:column;
   align-items:center;
-  justify-content:center;      /* center in the rect */
+  justify-content:center;
   text-align:center;
-  font-size:var(--fsSub);      /* (set by JS fitter) */
-  line-height:1.32;            /* line rhythm per line */
-  padding-inline:10px;
+  padding-inline:2px;      /* narrow so fitter can choose larger size */
+  line-height:1.12;
+  font-size:var(--fsSub);  /* set by JS */
   overflow:hidden;
   transform: translateY(var(--oneteam-nudge-y));
 }
 
-/* each sentence sits on its own line; prevent wrapping to a 3rd line */
+/* each sentence is one visual line */
 #slot-oneteam .otcopy > span{
   display:block;
   white-space:nowrap;
 }
-/* GAP KNOB between the two sentences (change 8px to taste) */
+
+/* the gap *between* the two sentences */
 #slot-oneteam .otcopy > span + span{
-  margin-top:8px;
+  margin-top: var(--oneteam-gap);
 }
 
+/* Keep subtext above panel, below CTA */
+#slot-oneteam{ z-index: 11; }
 
-/* 4) Layering (keep subtext above frosted panel, below CTA) */
-#slot-oneteam{ z-index: 11; }    /* panel ~6, other slots ~10, CTA ~12+ */
+/* -----------------------------------------
+   CTA (“Get Started With Nemi”) — rect id="getstartedwithnemi"
+   (Font-size comes from JS scaleCta; keep font-size here neutral.)
+   ----------------------------------------- */
+#slot-getstartedwithnemi{
+  z-index:15;
+  display:flex !important;
+  align-items:center; 
+  justify-content:center;
+  width:100%; height:100%;
+  border-radius:9999px;
+  text-decoration:none;
+  font-weight:800; 
+  letter-spacing:.2px;
+  color:#0f1e3a;
+  border:3px solid #1c2c46;
+  background: linear-gradient(#f6d768, #e3be32);
+  box-shadow:
+    0 3px 0 #1c2c46,
+    0 6px 18px rgba(28,44,70,.25),
+    inset 0 2px 0 rgba(255,255,255,.65);
+  font-size:inherit; /* actual size set in JS */
+}
+#slot-getstartedwithnemi:hover { filter: brightness(1.02); }
+#slot-getstartedwithnemi:active {
+  transform: translateY(1px);
+  box-shadow:
+    0 1px 0 #1c2c46,
+    0 4px 12px rgba(28,44,70,.22),
+    inset 0 1px 0 rgba(255,255,255,.55);
+}
+#slot-getstartedwithnemi:focus-visible { outline:3px solid #0ea5e9; outline-offset:2px; }
 
-
-
-
-#slot-getstartedwithnemi{ z-index:15; }
-
-
-
-/* optional: tiny vertical nudge the text inside */
-#nemiMobile{ --oneteam-nudge-y: -2px; }  /* was -4 closer to title 0–3px is typical */
-
-
-    /* Inputs: nicer focus ring */
-    #nemiMobile input:focus{ outline:none; border-color:#1c2c46; box-shadow:0 0 0 4px rgba(28,44,70,.12); }
-
-    /* Buttons scale to slot height */
-   #slot-loginbar, #slot-explorenemibox { font-size: clamp(18px, 3.6vw, 20px); }
-
-     /* CTA font-size is controlled by JS */
-    #slot-getstartedwithnemi { font-size: inherit; }   /* or: --note: 'set in JS'; */
-
-
-    /* ---- GET STARTED pill look ---- */
-    #slot-getstartedwithnemi{
-      z-index:15;
-      display:flex !important;
-      align-items:center; justify-content:center;
-      width:100%; height:100%;
-      border-radius:9999px;
-      text-decoration:none;
-      font-weight:800; letter-spacing:.2px;
-      color:#0f1e3a;
-      border:3px solid #1c2c46;
-      background: linear-gradient(#f6d768, #e3be32);
-      box-shadow:
-        0 3px 0 #1c2c46,
-        0 6px 18px rgba(28,44,70,.25),
-        inset 0 2px 0 rgba(255,255,255,.65);
-    }
-    #slot-getstartedwithnemi:hover { filter: brightness(1.02); }
-    #slot-getstartedwithnemi:active {
-      transform: translateY(1px);
-      box-shadow:
-        0 1px 0 #1c2c46,
-        0 4px 12px rgba(28,44,70,.22),
-        inset 0 1px 0 rgba(255,255,255,.55);
-    }
-    #slot-getstartedwithnemi:focus-visible { outline:3px solid #0ea5e9; outline-offset:2px; }
-  
-  #slot-alreadyamember{
-  display:flex; align-items:center; justify-content:center; text-align:center;
-  }
-  #slot-alreadyamember .amcopy{
+/* -----------------------------------------
+   Already a Nemi Member? (rect id="alreadyamember")
+   ----------------------------------------- */
+#slot-alreadyamember{
+  display:flex; 
+  align-items:center; 
+  justify-content:center; 
+  text-align:center;
+}
+#slot-alreadyamember .amcopy{
   font-size: clamp(12px, 2.8vw, 14px);
-  transform: translateY(-4px);   /* negative = UP; tweak -2 … -8px */
- }
+  transform: translateY(-4px);   /* negative = up */
+}
+
+/* -----------------------------------------
+   Inputs & other buttons
+   ----------------------------------------- */
+#nemiMobile input:focus{
+  outline:none; 
+  border-color:#1c2c46; 
+  box-shadow:0 0 0 4px rgba(28,44,70,.12);
+}
+#slot-loginbar, 
+#slot-explorenemibox{ 
+  font-size: clamp(18px, 3.6vw, 20px); 
+}
+
 
   </style>
 
