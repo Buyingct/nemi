@@ -148,15 +148,15 @@
 #slot-titletextbox,
 #slot-oneteam{
   display:flex;
-  align-items:center;      /* vertical center in the rect */
+  align-items:center;      /* vertical center within rect */
   justify-content:center;  /* horizontal center */
   overflow:hidden;
 }
 
-/* optional nudges */
+/* 0) Fine-tune nudges (edit just the numbers) */
 #nemiMobile{
-  --title-nudge-y: 2px;      /* +down / -up */
-  --oneteam-nudge-y:-2px;
+  --title-nudge-y: 2px;   /* +down / -up */
+  --oneteam-nudge-y: -2px;/* +down / -up */
 }
 
 /* Title: one centered line that auto-fits */
@@ -174,30 +174,38 @@
   transform: translateY(var(--title-nudge-y));
 }
 
-/* One-team: exactly 2 centered lines */
+/* 3) One-team — exactly 2 centered lines with adjustable gap */
 #slot-oneteam .otcopy{
   width:100%; height:auto;
-  text-align: center;
-  line-height: 1.3;
-  font-size: var(--fsSub);   /* set by JS */
-  display: -webkit-box;
-  -webkit-box-orient: vertical;
-  -webkit-line-clamp: 2;     /* vendor */
-  line-clamp: 2;             /* standard */
-  overflow: hidden;
-  padding-inline: 2px;
+  display:flex;                /* stack two sentences */
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;      /* center in the rect */
+  text-align:center;
+  font-size:var(--fsSub);      /* (set by JS fitter) */
+  line-height:1.15;            /* line rhythm per line */
+  padding-inline:10px;
+  overflow:hidden;
   transform: translateY(var(--oneteam-nudge-y));
 }
 
-/* Extra gap only between the 1st and 2nd line inside oneteam */
-#slot-oneteam .otcopy br {
-  display: block;          /* make <br> take space */
-  margin-top: 6px !important;   /* try 4–10px */
+/* each sentence sits on its own line; prevent wrapping to a 3rd line */
+#slot-oneteam .otcopy > span{
+  display:block;
+  white-space:nowrap;
+}
+/* GAP KNOB between the two sentences (change 8px to taste) */
+#slot-oneteam .otcopy > span + span{
+  margin-top:8px;
 }
 
 
-/* Stacking: subtext above panel, CTA still on top */
-#slot-oneteam{ z-index:1; }
+/* 4) Layering (keep subtext above frosted panel, below CTA) */
+#slot-oneteam{ z-index: 11; }    /* panel ~6, other slots ~10, CTA ~12+ */
+
+
+
+
 #slot-getstartedwithnemi{ z-index:15; }
 
 
