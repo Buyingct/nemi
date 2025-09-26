@@ -273,34 +273,44 @@ html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
     /* ---------------------------
        [NEMI:CONFIG KNOBS]
        --------------------------- */
-    var CFG = {
+    /* =========================
+   NEMI — CONFIG (tune here)
+   ========================= */
+var CFG = {
+  /* SVG fallbacks */
   svgCandidates: [
     'assets/svgs/signinrenamed','/assets/svgs/signinrenamed','/nemi/assets/svgs/signinrenamed',
     'assets/svgs/signinrenamed.svg','/assets/svgs/signinrenamed.svg','/nemi/assets/svgs/signinrenamed.svg'
   ],
 
-  /* widen the whole card (purely visual; doesn’t alter the SVG) */
-  cardGrowX: 10,
+  /* Card-wide visuals (used to grow CTA width against the rect) */
+  cardGrowX: 10,   // extra width each side you can apply (we use it on the CTA)
   cardGrowY: 0,
 
-  /* title + oneteam sizing */
-  titlePadPx: 0,
-  titleFontMax: 22,   // bump up if you want even larger/* raise/lower to taste */
-  oneteamPadPx: 0,
+  /* TITLE (rect id="titletextbox") */
+  titleInsetLR: -12,  // negative widens the slot left/right
+  titleInsetT: 0,     // negative moves the slot UP
+  titleInsetB: 0,     // mirror T to keep height unchanged if you nudge
+  titleFontMin: 18,   // fitter lower bound
+  titleFontMax: 36,   // fitter upper bound (set lower if iPhone clips)
+
+  /* SUBTEXT (“One team…”, rect id="oneteam”) */
+  oneteamPadPx: 0,         // uniform pad
+  oneteamBumpUp: 6,        // raise the block (visual)
+  oneteamExtraHeight: 6,   // add vertical room so two lines breathe
   oneteamFontMin: 11,
   oneteamFontMax: 20,
-  oneteamBumpUp: 6,   // ↑ how many px to move the oneteam block UP (try 6–12)
-  // CFG
-  oneteamExtraHeight: 6,   // add ~4px vertical room for the two lines try 4-8
 
-
-  /* CTA:"get started..."" make wider, not taller; nudge down a bit */
-    // CTA pill
-  ctaInset:  { l:-10, r:-10, t:0, b:0 },
-  ctaNudgeY: 3,   // <— raise the pill (negative = up). positive=down
+  /* CTA pill (rect id="getstartedwithnemi") */
+  ctaInset:  { l:-10, r:-10, t:0, b:0 },  // negative widens left/right
+  ctaNudgeY: 3,       // +down / -up
   ctaFontMin: 16,
-  ctaFontMax: 28  // <— allow larger cta pill text
+  ctaFontMax: 28,
+
+  /* “Already a Nemi Member?” line */
+  alreadyNudgeY: -3    // -up / +down
 };
+
 
   
     var section = document.getElementById('nemiMobile');
@@ -420,79 +430,63 @@ function scaleCta(slotId){
 
       // ------------ single layout pass ------------
       function layout(){
-        /* Card background */
-        place('loginbox', 'slot-loginboxbg', 3);
-        (function syncRadius(){
-          var rEl = svg.querySelector('#loginbox');
-          if (!rEl) return;
-          var rx = parseFloat(rEl.getAttribute('rx') || 0);
-          var ry = parseFloat(rEl.getAttribute('ry') || rx || 0);
-          var bg = document.getElementById('slot-loginboxbg');
-          if (bg && (rx || ry)) bg.style.borderRadius = Math.max(rx, ry) + 'px';
-        })();
+  /* 1) Card background (frosted panel) */
+  place('loginbox', 'slot-loginboxbg', 3);
+  (function syncRadius(){
+    var rEl = svg.querySelector('#loginbox');
+    if (!rEl) return;
+    var rx = parseFloat(rEl.getAttribute('rx') || 0);
+    var ry = parseFloat(rEl.getAttribute('ry') || rx || 0);
+    var bg = document.getElementById('slot-loginboxbg');
+    if (bg && (rx || ry)) bg.style.borderRadius = Math.max(rx, ry) + 'px';
+  })();
 
-        /* Heading cluster */
-        place('teamiconbox',  'slot-teamiconbox');
-        placeInset('titletextbox','slot-titletextbox', {
-       l: -12,   // more negative = wider to the left
-       r: -12,   // more negative = wider to the right
-       t:  0,    // negative = move the whole slot UP
-       b:  0     // positive +t keeps height the same (mirror t)
-      });
+  /* 2) Icon + header slots (position first, fit after) */
+  place('teamiconbox','slot-teamiconbox');
 
+  // Title slot widened via knobs
+  placeInset('titletextbox','slot-titletextbox',{
+    l: CFG.titleInsetLR,
+    r: CFG.titleInsetLR,
+    t: CFG.titleInsetT,
+    b: CFG.titleInsetB
+  });
 
-       // Size them:
-       fitVar('#slot-oneteam', '.otcopy', '--fsSub', 11, 20);                 // subtext: 2 lines
-       fitOneLine('#slot-titletextbox', '.titlecopy', '--fsTitle', 16, 36); 
+  // Subtext slot: pad + raise + add extra height
+  const P = CFG.oneteamPadPx|0, U = CFG.oneteamBumpUp|0, G = CFG.oneteamExtraHeight|0;
+  placeInset('oneteam','slot-oneteam', { l:P, r:P, t:P-U, b:P+U-G });
 
-        // NEW — move the slot up without changing its height
-        // Pad + nudge up, without changing the slot’s height
-       const P = CFG.oneteamPadPx || 0;
-const U = CFG.oneteamBumpUp || 0;
-const G = CFG.oneteamExtraHeight || 0;
+  /* 3) Fit text (subtext first, then title) */
+  const subSize = fitVar('#slot-oneteam', '.otcopy', '--fsSub',
+                         CFG.oneteamFontMin, CFG.oneteamFontMax);
+  fitOneLine('#slot-titletextbox', '.titlecopy', '--fsTitle',
+             Math.max(CFG.titleFontMin, subSize+1), CFG.titleFontMax);
 
-placeInset('oneteam','slot-oneteam', {
-  l: P, r: P,
-  t: P - U,        // keep your nudge-up
-  b: P + U - G     // smaller b => taller slot by G px
-});
+  /* 4) CTA pill: widen, nudge, then scale font */
+  placeInset('getstartedwithnemi','slot-getstartedwithnemi',{
+    l: CFG.ctaInset.l - CFG.cardGrowX,
+    r: CFG.ctaInset.r - CFG.cardGrowX,
+    t: CFG.ctaInset.t + CFG.ctaNudgeY,
+    b: CFG.ctaInset.b - CFG.ctaNudgeY
+  });
+  scaleCta('slot-getstartedwithnemi', CFG.ctaFontMin, CFG.ctaFontMax);
 
+  /* 5) “Already a Nemi Member?” — use inset so the nudge sticks */
+  placeInset('alreadyamember','slot-alreadyamember',
+             { t: CFG.alreadyNudgeY, b: -CFG.alreadyNudgeY });
 
+  /* 6) Form + extras (exact to rects) */
+  place('emailbox',       'slot-emailbox');
+  place('passwordbox',    'slot-passwordbox');
+  place('loginbar',       'slot-loginbar');
+  place('forgotpassword', 'slot-forgotpassword');
+  place('appdownload',    'slot-appdownload');
+  place('androiddownload','slot-androiddownload');
+  place('explorenemibox', 'slot-explorenemibox');
+  place('realtorapply',   'slot-realtorapply');
 
-
-        // Fit oneteam (2 lines) then title (single line)
-       // subtext first (unchanged)
-       const subSize = fitVar('#slot-oneteam', '.otcopy', '--fsSub', CFG.oneteamFontMin, CFG.oneteamFontMax);
-
-       // TITLE — single line, use your config cap
-       fitOneLine('#slot-titletextbox', '.titlecopy', '--fsTitle', Math.max(22, subSize+1), CFG.titleFontMax);
-
-        /* GET STARTED pill — grow beyond rect a bit */
-        placeInset('getstartedwithnemi','slot-getstartedwithnemi',{
-  l: CFG.ctaInset.l - CFG.cardGrowX,
-  r: CFG.ctaInset.r - CFG.cardGrowX,
-  t: CFG.ctaInset.t + CFG.ctaNudgeY,  // shift down
-  b: CFG.ctaInset.b - CFG.ctaNudgeY   // keep same height
-});
-        // layout()
-       placeInset('alreadyamember','slot-alreadyamember', { t:-3, b:3 }); // up 3px, keep height
-
-
-        scaleCta('slot-getstartedwithnemi', CFG.ctaFontMin, CFG.ctaFontMax);
-
-        /* Form + extras (exact to rects) */
-        place('alreadyamember', 'slot-alreadyamember');
-        place('emailbox',       'slot-emailbox');
-        place('passwordbox',    'slot-passwordbox');
-        place('loginbar',       'slot-loginbar');
-        place('forgotpassword', 'slot-forgotpassword');
-        place('appdownload',    'slot-appdownload');
-        place('androiddownload','slot-androiddownload');
-        place('explorenemibox', 'slot-explorenemibox');
-        place('realtorapply',   'slot-realtorapply');
-
-        section.classList.remove('invisible');
-      }
+  section.classList.remove('invisible');
+}
 
       // Fonts ready → layout
       if (document.fonts && document.fonts.ready && typeof document.fonts.ready.then === 'function') {
