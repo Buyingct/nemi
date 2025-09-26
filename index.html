@@ -189,6 +189,13 @@
   transform: translateY(var(--oneteam-nudge-y));
 }
 
+/* Extra gap only between the 1st and 2nd line inside oneteam */
+#slot-oneteam .otcopy br {
+  display: block;          /* make <br> take space */
+  margin-top: 6px !important;   /* try 4–10px */
+}
+
+
 /* Stacking: subtext above panel, CTA still on top */
 #slot-oneteam{ z-index:1; }
 #slot-getstartedwithnemi{ z-index:15; }
@@ -273,7 +280,7 @@
   oneteamFontMax: 20,
   oneteamBumpUp: 6,   // ↑ how many px to move the oneteam block UP (try 6–12)
   // CFG
-  oneteamExtraHeight: 4,   // add ~4px vertical room for the two lines
+  oneteamExtraHeight: 6,   // add ~4px vertical room for the two lines try 4-8
 
 
   /* CTA:"get started..."" make wider, not taller; nudge down a bit */
@@ -429,15 +436,16 @@ function scaleCta(slotId){
 
         // NEW — move the slot up without changing its height
         // Pad + nudge up, without changing the slot’s height
-       const P = CFG.oneteamPadPx || 0;        // padding you already use
-       const U = CFG.oneteamBumpUp || 0;       // how much you nudge up
-       const G = CFG.oneteamExtraHeight || 0;  // extra height to add
+       const P = CFG.oneteamPadPx || 0;
+const U = CFG.oneteamBumpUp || 0;
+const G = CFG.oneteamExtraHeight || 0;
 
-       placeInset('oneteam','slot-oneteam',{
-        l: P, r: P,
-        t: P - U,          // keep the nudge-up
-        b: P + U - G       // smaller b => taller box by G px
-      });
+placeInset('oneteam','slot-oneteam', {
+  l: P, r: P,
+  t: P - U,        // keep your nudge-up
+  b: P + U - G     // smaller b => taller slot by G px
+});
+
 
 
 
