@@ -156,7 +156,7 @@
 /* optional nudges */
 #nemiMobile{
   --title-nudge-y: 2px;      /* +down / -up */
-  --oneteam-nudge-y:-1px;
+  --oneteam-nudge-y:-2px;
 }
 
 /* Title: one centered line that auto-fits */
@@ -178,7 +178,7 @@
 #slot-oneteam .otcopy{
   width:100%; height:auto;
   text-align: center;
-  line-height: 1.28;
+  line-height: 1.3;
   font-size: var(--fsSub);   /* set by JS */
   display: -webkit-box;
   -webkit-box-orient: vertical;
@@ -272,6 +272,9 @@
   oneteamFontMin: 11,
   oneteamFontMax: 20,
   oneteamBumpUp: 6,   // ↑ how many px to move the oneteam block UP (try 6–12)
+  // CFG
+  oneteamExtraHeight: 4,   // add ~4px vertical room for the two lines
+
 
   /* CTA:"get started..."" make wider, not taller; nudge down a bit */
     // CTA pill
@@ -426,15 +429,16 @@ function scaleCta(slotId){
 
         // NEW — move the slot up without changing its height
         // Pad + nudge up, without changing the slot’s height
-const P = CFG.oneteamPadPx || 0;   // uniform padding
-const U = CFG.oneteamBumpUp || 0;  // pixels to move up
+       const P = CFG.oneteamPadPx || 0;        // padding you already use
+       const U = CFG.oneteamBumpUp || 0;       // how much you nudge up
+       const G = CFG.oneteamExtraHeight || 0;  // extra height to add
 
-// Pad + grow taller by 2*U (and shift up by U)
-placeInset('oneteam', 'slot-oneteam', {
-  l: P, r: P,
-  t: P - U,
-  b: P - U         // using P - U here increases height
-});
+       placeInset('oneteam','slot-oneteam',{
+        l: P, r: P,
+        t: P - U,          // keep the nudge-up
+        b: P + U - G       // smaller b => taller box by G px
+      });
+
 
 
         // Fit oneteam (2 lines) then title (single line)
