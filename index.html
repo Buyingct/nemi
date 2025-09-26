@@ -178,7 +178,7 @@
 #slot-oneteam .otcopy{
   width:100%; height:auto;
   text-align: center;
-  line-height: 2;
+  line-height: 1.28;
   font-size: var(--fsSub);   /* set by JS */
   display: -webkit-box;
   -webkit-box-orient: vertical;
@@ -419,14 +419,23 @@ function scaleCta(slotId){
        b:  0     // positive +t keeps height the same (mirror t)
       });
 
-        place('oneteam',      'slot-oneteam', CFG.oneteamPadPx);
-       
+
        // Size them:
        fitVar('#slot-oneteam', '.otcopy', '--fsSub', 11, 20);                 // subtext: 2 lines
        fitOneLine('#slot-titletextbox', '.titlecopy', '--fsTitle', 16, 36); 
 
         // NEW — move the slot up without changing its height
-        placeInset('oneteam','slot-oneteam', { t: -CFG.oneteamBumpUp, b: CFG.oneteamBumpUp });
+        // Pad + nudge up, without changing the slot’s height
+const P = CFG.oneteamPadPx || 0;   // uniform padding
+const U = CFG.oneteamBumpUp || 0;  // pixels to move up
+
+// Pad + grow taller by 2*U (and shift up by U)
+placeInset('oneteam', 'slot-oneteam', {
+  l: P, r: P,
+  t: P - U,
+  b: P - U         // using P - U here increases height
+});
+
 
         // Fit oneteam (2 lines) then title (single line)
        // subtext first (unchanged)
