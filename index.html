@@ -309,6 +309,7 @@ html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
       exploreFlex:  { dy: 62 },
       appstoreFlex: { dy: 70 },
       playFlex:     { dy: 70 },
+      panelPadBottom: 14,   // extra white space under the lowest row
 
       /* One-line “Have what it takes…” */
       realtorFlex: { dy: 74, growX: 14 },
@@ -319,6 +320,7 @@ html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
 
       /* Panel breathing room (expands frosted card on phones only) */
       panelGrowY: 16, panelGrowX: 0
+     
     },
     { // Small phones (≤380px)
       maxWidth: 380,
@@ -335,6 +337,7 @@ html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
       exploreFlex:  { dy: 52 },
       appstoreFlex: { dy: 60 },
       playFlex:     { dy: 60 },
+      panelPadBottom: 14,   // extra white space under the lowest row
 
       realtorFlex: { dy: 64, growX: 12 },
       realtorFs: 12,
@@ -468,7 +471,31 @@ html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
       el.style.lineHeight = '1';
       el.style.whiteSpace = 'nowrap';
     }
+    
+    // Auto-grow the frosted panel to cover the lowest slot (mobile only)
+function autoGrowPanel(slotIds, extraBottomPx){
+  const panel = document.getElementById('slot-loginboxbg');
+  if (!panel) return;
+  const hb = host.getBoundingClientRect();
+  const pTop = panel.getBoundingClientRect().top - hb.top; // current top (px from host)
 
+  // find bottom-most visible slot
+  let maxBottom = 0;
+  for (const id of slotIds){
+    const el = document.getElementById(id);
+    if (!el || el.offsetParent === null) continue; // skip hidden
+    const r = el.getBoundingClientRect();
+    maxBottom = Math.max(maxBottom, r.bottom - hb.top);
+  }
+
+  // set new height = (bottom-most – panelTop) + padding
+  const pad = Math.max(0, extraBottomPx|0);
+  const newH = Math.max(0, Math.ceil(maxBottom - pTop + pad));
+  if (newH) panel.style.height = newH + 'px';
+}
+
+     
+       
     /* ---------- layout ---------- */
     function layout(){
       const vw = section.clientWidth;
@@ -558,13 +585,30 @@ html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
       placeFlex('androiddownload','slot-androiddownload', {l:0,r:0,t:0,b:0}, Object.assign({}, CFG.playFlex, preset?.playFlex || {}), 0);
 
       /* 12) Explore pill (independent) */
-      placeFlex('explorenemibox','slot-explorenemibox', {l:0,r:0,t:0,b:0}, Object.assign({}, CFG.exploreFlex, preset?.exploreFlex || {}), 0);
-      scalePill('slot-explorenemibox');
+placeFlex('explorenemibox','slot-explorenemibox',
+          {l:0,r:0,t:0,b:0},
+          Object.assign({}, CFG.exploreFlex, preset?.exploreFlex || {}), 0);
+scalePill('slot-explorenemibox');
 
-      /* 13) Apply line */
-      placeFlex('realtorapply','slot-realtorapply', {l:0,r:0,t:0,b:0}, Object.assign({}, CFG.realtorFlex, preset?.realtorFlex || {}), 0);
-      if (CFG.realtorFs || preset?.realtorFs) document.getElementById('slot-realtorapply')
-        .style.setProperty('--realtorFs', (preset?.realtorFs ?? CFG.realtorFs) + 'px');
+/* 13) Apply line */
+placeFlex('realtorapply','slot-realtorapply',
+          {l:0,r:0,t:0,b:0},
+          Object.assign({}, CFG.realtorFlex, preset?.realtorFlex || {}), 0);
+if (CFG.realtorFs || preset?.realtorFs) document.getElementById('slot-realtorapply')
+  .style.setProperty('--realtorFs', (preset?.realtorFs ?? CFG.realtorFs) + 'px');
+
+/* 👇 NEW: auto-extend frosted panel on mobile only */
+if (preset){
+  autoGrowPanel(
+    [
+      'slot-getstartedwithnemi','slot-alreadyamember',
+      'slot-emailbox','slot-passwordbox','slot-logintext',
+      'slot-forgotpassword','slot-appdownload','slot-androiddownload',
+      'slot-explorenemibox','slot-realtorapply'
+    ],
+    preset.panelPadBottom ?? 14 // extra bottom padding inside the panel
+  );
+}
 
       section.classList.remove('invisible');
     }
