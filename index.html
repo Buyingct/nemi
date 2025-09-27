@@ -260,6 +260,7 @@ const MOBILE_TUNING = [
     titleScale: 1.00,     // keep title unchanged
     titleMax: 24, titleMin: 16,
     subMax: 18,  subMin: 16,
+    subTopPad: 2,   // pixels of extra top padding for the subtext block
     extraCtaNudge: 8
   },
   { // Small phones (≤380px)
@@ -471,6 +472,9 @@ section.style.setProperty('--bodyScale', bodyScale);
   // Subtext slot
   const P = CFG.oneteamPadPx|0, U = CFG.oneteamBumpUp|0, G = CFG.oneteamExtraHeight|0;
   placeInset('oneteam','slot-oneteam', { l:P, r:P, t:P-U, b:P+U-G });
+
+  const ot = document.querySelector('#slot-oneteam .otcopy');
+ot.style.paddingTop = (preset?.subTopPad || 0) + 'px';
 
   
   const scale    = preset ? preset.scale    : 1;
