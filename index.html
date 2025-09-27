@@ -218,6 +218,8 @@ html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
     --oneteam-nudge-y: -2px;
   }
   #slot-oneteam .otcopy{ padding-top: 2px; }
+  #slot-realtorapply{ white-space: nowrap; }
+
 }
 
 /* [NEMI: INPUT SIZING KNOBS] — font, radius, padding (overrides Tailwind) */
@@ -310,50 +312,57 @@ html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
   };
 
   /* ===== Mobile presets (first match wins) ===== */
-  const MOBILE_TUNING = [
-    { // Tiny phones (≤340px)
-  maxWidth: 340,
-  bodyScale: 1.08, titleScale: 1.00,
-  titleMax: 24, titleMin: 16,
-  subMax: 17,  subMin: 15,
-  subTopPad: 2,
-  extraCtaNudge: 8,
+const MOBILE_TUNING = [
+  { // Tiny phones (≤340px)
+    maxWidth: 340,
+    bodyScale: 1.08, titleScale: 1.00,
+    titleMax: 24, titleMin: 16,
+    subMax: 17,  subMin: 15,
+    subTopPad: 2,
+    extraCtaNudge: 8,
 
-  // ➕ Mobile-only input bumps
-  emailFs: 19,                 // was 17
-  passwordFs: 19,              // was 17
-  emailFlex:    { growY: 6 },  // taller email pill
-  passwordFlex: { growY: 6 },  // taller password pill
+    // One-line “Have what it takes…”
+    realtorFlex: { growX: 12 },   // widen that line’s slot
+    realtorFs: 12,                // slightly smaller text
 
-  // If bigger inputs make things tight, a tiny push on login:
-  loginFlex: { dy: 2 },        // nudges login pill down 2px
-  // (you can delete this if you don’t need it)
+    // Mobile-only input bumps
+    emailFs: 19,                  // was 17
+    passwordFs: 19,               // was 17
+    emailFlex:    { growY: 6 },   // taller email pill
+    passwordFlex: { growY: 6 },   // taller password pill
 
-  // ➕ Keep the frosted panel comfy (explained below)
-  panelGrowY: 8
-},
-{ // Small phones (≤380px)
-  maxWidth: 380,
-  bodyScale: 1.08, titleScale: 1.00,
-  titleMax: 26, titleMin: 16,
-  subMax: 17,  subMin: 15,
-  extraCtaNudge: 6,
+    // (optional) tiny login nudge if things get tight
+    loginFlex: { dy: 2 },
 
-  // ➕ Mobile-only input bumps
-  emailFs: 18,
-  passwordFs: 18,
-  emailFlex:    { growY: 4 },
-  passwordFlex: { growY: 4 },
+    // Panel breathing room (expands frosted card on phones only)
+    panelGrowY: 8,
+  },
 
-  // (optional) tiny login nudge
-  // loginFlex: { dy: 2 },
-  
+  { // Small phones (≤380px)
+    maxWidth: 380,
+    bodyScale: 1.08, titleScale: 1.00,
+    titleMax: 26, titleMin: 16,
+    subMax: 17,  subMin: 15,
+    extraCtaNudge: 6,
 
-  // ➕ Panel breathing room
-  panelGrowY: 6
-}
+    // One-line “Have what it takes…”
+    realtorFlex: { growX: 12 },
+    realtorFs: 12,
 
-  ];
+    // Mobile-only input bumps
+    emailFs: 18,
+    passwordFs: 18,
+    emailFlex:    { growY: 4 },
+    passwordFlex: { growY: 4 },
+
+    // (optional) tiny login nudge
+    // loginFlex: { dy: 2 },
+
+    // Panel breathing room
+    panelGrowY: 6,
+  },
+];
+
 
   /* ===== Desktop/large screens ===== */
   const DESKTOP_TUNING = {
