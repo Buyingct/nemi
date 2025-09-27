@@ -322,11 +322,11 @@ const MOBILE_TUNING = [
     extraCtaNudge: 8,
 
        // spacing between rows (no size change)
-  alreadyFlex:  { dy:  6 },
-  emailFlex:    { dy: 14, growY: 6 },  // slightly taller email pill
-  passwordFlex: { dy: 26, growY: 6 },  // slightly taller password pill
-  loginFlex:    { dy: 40 },
-   forgotFlex: { dy: 48 },   // push "Forgot Password?" down ~48px
+   alreadyFlex:  { dy:  6 },
+  emailFlex:    { dy: 12, growY: 4 },
+  passwordFlex: { dy: 22, growY: 4 },
+  loginFlex:    { dy: 34 },
+  forgotFlex:   { dy: 46 },   // puts it clearly below Login   // push "Forgot Password?" down ~48px
    forgotFs: 12,   // optional size tweak
    
    // One-line “Have what it takes…”
@@ -341,6 +341,10 @@ const MOBILE_TUNING = [
 
     // (optional) tiny login nudge if things get tight
     loginFlex: { dy: 2 },
+   
+     // push badges further down so they never clash with Forgot
+  appstoreFlex: { dy: 60 },
+  playFlex:     { dy: 60 },
 
     // Panel breathing room (expands frosted card on phones only)
     panelGrowY: 14,
@@ -361,7 +365,9 @@ const MOBILE_TUNING = [
   loginFlex:    { dy: 32 },
   forgotFlex: { dy: 40 },   // slightly less on wider small phones
   forgotFs: 12,  // optional size tweak
-    
+    appstoreFlex: { dy: 52 },
+  playFlex:     { dy: 52 },
+
   // One-line “Have what it takes…”
     realtorFlex: { growX: 12 },
     realtorFs: 12,
@@ -376,7 +382,7 @@ const MOBILE_TUNING = [
     // loginFlex: { dy: 2 },
 
     // Panel breathing room
-    panelGrowY: 10,
+    panelGrowY: 12,
     panelGrowX: 0,   // usually 0; set if you need a bit more width
   },
 ];
