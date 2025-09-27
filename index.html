@@ -321,6 +321,12 @@ const MOBILE_TUNING = [
     subTopPad: 2,
     extraCtaNudge: 8,
 
+      /* add spacing between these rows (no size change) */
+    alreadyFlex:  { dy: 0 },   // keep “Already…” where it is
+    emailFlex:    { dy: 4 },   // move Email down 4px
+    passwordFlex: { dy: 10 },  // move Password down 10px
+    loginFlex:    { dy: 16 },  // move Login down 16px
+
     // One-line “Have what it takes…”
     realtorFlex: { growX: 12 },   // widen that line’s slot
     realtorFs: 12,                // slightly smaller text
@@ -344,6 +350,12 @@ const MOBILE_TUNING = [
     titleMax: 26, titleMin: 16,
     subMax: 17,  subMin: 15,
     extraCtaNudge: 6,
+
+     /* same idea, slightly smaller nudges */
+    alreadyFlex:  { dy: 0 },
+    emailFlex:    { dy: 3 },
+    passwordFlex: { dy: 8 },
+    loginFlex:    { dy: 13 },
 
     // One-line “Have what it takes…”
     realtorFlex: { growX: 12 },
