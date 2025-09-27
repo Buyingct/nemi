@@ -537,21 +537,26 @@ const MOBILE_TUNING = [
       if (preset?.oneteamGap != null) section.style.setProperty('--oneteam-gap', preset.oneteamGap + 'px');
 
       /* 1) Frosted panel */
-      const panelGrowX = preset?.panelGrowX || 0;
-const panelGrowY = preset?.panelGrowY || 0;
-// expand the frosted panel only on mobile presets
+      /* 1) Frosted panel — desktop unchanged, mobile can grow */
+const baseInset = 3;                      // same as your old: place(..., 3)
+const growX = preset?.panelGrowX || 0;    // mobile-only extra width (each side)
+const growY = preset?.panelGrowY || 0;    // mobile-only extra height (each side)
+
 placeInset('loginbox','slot-loginboxbg', {
-  l: -panelGrowX, r: -panelGrowX,
-  t: -panelGrowY, b: -panelGrowY
+  l: baseInset - growX,
+  r: baseInset - growX,
+  t: baseInset - growY,
+  b: baseInset - growY
 });
 
-      (function syncRadius(){
-        const rEl = svg.querySelector('#loginbox'); if (!rEl) return;
-        const rx = parseFloat(rEl.getAttribute('rx') || 0);
-        const ry = parseFloat(rEl.getAttribute('ry') || rx || 0);
-        const bg = document.getElementById('slot-loginboxbg');
-        if (bg && (rx || ry)) bg.style.borderRadius = Math.max(rx, ry) + 'px';
-      })();
+(function syncRadius(){
+  const rEl = svg.querySelector('#loginbox'); if (!rEl) return;
+  const rx = parseFloat(rEl.getAttribute('rx') || 0);
+  const ry = parseFloat(rEl.getAttribute('ry') || rx || 0);
+  const bg = document.getElementById('slot-loginboxbg');
+  if (bg && (rx || ry)) bg.style.borderRadius = Math.max(rx, ry) + 'px';
+})();
+
 
       /* 2) Team icon */
       placeFlex('teamiconbox','slot-teamiconbox', {l:0,r:0,t:0,b:0}, Object.assign({}, CFG.teamIconFlex, preset?.teamIconFlex || {}), 0);
