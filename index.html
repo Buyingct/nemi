@@ -312,22 +312,47 @@ html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
   /* ===== Mobile presets (first match wins) ===== */
   const MOBILE_TUNING = [
     { // Tiny phones (≤340px)
-      maxWidth: 340,
-      bodyScale: 1.08, titleScale: 1.00,
-      titleMax: 24, titleMin: 16,
-      subMax: 17,  subMin: 15,
-      subTopPad: 2,
-      extraCtaNudge: 8,
-      // per-slot overrides (optional):
-      // ctaFlex: { dy:-4, growX:6, growY:3 }, emailFs:18, passwordFs:18
-    },
-    { // Small phones (≤380px)
-      maxWidth: 380,
-      bodyScale: 1.08, titleScale: 1.00,
-      titleMax: 26, titleMin: 16,
-      subMax: 17,  subMin: 15,
-      extraCtaNudge: 6
-    }
+  maxWidth: 340,
+  bodyScale: 1.08, titleScale: 1.00,
+  titleMax: 24, titleMin: 16,
+  subMax: 17,  subMin: 15,
+  subTopPad: 2,
+  extraCtaNudge: 8,
+
+  // ➕ Mobile-only input bumps
+  emailFs: 19,                 // was 17
+  passwordFs: 19,              // was 17
+  emailFlex:    { growY: 6 },  // taller email pill
+  passwordFlex: { growY: 6 },  // taller password pill
+
+  // If bigger inputs make things tight, a tiny push on login:
+  loginFlex: { dy: 2 },        // nudges login pill down 2px
+  // (you can delete this if you don’t need it)
+
+  // ➕ Keep the frosted panel comfy (explained below)
+  panelGrowY: 8
+},
+{ // Small phones (≤380px)
+  maxWidth: 380,
+  bodyScale: 1.08, titleScale: 1.00,
+  titleMax: 26, titleMin: 16,
+  subMax: 17,  subMin: 15,
+  extraCtaNudge: 6,
+
+  // ➕ Mobile-only input bumps
+  emailFs: 18,
+  passwordFs: 18,
+  emailFlex:    { growY: 4 },
+  passwordFlex: { growY: 4 },
+
+  // (optional) tiny login nudge
+  // loginFlex: { dy: 2 },
+  
+
+  // ➕ Panel breathing room
+  panelGrowY: 6
+}
+
   ];
 
   /* ===== Desktop/large screens ===== */
@@ -491,7 +516,14 @@ html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
       if (preset?.oneteamGap != null) section.style.setProperty('--oneteam-gap', preset.oneteamGap + 'px');
 
       /* 1) Frosted panel */
-      place('loginbox', 'slot-loginboxbg', 3);
+      const panelGrowX = preset?.panelGrowX || 0;
+const panelGrowY = preset?.panelGrowY || 0;
+// expand the frosted panel only on mobile presets
+placeInset('loginbox','slot-loginboxbg', {
+  l: -panelGrowX, r: -panelGrowX,
+  t: -panelGrowY, b: -panelGrowY
+});
+
       (function syncRadius(){
         const rEl = svg.querySelector('#loginbox'); if (!rEl) return;
         const rx = parseFloat(rEl.getAttribute('rx') || 0);
