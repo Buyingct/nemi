@@ -189,12 +189,14 @@ html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
 #slot-realtorapply{ font-size: calc(var(--bodyScale,1) * 12px); }
 
   /* Mobile-only vertical nudges (no JS changes needed) */
-@media (max-width: 380px){
+  @media (max-width: 380px){
   #nemiMobile{
-    --title-nudge-y:   -6px;  /* move the big title up */
-    --oneteam-nudge-y: -4px;  /* move “One team…” up */
+    --title-nudge-y:   -6px;  /* same as before */
+    --oneteam-nudge-y: -2px;  /* was -4px; a bit less up */
   }
+  #slot-oneteam .otcopy{ padding-top: 2px; } /* prevents top clipping */
 }
+
 
 
  </style>
