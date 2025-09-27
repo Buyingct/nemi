@@ -242,20 +242,24 @@ const CFG = {
    for narrow phones. The first matching preset is applied.
    ========================================================= */
 const MOBILE_TUNING = [
-  { /* Tiny phones (e.g., iPhone SE) */
+  { // Tiny phones (≤340px)
     maxWidth: 340,
-    scale: 0.86,                 // global text scale for title/subtext/CTA
-    titleMax: 24, titleMin: 16,  // hard caps for title
-    subMax: 18,   subMin: 16,    // hard caps for subtext
+    bodyScale: 1.12,      // ⬅️ was ~1.00–1.08; raises subtext/buttons/labels
+    titleScale: 1.00,     // keep title unchanged
+    titleMax: 24, titleMin: 16,
+    subMax: 18,  subMin: 16,
     extraCtaNudge: 8
   },
-  { /* Small phones (most iPhones @ 360–375 width) */
+  { // Small phones (≤380px)
     maxWidth: 380,
-    scale: 0.92,
-    titleMax: 24, titleMin: 16,
+    bodyScale: 1.08,      // a gentler bump here
+    titleScale: 1.00,
+    titleMax: 26, titleMin: 16,
     subMax: 19,  subMin: 16,
-    extraCtaNudge: 4
+    extraCtaNudge: 6
   }
+];
+
   // Add more presets if you want different breakpoints.
 ];
 
