@@ -189,58 +189,75 @@ html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
   /* =========================================================
      [NEMI:CONFIG]  ❗ EDIT HERE ONLY (copy, URLs, sizing knobs)
      ========================================================= */
-  const TEXT = {
-    title: "Take Control of Your Homebuying Journey",
-    sub1:  "One <strong>team</strong>. Every step, <strong>always</strong> clear.",
-    sub2:  "Your Realtor, Lender &amp; Attorney in <strong>One</strong> Hub.",
-    cta:   "Get Started With Nemi",
-    already: "Already a Nemi Member? Sign in below!",
-    explore: "Explore Nemi Features",
-    applyLead: "Have what it takes to be a Nemi Pro?"
-  };
-  const LINKS = {
-    cta: "/signup",
-    explore: "/features",
-    appstore: "#",
-    play: "#",
-    apply: "/pros/apply",
-    forgot: "/auth/forgot.php"
-  };
-  const CFG = {
-    /* SVG candidates (extensionless first for your server) */
-    svgCandidates: [
-      'assets/svgs/signinrenamed','/assets/svgs/signinrenamed','/nemi/assets/svgs/signinrenamed',
-      'assets/svgs/signinrenamed.svg','/assets/svgs/signinrenamed.svg','/nemi/assets/svgs/signinrenamed.svg'
-    ],
+   /* =========================================================
+   [NEMI:CONFIG] — copy, URLs, desktop sizes
+   ========================================================= */
+const TEXT = {
+  title: "Take Control of Your Homebuying Journey",
+  sub1:  "One <strong>team</strong>. Every step, <strong>always</strong> clear.",
+  sub2:  "Your Realtor, Lender &amp; Attorney in <strong>One</strong> Hub.",
+  cta:   "Get Started With Nemi",
+  already: "Already a Nemi Member? Sign in below!",
+  explore: "Explore Nemi Features",
+  applyLead: "Have what it takes to be a Nemi Pro?"
+};
+const LINKS = {
+  cta: "/signup", explore: "/features",
+  appstore: "#",  play: "#",
+  apply: "/pros/apply", forgot: "/auth/forgot.php"
+};
 
-    /* Card-wide visuals (used to grow CTA width vs rect) */
-    cardGrowX: 10,
-    cardGrowY: 0,
+/* ---------- Base (desktop-ish) sizes ---------- */
+const CFG = {
+  svgCandidates: [
+    'assets/svgs/signinrenamed','/assets/svgs/signinrenamed','/nemi/assets/svgs/signinrenamed',
+    'assets/svgs/signinrenamed.svg','/assets/svgs/signinrenamed.svg','/nemi/assets/svgs/signinrenamed.svg'
+  ],
+  cardGrowX: 10,
 
-    /* Title (rect: #titletextbox) */
-    titleInsetLR: -12,  // widen slot left/right (negative widens)
-    titleInsetT:  3,
-    titleInsetB:  0,
-    titleFontMin: 18,   // lowered for iPhone fit
-    titleFontMax: 32,   // lowered from 36 to avoid clipping
+  /* Title slot (rect: #titletextbox) */
+  titleInsetLR: -12,  titleInsetT: 3, titleInsetB: 0,
+  titleFontMin: 18,   titleFontMax: 32,   // ← desktop caps
 
-    /* Subtext (rect: #oneteam) */
-    oneteamPadPx:        0,
-    oneteamBumpUp:       8,
-    oneteamExtraHeight: 16,
-    oneteamFontMin:      18,
-    oneteamFontMax:      22,
+  /* Two-line subtext (rect: #oneteam) */
+  oneteamPadPx: 0, oneteamBumpUp: 8, oneteamExtraHeight: 16,
+  oneteamFontMin: 18, oneteamFontMax: 22,
 
-    /* CTA pill (rect: #getstartedwithnemi) */
-    ctaInset:  { l:-10, r:-10, t:0, b:0 },
-    ctaNudgeY: 4,           // +down / -up
-    ctaFontMin: 16,
-    ctaFontMax: 28,
-    ctaScale:   0.5,        // height → font-size factor
+  /* CTA pill */
+  ctaInset: { l:-10, r:-10, t:0, b:0 },
+  ctaNudgeY: 4, ctaFontMin: 16, ctaFontMax: 28, ctaScale: 0.5,
 
-    /* “Already a Nemi Member?” line */
-    alreadyNudgeY: -1
-  };
+  /* “Already…” line */
+  alreadyNudgeY: -1
+};
+
+/* =========================================================
+   [NEMI:MOBILE TUNING PRESETS] — edit these only to shrink/grow
+   for narrow phones. The first matching preset is applied.
+   ========================================================= */
+const MOBILE_TUNING = [
+  { /* Tiny phones (e.g., iPhone SE) */
+    maxWidth: 340,
+    scale: 0.86,                 // global text scale for title/subtext/CTA
+    titleMax: 24, titleMin: 16,  // hard caps for title
+    subMax: 18,   subMin: 16,    // hard caps for subtext
+    extraCtaNudge: 8
+  },
+  { /* Small phones (most iPhones @ 360–375 width) */
+    maxWidth: 380,
+    scale: 0.92,
+    titleMax: 26, titleMin: 16,
+    subMax: 19,  subMin: 16,
+    extraCtaNudge: 6
+  }
+  // Add more presets if you want different breakpoints.
+];
+
+/* Helper: resolve the active tuning based on viewport width */
+function getMobileTuning(vw){
+  for (const p of MOBILE_TUNING) if (vw <= p.maxWidth) return p;
+  return null; // desktop/tablet → use CFG as-is
+}
 
   /* ===============================
      [NEMI:Populate copy + links]
@@ -368,58 +385,73 @@ html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
     function layout(){
       // small-device flag (iPhone portrait 320–375)
       const vw = section.clientWidth;
-      const small = vw < 380;
+  const preset = getMobileTuning(vw);      // null on desktop/tablet
+  const small  = !!preset;
 
-      /* 1) Frosted panel + radius sync */
-      place('loginbox', 'slot-loginboxbg', 3);
-      (function syncRadius(){
-        const rEl = svg.querySelector('#loginbox'); if (!rEl) return;
-        const rx = parseFloat(rEl.getAttribute('rx') || 0);
-        const ry = parseFloat(rEl.getAttribute('ry') || rx || 0);
-        const bg = document.getElementById('slot-loginboxbg');
-        if (bg && (rx || ry)) bg.style.borderRadius = Math.max(rx, ry) + 'px';
-      })();
+      
+  
+     /* 1) Frosted panel + radius sync */
+  place('loginbox', 'slot-loginboxbg', 3);
+  (function syncRadius(){
+    const rEl = svg.querySelector('#loginbox'); if (!rEl) return;
+    const rx = parseFloat(rEl.getAttribute('rx') || 0);
+    const ry = parseFloat(rEl.getAttribute('ry') || rx || 0);
+    const bg = document.getElementById('slot-loginboxbg');
+    if (bg && (rx || ry)) bg.style.borderRadius = Math.max(rx, ry) + 'px';
+  })();
 
-      /* 2) Icon + header */
-      place('teamiconbox','slot-teamiconbox');
+  /* 2) Icon + header */
+  place('teamiconbox','slot-teamiconbox');
 
-      // Title inset with gentler widening on very small screens
-      const titleInsetLR = small ? Math.min(-6, CFG.titleInsetLR) : CFG.titleInsetLR;
-      placeInset('titletextbox','slot-titletextbox', { l:titleInsetLR, r:titleInsetLR, t:CFG.titleInsetT, b:CFG.titleInsetB });
+  // Title inset (gentler on small phones)
+  const titleInsetLR = small ? Math.min(-6, CFG.titleInsetLR) : CFG.titleInsetLR;
+  placeInset('titletextbox','slot-titletextbox', {
+    l:titleInsetLR, r:titleInsetLR, t:CFG.titleInsetT, b:CFG.titleInsetB
+  });
 
-      // Subtext: pad + bump + extra height for breathing room
-      const P = CFG.oneteamPadPx|0, U = CFG.oneteamBumpUp|0, G = CFG.oneteamExtraHeight|0;
-      placeInset('oneteam','slot-oneteam', { l:P, r:P, t:P-U, b:P+U-G });
+  // Subtext slot
+  const P = CFG.oneteamPadPx|0, U = CFG.oneteamBumpUp|0, G = CFG.oneteamExtraHeight|0;
+  placeInset('oneteam','slot-oneteam', { l:P, r:P, t:P-U, b:P+U-G });
 
-      /* 3) Fit text (subtext first, then title) */
-      fitVar('#slot-oneteam', '.otcopy', '--fsSub', CFG.oneteamFontMin, CFG.oneteamFontMax);
-      fitOneLine('#slot-titletextbox', '.titlecopy', '--fsTitle', CFG.titleFontMin, CFG.titleFontMax);
+  /* ---------- Size caps (apply mobile preset if present) ---------- */
+  const titleMin = preset ? preset.titleMin : CFG.titleFontMin;
+  const titleMax = preset ? preset.titleMax : CFG.titleFontMax;
+  const subMin   = preset ? preset.subMin   : CFG.oneteamFontMin;
+  const subMax   = preset ? preset.subMax   : CFG.oneteamFontMax;
+  const scale    = preset ? preset.scale    : 1;
 
-      /* 4) CTA pill — allow a bit more down-nudge on very small screens */
-      const ctaNudge = small ? (CFG.ctaNudgeY + 6) : CFG.ctaNudgeY;
-      placeInset('getstartedwithnemi','slot-getstartedwithnemi', {
-        l: CFG.ctaInset.l - CFG.cardGrowX,
-        r: CFG.ctaInset.r - CFG.cardGrowX,
-        t: CFG.ctaInset.t + ctaNudge,
-        b: CFG.ctaInset.b - ctaNudge
-      });
-      scaleCta('slot-getstartedwithnemi');
+  // 3) Fit text (subtext first, then title), with preset caps + scale
+  const fittedSub = fitVar('#slot-oneteam', '.otcopy', '--fsSub',
+                           Math.round(subMin*scale), Math.round(subMax*scale));
+  fitOneLine('#slot-titletextbox', '.titlecopy', '--fsTitle',
+             Math.round(titleMin*scale), Math.round(titleMax*scale));
 
-      /* 5) “Already a Nemi Member?” */
-      placeInset('alreadyamember','slot-alreadyamember', { t: CFG.alreadyNudgeY, b: -CFG.alreadyNudgeY });
+  /* 4) CTA pill — slip it down a hair more on small phones */
+  const ctaNudge = CFG.ctaNudgeY + (preset?.extraCtaNudge || 0);
+  placeInset('getstartedwithnemi','slot-getstartedwithnemi', {
+    l: CFG.ctaInset.l - CFG.cardGrowX,
+    r: CFG.ctaInset.r - CFG.cardGrowX,
+    t: CFG.ctaInset.t + ctaNudge,
+    b: CFG.ctaInset.b - ctaNudge
+  });
+  scaleCta('slot-getstartedwithnemi'); // font stays proportional to pill height
 
-      /* 6) Form + extras */
-      place('emailbox',       'slot-emailbox');
-      place('passwordbox',    'slot-passwordbox');
-      place('loginbar',       'slot-loginbar');
-      place('forgotpassword', 'slot-forgotpassword');
-      place('appdownload',    'slot-appdownload');
-      place('androiddownload','slot-androiddownload');
-      place('explorenemibox', 'slot-explorenemibox');
-      place('realtorapply',   'slot-realtorapply');
+  /* 5) “Already a Nemi Member?” */
+  placeInset('alreadyamember','slot-alreadyamember',
+             { t: CFG.alreadyNudgeY, b: -CFG.alreadyNudgeY });
 
-      section.classList.remove('invisible');
-    }
+  /* 6) Form + extras */
+  place('emailbox',       'slot-emailbox');
+  place('passwordbox',    'slot-passwordbox');
+  place('loginbar',       'slot-loginbar');
+  place('forgotpassword', 'slot-forgotpassword');
+  place('appdownload',    'slot-appdownload');
+  place('androiddownload','slot-androiddownload');
+  place('explorenemibox', 'slot-explorenemibox');
+  place('realtorapply',   'slot-realtorapply');
+
+  section.classList.remove('invisible');
+}
 
     // fonts ready → layout
     (document.fonts && document.fonts.ready?.then)
