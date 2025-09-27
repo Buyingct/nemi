@@ -4,15 +4,10 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Nemi – Your Personalized Path to Homeownership</title>
-
-  <!-- Tailwind (utility only) -->
   <script src="https://cdn.tailwindcss.com"></script>
-
-  <!-- [NEMI:ASSET PRELOAD] your server prefers extensionless SVG paths -->
   <link rel="preload" as="image" href="./assets/svgs/signinrenamed" type="image/svg+xml" />
 </head>
 <body class="bg-white text-slate-900">
-
   <!-- =========================================================
        [NEMI:MOBILE HERO] (9:16 container; SVG anchors + positioned slots)
        ========================================================= -->
@@ -26,9 +21,7 @@
     <!-- SVG host -->
     <div id="mobileArt" class="absolute inset-0" style="z-index:1;"></div>
 
-    <!-- =======================
-         [OVERLAY SLOTS]
-         ======================= -->
+    <!-- ======================= [OVERLAY SLOTS] ======================= -->
 
     <!-- Team icon (rect: #teamiconbox) -->
     <div id="slot-teamiconbox" class="slot absolute hidden">
@@ -94,14 +87,12 @@
     </div>
   </section>
 
-  <!-- ==================
-       [NEMI:STYLES]
-       ================== -->
+  <!-- ================== [NEMI:STYLES] ================== -->
   <style>
-/* ===== iOS text zoom guard ===== */
+/* iOS text zoom guard */
 html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
 
-/* ===== Quick CSS knobs (visual only; copy knobs are in JS CONFIG) ===== */
+/* Quick CSS knobs (visual only; copy knobs are in JS CONFIG) */
 #nemiMobile{
   --card-opacity: .65;     /* .55–.80 */
   --title-nudge-y: 2px;    /* +down / -up */
@@ -121,16 +112,15 @@ html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
   border: 1px solid rgba(255,255,255,0.35);
 }
 
-/* All overlay slots sit above the SVG artwork */
+/* Overlay slots above SVG */
 #nemiMobile .slot { z-index: 10; }
 
-/* Title + Subtext containers are flex-centered inside their rects */
-#slot-titletextbox,
-#slot-oneteam{
+/* Title + Subtext containers */
+#slot-titletextbox, #slot-oneteam{
   display:flex; align-items:center; justify-content:center; overflow:hidden;
 }
 
-/* Title: single line; size is controlled by --fsTitle (JS) */
+/* Title (one line; size via --fsTitle) */
 #slot-titletextbox .titlecopy{
   width:100%;
   white-space:nowrap;
@@ -150,14 +140,14 @@ html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
   display:flex; flex-direction:column; align-items:center; justify-content:center;
   text-align:center; padding-inline:2px;
   line-height:1.05;
-  font-size:var(--fsSub);          /* set by JS */
+  font-size:var(--fsSub);
   transform: translateY(var(--oneteam-nudge-y));
 }
 #slot-oneteam .otcopy > span{ display:block; white-space:nowrap; }
 #slot-oneteam .otcopy > span + span{ margin-top: var(--oneteam-gap); }
 #slot-oneteam{ z-index: 11; }
 
-/* === Pill themes (independent) ===================================== */
+/* === Pill themes (independent) ===================== */
 /* CTA pill (Get Started) */
 #slot-getstartedwithnemi{
   z-index:15; display:flex !important; align-items:center; justify-content:center;
@@ -166,13 +156,13 @@ html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
   border:3px solid #1c2c46;
   background: linear-gradient(#f6d768, #e3be32);
   box-shadow: 0 3px 0 #1c2c46, 0 6px 18px rgba(28,44,70,.25), inset 0 2px 0 rgba(255,255,255,.65);
-  font-size:inherit; /* actual size via JS scaler */
+  font-size:inherit;
 }
 #slot-getstartedwithnemi:hover { filter: brightness(1.02); }
 #slot-getstartedwithnemi:active { transform: translateY(1px); box-shadow: 0 1px 0 #1c2c46, 0 4px 12px rgba(28,44,70,.22), inset 0 1px 0 rgba(255,255,255,.55); }
 #slot-getstartedwithnemi:focus-visible { outline:3px solid #0ea5e9; outline-offset:2px; }
 
-/* Login pill (independent from CTA) */
+/* Login pill (independent) */
 #slot-logintext{
   z-index:15; display:flex !important; align-items:center; justify-content:center;
   width:100%; height:100%; border-radius:9999px; text-decoration:none;
@@ -186,7 +176,7 @@ html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
 #slot-logintext:active { transform: translateY(1px); box-shadow: 0 1px 0 #1c2c46, 0 4px 12px rgba(28,44,70,.22), inset 0 1px 0 rgba(255,255,255,.55); }
 #slot-logintext:focus-visible { outline:3px solid #0ea5e9; outline-offset:2px; }
 
-/* Explore pill (independent theme; white pill by default) */
+/* Explore pill (independent theme; white pill) */
 #slot-explorenemibox{
   z-index:15; display:flex !important; align-items:center; justify-content:center;
   width:100%; height:100%; border-radius:9999px; text-decoration:none;
@@ -194,19 +184,13 @@ html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
   border:3px solid #1c2c46;
   background: #ffffff;
   box-shadow: 0 3px 0 #1c2c46, 0 6px 18px rgba(28,44,70,.18), inset 0 2px 0 rgba(255,255,255,.85);
-  font-size:inherit; /* actual size via JS scaler */
+  font-size:inherit;
 }
 
-/* === Small text elements (size overridable per-slot) =============== */
-#slot-alreadyamember .amcopy{
-  font-size: var(--alreadyFs, calc(var(--bodyScale,1) * clamp(12px, 2.8vw, 14px)));
-}
-#slot-forgotpassword{
-  font-size: var(--forgotFs,  calc(var(--bodyScale,1) * 12px));
-}
-#slot-realtorapply{
-  font-size: var(--realtorFs, calc(var(--bodyScale,1) * 12px));
-}
+/* Small text rows (overridable per-slot via CSS vars) */
+#slot-alreadyamember .amcopy{ font-size: var(--alreadyFs, calc(var(--bodyScale,1) * clamp(12px, 2.8vw, 14px))); }
+#slot-forgotpassword     { font-size: var(--forgotFs,  calc(var(--bodyScale,1) * 12px)); }
+#slot-realtorapply       { font-size: var(--realtorFs, calc(var(--bodyScale,1) * 12px)); }
 
 /* Inputs focus */
 #nemiMobile input:focus{ outline:none; border-color:#1c2c46; box-shadow:0 0 0 4px rgba(28,44,70,.12); }
@@ -219,10 +203,9 @@ html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
   }
   #slot-oneteam .otcopy{ padding-top: 2px; }
   #slot-realtorapply{ white-space: nowrap; }
-
 }
 
-/* [NEMI: INPUT SIZING KNOBS] — font, radius, padding (overrides Tailwind) */
+/* Input sizing knobs (override Tailwind) */
 #slot-emailbox input{
   font-size: var(--emailFs, 16px);
   border-radius: var(--emailRadius, 9999px);
@@ -235,14 +218,10 @@ html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
 }
   </style>
 
-  <!-- ==============
-       [NEMI:SCRIPTS]
-       ============== -->
+  <!-- ============== [NEMI:SCRIPTS] ============== -->
   <script>
 (function(){
-  /* =========================================================
-     [NEMI:CONFIG]  ❗ EDIT HERE ONLY (copy, URLs, sizing knobs)
-     ========================================================= */
+  /* ====================== CONFIG (copy/links/knobs) ====================== */
   const TEXT = {
     title: "Take Control of Your Homebuying Journey",
     sub1:  "One <strong>team</strong>. Every step, <strong>always</strong> clear.",
@@ -259,7 +238,7 @@ html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
     apply: "/pros/apply", forgot: "/auth/forgot.php"
   };
 
-  /* ---------- Base (desktop-ish) sizes + knobs ---------- */
+  /* ---------- Base (desktop-ish) sizes + knobs (desktop unchanged) ---------- */
   const CFG = {
     svgCandidates: [
       'assets/svgs/signinrenamed','/assets/svgs/signinrenamed','/nemi/assets/svgs/signinrenamed',
@@ -270,12 +249,12 @@ html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
     /* Title block */
     titleInsetLR: -12,  titleInsetT: 3, titleInsetB: 0,
     titleFontMin: 18,   titleFontMax: 32,
-    titleFlex:    { dx: 0, dy: 0,  growX: 0, growY: 0 },  // ← move/grow the title slot itself
+    titleFlex:    { dx: 0, dy: 0,  growX: 0, growY: 0 },
 
     /* Subtext (“One team…”) */
     oneteamPadPx: 0, oneteamBumpUp: 8, oneteamExtraHeight: 16,
     oneteamFontMin: 18, oneteamFontMax: 22,
-    oneteamFlex:   { dx: 0, dy: 0,  growX: 0, growY: 0 },  // ← move/grow the subtext slot
+    oneteamFlex:   { dx: 0, dy: 0,  growX: 0, growY: 0 },
 
     /* Team icon */
     teamIconFlex:  { dx: 0, dy: 0,  growX: 0, growY: 0 },
@@ -302,8 +281,8 @@ html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
     emailPadX: 14, passwordPadX: 14,
 
     /* Small text rows */
-    alreadyFlex: { dx: 0, dy: 0, growX: 0, growY: 0 }, alreadyFs: null, /* px or null to use CSS calc */
-    forgotFlex:  { dx: 0, dy: 0, growX: 0, growY: 0 },  forgotFs:  null,
+    alreadyFlex: { dx: 0, dy: 0, growX: 0, growY: 0 }, alreadyFs: null,
+    forgotFlex:  { dx: 0, dy: 0, growX: 0, growY: 0 }, forgotFs:  null,
     realtorFlex: { dx: 0, dy: 0, growX: 0, growY: 0 }, realtorFs: null,
 
     /* Badges */
@@ -311,84 +290,62 @@ html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
     playFlex:     { dx: 0, dy: 0, growX: 0, growY: 0 }
   };
 
-  /* ===== Mobile presets (first match wins) ===== */
-const MOBILE_TUNING = [
-  { // Tiny phones (≤340px)
-    maxWidth: 340,
-    bodyScale: 1.08, titleScale: 1.00,
-    titleMax: 24, titleMin: 16,
-    subMax: 17,  subMin: 15,
-    subTopPad: 2,
-    extraCtaNudge: 8,
+  /* ===== Mobile presets (first match wins) — desktop unaffected ===== */
+  const MOBILE_TUNING = [
+    { // Tiny phones (≤340px)
+      maxWidth: 340,
+      bodyScale: 1.08, titleScale: 1.00,
+      titleMax: 24, titleMin: 16,
+      subMax: 17,  subMin: 15,
+      subTopPad: 2,
+      extraCtaNudge: 8,
 
-       // spacing between rows (no size change)
-   alreadyFlex:  { dy:  6 },
-  emailFlex:    { dy: 12, growY: 4 },
-  passwordFlex: { dy: 22, growY: 4 },
-  loginFlex:    { dy: 34 },
-  forgotFlex:   { dy: 46 },   // puts it clearly below Login   // push "Forgot Password?" down ~48px
-   forgotFs: 12,   // optional size tweak
-   
-   // One-line “Have what it takes…”
-    realtorFlex: { growX: 12 },   // widen that line’s slot
-    realtorFs: 12,                // slightly smaller text
+      /* spacing between rows (no size change unless growY specified) */
+      alreadyFlex:  { dy:  6 },
+      emailFlex:    { dy: 12, growY: 6 },
+      passwordFlex: { dy: 24, growY: 6 },
+      loginFlex:    { dy: 38 },
+      forgotFlex:   { dy: 50, },  forgotFs: 12,
+      exploreFlex:  { dy: 62 },
+      appstoreFlex: { dy: 70 },
+      playFlex:     { dy: 70 },
 
-    // Mobile-only input bumps
-    emailFs: 19,                  // was 17
-    passwordFs: 19,               // was 17
-    emailFlex:    { growY: 6 },   // taller email pill
-    passwordFlex: { growY: 6 },   // taller password pill
+      /* One-line “Have what it takes…” */
+      realtorFlex: { dy: 74, growX: 14 },
+      realtorFs: 12,
 
-    // (optional) tiny login nudge if things get tight
-    loginFlex: { dy: 2 },
-   
-     // push badges further down so they never clash with Forgot
-  appstoreFlex: { dy: 60 },
-  playFlex:     { dy: 60 },
+      /* Bigger input text on tiny phones */
+      emailFs: 19, passwordFs: 19,
 
-    // Panel breathing room (expands frosted card on phones only)
-    panelGrowY: 14,
-    panelGrowX: 0,   // usually 0; set if you need a bit more width
-  },
+      /* Panel breathing room (expands frosted card on phones only) */
+      panelGrowY: 16, panelGrowX: 0
+    },
+    { // Small phones (≤380px)
+      maxWidth: 380,
+      bodyScale: 1.08, titleScale: 1.00,
+      titleMax: 26, titleMin: 16,
+      subMax: 17,  subMin: 15,
+      extraCtaNudge: 6,
 
-  { // Small phones (≤380px)
-    maxWidth: 380,
-    bodyScale: 1.08, titleScale: 1.00,
-    titleMax: 26, titleMin: 16,
-    subMax: 17,  subMin: 15,
-    extraCtaNudge: 6,
+      alreadyFlex:  { dy:  4 },
+      emailFlex:    { dy: 10, growY: 4 },
+      passwordFlex: { dy: 20, growY: 4 },
+      loginFlex:    { dy: 32 },
+      forgotFlex:   { dy: 40 }, forgotFs: 12,
+      exploreFlex:  { dy: 52 },
+      appstoreFlex: { dy: 60 },
+      playFlex:     { dy: 60 },
 
-     /* same idea, slightly smaller nudges */
-     alreadyFlex:  { dy:  4 },
-  emailFlex:    { dy: 10, growY: 4 },
-  passwordFlex: { dy: 20, growY: 4 },
-  loginFlex:    { dy: 32 },
-  forgotFlex: { dy: 40 },   // slightly less on wider small phones
-  forgotFs: 12,  // optional size tweak
-    appstoreFlex: { dy: 52 },
-  playFlex:     { dy: 52 },
+      realtorFlex: { dy: 64, growX: 12 },
+      realtorFs: 12,
 
-  // One-line “Have what it takes…”
-    realtorFlex: { growX: 12 },
-    realtorFs: 12,
+      emailFs: 18, passwordFs: 18,
 
-    // Mobile-only input bumps
-    emailFs: 18,
-    passwordFs: 18,
-    emailFlex:    { growY: 4 },
-    passwordFlex: { growY: 4 },
+      panelGrowY: 12, panelGrowX: 0
+    }
+  ];
 
-    // (optional) tiny login nudge
-    // loginFlex: { dy: 2 },
-
-    // Panel breathing room
-    panelGrowY: 12,
-    panelGrowX: 0,   // usually 0; set if you need a bit more width
-  },
-];
-
-
-  /* ===== Desktop/large screens ===== */
+  /* Desktop/large screens */
   const DESKTOP_TUNING = {
     bodyScale: 1,
     titleScale: 1.15,
@@ -402,33 +359,23 @@ const MOBILE_TUNING = [
     return null;
   }
 
-  /* ===============================
-     Populate copy + links
-     =============================== */
+  /* Populate copy + links */
   document.querySelector('#slot-getstartedwithnemi').textContent = TEXT.cta;
   document.querySelector('#slot-getstartedwithnemi').href = LINKS.cta;
-
   document.querySelector('#slot-logintext').textContent = TEXT.login;
-
   document.querySelector('#ot-line1').innerHTML = TEXT.sub1;
   document.querySelector('#ot-line2').innerHTML = TEXT.sub2;
   document.querySelector('#slot-titletextbox .titlecopy').innerHTML = TEXT.title;
-
   document.querySelector('#slot-alreadyamember .amcopy').textContent = TEXT.already;
-
   document.querySelector('#slot-explorenemibox').textContent = TEXT.explore;
   document.querySelector('#slot-explorenemibox').href = LINKS.explore;
-
   document.querySelector('#slot-appdownload').href = LINKS.appstore;
   document.querySelector('#slot-androiddownload').href = LINKS.play;
-
   document.querySelector('#apply-line').textContent = TEXT.applyLead;
   document.querySelector('#apply-link').href = LINKS.apply;
   document.querySelector('#slot-forgotpassword').href = LINKS.forgot;
 
-  /* ===============================
-     Boot + layout engine
-     =============================== */
+  /* =============================== Boot + layout engine =============================== */
   const section = document.getElementById('nemiMobile');
   const host    = document.getElementById('mobileArt');
 
@@ -445,16 +392,13 @@ const MOBILE_TUNING = [
 
   fetchFirst(CFG.svgCandidates, function(svgText){
     if (!svgText) { section.classList.remove('invisible'); return; }
-
-    // Inject SVG inline
     host.innerHTML = svgText.replace('<svg','<svg id="mobileSVG" style="display:block;width:100%;height:100%;pointer-events:none"');
     const svg = document.getElementById('mobileSVG');
 
-    // Keep container aspect
     const vb = svg.viewBox.baseVal;
     if (vb && vb.width && vb.height) section.style.aspectRatio = vb.width + ' / ' + vb.height;
 
-    /* ---------- helpers ---------- */
+    /* helpers */
     function placeInset(rectId, slotId, inset={}){
       const rEl = svg.querySelector('#'+rectId);
       const slot= document.getElementById(slotId);
@@ -510,7 +454,6 @@ const MOBILE_TUNING = [
       block.style.setProperty(varName, Math.max(minPx, Math.floor(best)-1) + 'px');
       return best;
     }
-    // Pill font scaler (independent configs per element)
     function scalePill(slotId){
       const el = document.getElementById(slotId);
       if (!el) return;
@@ -526,13 +469,12 @@ const MOBILE_TUNING = [
       el.style.whiteSpace = 'nowrap';
     }
 
-    /* ---------- single layout pass ---------- */
+    /* ---------- layout ---------- */
     function layout(){
       const vw = section.clientWidth;
       const preset = getMobileTuning(vw);
       const small  = !!preset;
 
-      // Scales/caps
       const bodyScale  = preset ? (preset.bodyScale ?? 1)  : (DESKTOP_TUNING.bodyScale ?? 1);
       const titleScale = preset ? (preset.titleScale ?? 1) : (DESKTOP_TUNING.titleScale ?? 1);
       const titleMinBase = preset ? preset.titleMin : (DESKTOP_TUNING.titleMin ?? CFG.titleFontMin);
@@ -544,31 +486,21 @@ const MOBILE_TUNING = [
       const subMin   = Math.round(subMinBase * bodyScale);
       const subMax   = Math.round(subMaxBase * bodyScale);
 
-      // Expose bodyScale to CSS
       section.style.setProperty('--bodyScale', bodyScale);
       if (preset?.oneteamGap != null) section.style.setProperty('--oneteam-gap', preset.oneteamGap + 'px');
 
-      /* 1) Frosted panel */
       /* 1) Frosted panel — desktop unchanged, mobile can grow */
-const baseInset = 3;                      // same as your old: place(..., 3)
-const growX = preset?.panelGrowX || 0;    // mobile-only extra width (each side)
-const growY = preset?.panelGrowY || 0;    // mobile-only extra height (each side)
-
-placeInset('loginbox','slot-loginboxbg', {
-  l: baseInset - growX,
-  r: baseInset - growX,
-  t: baseInset - growY,
-  b: baseInset - growY
-});
-
-(function syncRadius(){
-  const rEl = svg.querySelector('#loginbox'); if (!rEl) return;
-  const rx = parseFloat(rEl.getAttribute('rx') || 0);
-  const ry = parseFloat(rEl.getAttribute('ry') || rx || 0);
-  const bg = document.getElementById('slot-loginboxbg');
-  if (bg && (rx || ry)) bg.style.borderRadius = Math.max(rx, ry) + 'px';
-})();
-
+      const baseInset = 3;
+      const growX = preset?.panelGrowX || 0;
+      const growY = preset?.panelGrowY || 0;
+      placeInset('loginbox','slot-loginboxbg', { l: baseInset - growX, r: baseInset - growX, t: baseInset - growY, b: baseInset - growY });
+      (function syncRadius(){
+        const rEl = svg.querySelector('#loginbox'); if (!rEl) return;
+        const rx = parseFloat(rEl.getAttribute('rx') || 0);
+        const ry = parseFloat(rEl.getAttribute('ry') || rx || 0);
+        const bg = document.getElementById('slot-loginboxbg');
+        if (bg && (rx || ry)) bg.style.borderRadius = Math.max(rx, ry) + 'px';
+      })();
 
       /* 2) Team icon */
       placeFlex('teamiconbox','slot-teamiconbox', {l:0,r:0,t:0,b:0}, Object.assign({}, CFG.teamIconFlex, preset?.teamIconFlex || {}), 0);
@@ -603,7 +535,6 @@ placeInset('loginbox','slot-loginboxbg', {
       /* 8) Inputs */
       placeFlex('emailbox',    'slot-emailbox',    {l:0,r:0,t:0,b:0}, Object.assign({}, CFG.emailFlex,    preset?.emailFlex    || {}), 0);
       placeFlex('passwordbox', 'slot-passwordbox', {l:0,r:0,t:0,b:0}, Object.assign({}, CFG.passwordFlex, preset?.passwordFlex || {}), 0);
-
       const emailBox = document.getElementById('slot-emailbox');
       const passBox  = document.getElementById('slot-passwordbox');
       emailBox.style.setProperty('--emailFs',     (preset?.emailFs ?? CFG.emailFs) + 'px');
@@ -615,8 +546,7 @@ placeInset('loginbox','slot-loginboxbg', {
 
       /* 9) Login pill (independent) */
       placeFlex('logintext', 'slot-logintext', {l:0,r:0,t:0,b:0}, Object.assign({}, CFG.loginFlex, preset?.loginFlex || {}), 0);
-      scalePill('slot-logintext');
-      // (If your SVG rect is #loginbar, change first arg to 'loginbar')
+      scalePill('slot-logintext'); // if your rect id is loginbar, change the first arg above
 
       /* 10) Forgot */
       placeFlex('forgotpassword','slot-forgotpassword', {l:0,r:0,t:0,b:0}, Object.assign({}, CFG.forgotFlex, preset?.forgotFlex || {}), 0);
@@ -639,17 +569,12 @@ placeInset('loginbox','slot-loginboxbg', {
       section.classList.remove('invisible');
     }
 
-    // Fonts → layout
-    (document.fonts && document.fonts.ready?.then)
-      ? document.fonts.ready.then(layout)
-      : layout();
-
-    // Reflow guards
+    (document.fonts && document.fonts.ready?.then) ? document.fonts.ready.then(layout) : layout();
     window.addEventListener('resize', layout, { passive:true });
     window.addEventListener('orientationchange', layout, { passive:true });
-    window.addEventListener('pageshow', layout, { passive:true }); // iOS bfcache
+    window.addEventListener('pageshow', layout, { passive:true });
     new ResizeObserver(layout).observe(document.getElementById('mobileArt'));
-    requestAnimationFrame(() => setTimeout(layout, 60)); // one extra pass after paint
+    requestAnimationFrame(() => setTimeout(layout, 60));
   });
 })();
   </script>
