@@ -390,27 +390,43 @@ var CFG = {
       }
 
       // [NEMI:fitOneLine] binary-search fit for single-line (nowrap) title
-     function fitOneLine(slotSel, blockSel, varName, minPx, maxPx){
+     // --- Safe 1-line fitter (iOS-friendly) ---
+function fitOneLine(slotSel, blockSel, varName, minPx, maxPx){
   const slot  = document.querySelector(slotSel);
   const block = slot ? slot.querySelector(blockSel) : null;
   if (!slot || !block) return minPx;
 
-  const SAFETY = 24; // wider buffer for iOS/zoom rounding
-  let lo = minPx, hi = maxPx, best = minPx;
+  // iOS needs a bigger safety margin
+  const isiOS = /iP(hone|ad|od)/.test(navigator.platform) ||
+                (navigator.userAgent.includes('Mac') && 'ontouchend' in document);
+  const SAFETY = isiOS ? 28 : 18;
 
-  for (let i = 0; i < 12; i++) {
+  let lo = minPx, hi = maxPx, best = minPx;
+  for (let i = 0; i < 12; i++){
     const mid = (lo + hi) / 2;
     block.style.setProperty(varName, mid + 'px');
-    const w = block.getBoundingClientRect().width;
-    const h = block.getBoundingClientRect().height;
-    const fits = (w <= slot.clientWidth - SAFETY) && (h <= slot.clientHeight);
-    if (fits) { best = mid; lo = mid; } else { hi = mid; }
+    const fitsW = block.scrollWidth <= (slot.clientWidth - SAFETY);
+    const fitsH = block.getBoundingClientRect().height <= slot.clientHeight;
+    if (fitsW && fitsH){ best = mid; lo = mid; } else { hi = mid; }
   }
+  // one last squeeze in case of rounding
+  const finalSize = Math.max(minPx, Math.floor(best) - 1);
   // lock one pixel smaller than the best we saw
   block.style.setProperty(varName, Math.floor(best) - 1 + 'px');
   return best;
  }
 
+function ensureFitsOneLine(slotSel, blockSel, varName){
+  const slot  = document.querySelector(slotSel);
+  const block = slot ? slot.querySelector(blockSel) : null;
+  if (!slot || !block) return;
+  let fs = parseFloat(getComputedStyle(block).getPropertyValue(varName)) || 16;
+  let guard = 12;
+  while (guard-- > 0 && block.scrollWidth > (slot.clientWidth - 4)){
+    fs -= 1;
+    block.style.setProperty(varName, fs + 'px');
+  }
+}
 
 
       // [NEMI:scaleCta] set CTA font relative to pill height
@@ -444,6 +460,17 @@ function scaleCta(slotId){
   /* 2) Icon + header slots (position first, fit after) */
   place('teamiconbox','slot-teamiconbox');
 
+ const vw = section.clientWidth;
+const small = vw < 380; // iPhone portrait is typically 320–375
+
+// Title slot: slightly less aggressive widening on small screens
+placeInset('titletextbox','slot-titletextbox', {
+  l: small ? -6 : -12,
+  r: small ? -6 : -12,
+  t: 0, b: 0
+});
+
+
   // Title slot widened via knobs
   placeInset('titletextbox','slot-titletextbox',{
     l: CFG.titleInsetLR,
@@ -456,20 +483,30 @@ function scaleCta(slotId){
   const P = CFG.oneteamPadPx|0, U = CFG.oneteamBumpUp|0, G = CFG.oneteamExtraHeight|0;
   placeInset('oneteam','slot-oneteam', { l:P, r:P, t:P-U, b:P+U-G });
 
+  // 1) Fit subtext (2 lines)
+fitVar('#slot-oneteam', '.otcopy', '--fsSub', CFG.oneteamFontMin, CFG.oneteamFontMax);
+
+// 2) Fit title (1 line) and do a final squeeze so it never clips on iOS
+fitOneLine('#slot-titletextbox', '.titlecopy', '--fsTitle', 16, CFG.titleFontMax);
+ensureFitsOneLine('#slot-titletextbox', '.titlecopy', '--fsTitle');
+
   /* 3) Fit text (subtext first, then title) */
   const subSize = fitVar('#slot-oneteam', '.otcopy', '--fsSub',
                          CFG.oneteamFontMin, CFG.oneteamFontMax);
   fitOneLine('#slot-titletextbox', '.titlecopy', '--fsTitle',
              Math.max(CFG.titleFontMin, subSize+1), CFG.titleFontMax);
 
-  /* 4) CTA pill: widen, nudge, then scale font */
-  placeInset('getstartedwithnemi','slot-getstartedwithnemi',{
-    l: CFG.ctaInset.l - CFG.cardGrowX,
-    r: CFG.ctaInset.r - CFG.cardGrowX,
-    t: CFG.ctaInset.t + CFG.ctaNudgeY,
-    b: CFG.ctaInset.b - CFG.ctaNudgeY
-  });
-  scaleCta('slot-getstartedwithnemi', CFG.ctaFontMin, CFG.ctaFontMax);
+             // CTA pill — allow a bit more down-nudge on very small screens
+const ctaNudge = small ? (CFG.ctaNudgeY + 6) : CFG.ctaNudgeY;
+
+placeInset('getstartedwithnemi','slot-getstartedwithnemi',{
+  l: CFG.ctaInset.l - CFG.cardGrowX,
+  r: CFG.ctaInset.r - CFG.cardGrowX,
+  t: CFG.ctaInset.t + ctaNudge,
+  b: CFG.ctaInset.b - ctaNudge
+});
+
+scaleCta('slot-getstartedwithnemi', CFG.ctaFontMin, CFG.ctaFontMax);
 
   /* 5) “Already a Nemi Member?” — use inset so the nudge sticks */
   placeInset('alreadyamember','slot-alreadyamember',
