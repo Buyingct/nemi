@@ -174,12 +174,18 @@ html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
 
 /* Already a member */
 #slot-alreadyamember{ display:flex; align-items:center; justify-content:center; text-align:center; }
-#slot-alreadyamember .amcopy{ font-size: clamp(12px, 2.8vw, 14px); transform: translateY(-4px); }
+#slot-alreadyamember .amcopy{
+  font-size: calc(var(--bodyScale,1) * clamp(12px, 2.8vw, 14px));
+}
 
 /* Inputs + secondary buttons */
 #nemiMobile input:focus{ outline:none; border-color:#1c2c46; box-shadow:0 0 0 4px rgba(28,44,70,.12); }
-#slot-loginbar, #slot-explorenemibox{ font-size: clamp(18px, 3.6vw, 20px); }
-  </style>
+
+#slot-loginbar, #slot-explorenemibox{
+  font-size: calc(var(--bodyScale,1) * clamp(18px, 3.6vw, 20px));
+}
+
+ </style>
 
   <!-- ==============
        [NEMI:SCRIPTS]
@@ -252,6 +258,18 @@ const MOBILE_TUNING = [
   }
   // Add more presets if you want different breakpoints.
 ];
+
+/* ===== Desktop/large screens only ===== */
+const DESKTOP_TUNING = {
+  // Make non-title text a bit bigger on desktop…
+  bodyScale: 1.08,
+  // …while nudging the TITLE slightly smaller so it matches mobile feel
+  titleScale: 0.94,
+  // optional hard caps for desktop only (leave undefined to use CFG caps)
+  titleMin: undefined,   // e.g. 18
+  titleMax: 28           // try 28 if the Windows title feels too large
+};
+
 
 /* Helper: resolve the active tuning based on viewport width */
 function getMobileTuning(vw){
@@ -385,8 +403,33 @@ function getMobileTuning(vw){
     function layout(){
       // small-device flag (iPhone portrait 320–375)
       const vw = section.clientWidth;
-  const preset = getMobileTuning(vw);      // null on desktop/tablet
-  const small  = !!preset;
+const preset = getMobileTuning(vw);  
+const small  = !!preset;
+     
+// pick scales/caps by platform
+const bodyScale  = preset ? (preset.bodyScale ?? 1)  : (DESKTOP_TUNING.bodyScale ?? 1);
+const titleScale = preset ? (preset.titleScale ?? 1) : (DESKTOP_TUNING.titleScale ?? 1);
+
+// title caps
+const titleMinBase = preset ? preset.titleMin : (DESKTOP_TUNING.titleMin ?? CFG.titleFontMin);
+const titleMaxBase = preset ? preset.titleMax : (DESKTOP_TUNING.titleMax ?? CFG.titleFontMax);
+
+// subtext caps
+const subMinBase = preset ? preset.subMin : CFG.oneteamFontMin;
+const subMaxBase = preset ? preset.subMax : CFG.oneteamFontMax;
+
+// apply scales
+const titleMin = Math.round(titleMinBase * titleScale);
+const titleMax = Math.round(titleMaxBase * titleScale);
+const subMin   = Math.round(subMinBase   * bodyScale);
+const subMax   = Math.round(subMaxBase   * bodyScale);
+
+// fit text
+fitVar('#slot-oneteam', '.otcopy', '--fsSub', subMin, subMax);
+fitOneLine('#slot-titletextbox', '.titlecopy', '--fsTitle', titleMin, titleMax);
+
+// expose bodyScale to CSS (buttons/labels)
+section.style.setProperty('--bodyScale', bodyScale);
 
       
   
@@ -413,11 +456,7 @@ function getMobileTuning(vw){
   const P = CFG.oneteamPadPx|0, U = CFG.oneteamBumpUp|0, G = CFG.oneteamExtraHeight|0;
   placeInset('oneteam','slot-oneteam', { l:P, r:P, t:P-U, b:P+U-G });
 
-  /* ---------- Size caps (apply mobile preset if present) ---------- */
-  const titleMin = preset ? preset.titleMin : CFG.titleFontMin;
-  const titleMax = preset ? preset.titleMax : CFG.titleFontMax;
-  const subMin   = preset ? preset.subMin   : CFG.oneteamFontMin;
-  const subMax   = preset ? preset.subMax   : CFG.oneteamFontMax;
+  
   const scale    = preset ? preset.scale    : 1;
 
   // 3) Fit text (subtext first, then title), with preset caps + scale
