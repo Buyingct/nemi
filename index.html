@@ -321,13 +321,15 @@ const MOBILE_TUNING = [
     subTopPad: 2,
     extraCtaNudge: 8,
 
-      /* add spacing between these rows (no size change) */
-    alreadyFlex:  { dy: 0 },   // keep “Already…” where it is
-    emailFlex:    { dy: 4 },   // move Email down 4px
-    passwordFlex: { dy: 10 },  // move Password down 10px
-    loginFlex:    { dy: 16 },  // move Login down 16px
-
-    // One-line “Have what it takes…”
+       // spacing between rows (no size change)
+  alreadyFlex:  { dy:  6 },
+  emailFlex:    { dy: 14, growY: 6 },  // slightly taller email pill
+  passwordFlex: { dy: 26, growY: 6 },  // slightly taller password pill
+  loginFlex:    { dy: 40 },
+   forgotFlex: { dy: 48 },   // push "Forgot Password?" down ~48px
+   forgotFs: 12,   // optional size tweak
+   
+   // One-line “Have what it takes…”
     realtorFlex: { growX: 12 },   // widen that line’s slot
     realtorFs: 12,                // slightly smaller text
 
@@ -341,7 +343,7 @@ const MOBILE_TUNING = [
     loginFlex: { dy: 2 },
 
     // Panel breathing room (expands frosted card on phones only)
-    panelGrowY: 8,
+    panelGrowY: 14,
     panelGrowX: 0,   // usually 0; set if you need a bit more width
   },
 
@@ -353,12 +355,14 @@ const MOBILE_TUNING = [
     extraCtaNudge: 6,
 
      /* same idea, slightly smaller nudges */
-    alreadyFlex:  { dy: 0 },
-    emailFlex:    { dy: 3 },
-    passwordFlex: { dy: 8 },
-    loginFlex:    { dy: 13 },
-
-    // One-line “Have what it takes…”
+     alreadyFlex:  { dy:  4 },
+  emailFlex:    { dy: 10, growY: 4 },
+  passwordFlex: { dy: 20, growY: 4 },
+  loginFlex:    { dy: 32 },
+  forgotFlex: { dy: 40 },   // slightly less on wider small phones
+  forgotFs: 12,  // optional size tweak
+    
+  // One-line “Have what it takes…”
     realtorFlex: { growX: 12 },
     realtorFs: 12,
 
@@ -372,7 +376,7 @@ const MOBILE_TUNING = [
     // loginFlex: { dy: 2 },
 
     // Panel breathing room
-    panelGrowY: 6,
+    panelGrowY: 10,
     panelGrowX: 0,   // usually 0; set if you need a bit more width
   },
 ];
