@@ -224,6 +224,10 @@ html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
   }
   #slot-oneteam .otcopy{ padding-top: 2px; }
   #slot-realtorapply{ white-space: nowrap; }
+  #slot-titletextbox,
+  #slot-oneteam{
+    overflow: visible; /* avoid clipping when nudged up */
+  }
 }
 
 /* Input sizing knobs (override Tailwind) */
@@ -275,11 +279,7 @@ html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
     globalLiftY: -8  // negative lifts everything up a bit; try -6 to -12
   },
 
-  /* NEW — move “One team…” up/down specifically */
-  slotTweak: {
-    oneteam: { dy: -10 }, // negative = higher. Try -8 to -14
-    // you can keep/add other tweaks here (titletextbox, emailbox, etc.)
-  },   
+  /* NEW — move “One team…” up/down specifically */  
 
     /* Font limits for auto-fit routines on mobile */
     fonts: {
@@ -318,10 +318,17 @@ html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
     panelGrow: { x: 0, y: 16 },
 
     /* Per-slot fine-tune (applied on top of SVG rects) */
-    slotTweak: {
-  titletextbox: { dy: -4 },
-  emailbox:     { dy: 6 },
-  getstartedwithnemi: { dx: 4, growX: 8 }
+    /* Per-slot fine-tune (applied on top of SVG rects) */
+slotTweak: {
+  // headline rows
+  titletextbox: { dy: -6 },   // negative = move up
+  oneteam:      { dy: -12 },  // lift “One team…” block
+
+  // CTA + inputs
+  getstartedwithnemi: { dx: 0, dy: 0, growX: 8 },
+  emailbox:           { dy: 6 }
+
+  // add more here if needed: passwordbox, logintext, etc.
 },
 
     /* Optional images injected into MOBILE background SVG (by element id) */
@@ -674,8 +681,8 @@ const bumpScale = isPhone
   : 1;
 
 // NEW: global spacing controls (mobile only)
-const DENSITY   = 0.5; // < 1 pulls rows closer; try 0.90, 0.85, 0.80
-const MIN_GAP   = 4;    // pixels; safety so rows never get too close
+const DENSITY   = 0.92; // < 1 pulls rows closer; try 0.90, 0.85, 0.80
+const MIN_GAP   = 12;    // pixels; safety so rows never get too close
 
 // Replace your old bump() with this:
 const bump = n => {
