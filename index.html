@@ -472,21 +472,21 @@ html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
 
     /* ---------- layout ---------- */
     function layout(){
-      const vw = section.clientWidth;
-      const preset = getMobileTuning(vw);
-      const small  = !!preset;
+  const vw = section.clientWidth;
+  const preset = getMobileTuning(vw);   // keep presets for tiny phones
+  const small  = !!preset;
 
-      // Make phones a bit taller without touching desktop
-const MOBILE_TALL = 1.14; // ↑ increase to 1.18–1.22 if you want more length
-if (preset) {
-  // Phones: free the aspect-ratio and set explicit height from width
-  section.style.aspectRatio = '';
-  section.style.height = Math.round(vw * vbRatio * MOBILE_TALL) + 'px';
-} else {
-  // Desktop/tablet: original behavior
-  section.style.height = '';
-  section.style.aspectRatio = vb.width + ' / ' + vb.height;
-}
+  // 🔽 Use a broader phone check so iPhone 390/414/430 hit the tall path
+  const isPhone = vw <= 520;
+
+  const MOBILE_TALL = 1.14; // bump to 1.18–1.22 if you want even more room
+  if (isPhone) {
+    section.style.aspectRatio = '';
+    section.style.height = Math.round(vw * vbRatio * MOBILE_TALL) + 'px';
+  } else {
+    section.style.height = '';
+    section.style.aspectRatio = vb.width + ' / ' + vb.height;
+  }
 
 
       const bodyScale  = preset ? (preset.bodyScale ?? 1)  : (DESKTOP_TUNING.bodyScale ?? 1);
