@@ -383,19 +383,18 @@ function coverTitleWithPanel(topPadPx){
 
       // mobile vs desktop toggles
       if (preset) {
-  // MOBILE: show fixed bg, and keep the inline SVG only for geometry
+  // MOBILE: show fixed bg; keep inline SVG only for geometry
   bgFixed.style.display = 'block';
   host.style.opacity = '0';
   host.style.pointerEvents = 'none';
-  section.style.aspectRatio = '';   // allow the section to grow tall (page scrolls)
+  section.style.aspectRatio = DESKTOP_AR;   // keep a measuring box for placements
 } else {
-  // DESKTOP: hide fixed bg and restore the original behavior
+  // DESKTOP: normal behavior
   bgFixed.style.display = 'none';
   host.style.opacity = '1';
   host.style.pointerEvents = '';
   section.style.aspectRatio = DESKTOP_AR;
-  // reset any mobile-added heights
-  section.style.height = '';
+   section.style.height = '';
   section.style.minHeight = '';
   const panel = document.getElementById('slot-loginboxbg');
   if (panel) { panel.style.height = ''; panel.style.minHeight = ''; }
@@ -514,6 +513,11 @@ if (preset) coverTitleWithPanel(10);  // try 10–14px if you want a touch more 
         autoGrowPanel(ids, preset.panelPadBottom ?? 24);
         growSectionToContent(ids, preset.panelPadBottom ?? 24);
       }
+
+      if (preset) {
+  section.style.aspectRatio = '';   // now that height is set, let it scroll
+}
+  
 
       section.classList.remove('invisible');
     }
