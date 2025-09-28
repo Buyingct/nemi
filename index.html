@@ -350,6 +350,29 @@ html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
         const h=Math.ceil(maxBottom + (bottomPadPx|0));
         section.style.height=h+'px'; section.style.minHeight=h+'px';
       }
+    
+      // Make the frosted panel start at (or above) the title on mobile
+function coverTitleWithPanel(topPadPx){
+  const panel = document.getElementById('slot-loginboxbg');
+  const title = document.getElementById('slot-titletextbox');
+  if (!panel || !title) return;
+
+  const hb   = host.getBoundingClientRect();
+  const pNow = panel.getBoundingClientRect();
+  const tBox = title.getBoundingClientRect();
+
+  // desired new top: a bit above the title
+  const newTop = Math.max(0, Math.min(pNow.top, tBox.top) - hb.top - (topPadPx|0));
+
+  if (newTop < (pNow.top - hb.top)) {
+    const delta = (pNow.top - hb.top) - newTop;   // how much we moved up
+    panel.style.top       = newTop + 'px';
+    panel.style.height    = (pNow.height + delta) + 'px'; // keep bottom where it was
+    panel.style.minHeight = panel.style.height;
+  }
+}
+
+
     }
 
     /* ------- layout ------- */
@@ -359,18 +382,25 @@ html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
       const small  = !!preset;
 
       // mobile vs desktop toggles
-      if (preset){
-        bgFixed.style.display = 'block';   // show fixed background
-        host.style.opacity    = '0';       // hide inline art (keep for geometry)
-        section.style.aspectRatio = '';    // allow scrolling height
-      }else{
-        bgFixed.style.display = 'none';
-        host.style.opacity    = '1';
-        section.style.aspectRatio = DESKTOP_AR;
-        section.style.height = ''; section.style.minHeight = '';
-        const panel=document.getElementById('slot-loginboxbg');
-        if(panel){ panel.style.height=''; panel.style.minHeight=''; }
-      }
+      if (preset) {
+  // MOBILE: show fixed bg, and keep the inline SVG only for geometry
+  bgFixed.style.display = 'block';
+  host.style.opacity = '0';
+  host.style.pointerEvents = 'none';
+  section.style.aspectRatio = '';   // allow the section to grow tall (page scrolls)
+} else {
+  // DESKTOP: hide fixed bg and restore the original behavior
+  bgFixed.style.display = 'none';
+  host.style.opacity = '1';
+  host.style.pointerEvents = '';
+  section.style.aspectRatio = DESKTOP_AR;
+  // reset any mobile-added heights
+  section.style.height = '';
+  section.style.minHeight = '';
+  const panel = document.getElementById('slot-loginboxbg');
+  if (panel) { panel.style.height = ''; panel.style.minHeight = ''; }
+}
+
 
       const bodyScale  = preset ? (preset.bodyScale ?? 1)  : (DESKTOP_TUNING.bodyScale ?? 1);
       const titleScale = preset ? (preset.titleScale ?? 1) : (DESKTOP_TUNING.titleScale ?? 1);
@@ -419,6 +449,10 @@ html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
       placeFlex('oneteam','slot-oneteam', baseSub, Object.assign({}, CFG.oneteamFlex, preset?.oneteamFlex || {}), 0);
       const ot = document.querySelector('#slot-oneteam .otcopy');
       ot.style.paddingTop = (preset?.subTopPad || 0) + 'px';
+
+    // MOBILE ONLY: lift panel top to actually cover the title
+if (preset) coverTitleWithPanel(10);  // try 10–14px if you want a touch more air
+
 
       /* 5) Fit text */
       fitVar('#slot-oneteam', '.otcopy', '--fsSub', subMin, subMax);
@@ -472,10 +506,11 @@ html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
       /* Mobile: extend panel + allow page scroll */
       if (preset){
         const ids = [
-          'slot-getstartedwithnemi','slot-alreadyamember','slot-emailbox',
-          'slot-passwordbox','slot-logintext','slot-forgotpassword',
-          'slot-appdownload','slot-androiddownload','slot-explorenemibox','slot-realtorapply'
-        ];
+  'slot-titletextbox','slot-oneteam',              // <— add these two
+  'slot-getstartedwithnemi','slot-alreadyamember','slot-emailbox',
+  'slot-passwordbox','slot-logintext','slot-forgotpassword',
+  'slot-appdownload','slot-androiddownload','slot-explorenemibox','slot-realtorapply'
+];
         autoGrowPanel(ids, preset.panelPadBottom ?? 24);
         growSectionToContent(ids, preset.panelPadBottom ?? 24);
       }
