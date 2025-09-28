@@ -479,14 +479,18 @@ html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
   // 🔽 Use a broader phone check so iPhone 390/414/430 hit the tall path
   const isPhone = vw <= 520;
 
-  const MOBILE_TALL = 1.14; // bump to 1.18–1.22 if you want even more room
-  if (isPhone) {
-    section.style.aspectRatio = '';
-    section.style.height = Math.round(vw * vbRatio * MOBILE_TALL) + 'px';
-  } else {
-    section.style.height = '';
-    section.style.aspectRatio = vb.width + ' / ' + vb.height;
-  }
+  const MOBILE_TALL = 1.14;
+if (isPhone) {
+  section.style.aspectRatio = '';
+  section.style.height = Math.round(vw * vbRatio * MOBILE_TALL) + 'px';
+} else {
+  section.style.height = '';
+  section.style.aspectRatio = vb.width + ' / ' + vb.height;
+}
+
+// Add progressive spacing only on phones
+const bump = (n)=> (isPhone ? n : 0);
+
 
 
       const bodyScale  = preset ? (preset.bodyScale ?? 1)  : (DESKTOP_TUNING.bodyScale ?? 1);
@@ -542,43 +546,55 @@ html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
       scalePill('slot-getstartedwithnemi');
 
       /* 7) Already a member */
-      placeFlex('alreadyamember','slot-alreadyamember', {l:0,r:0,t:0,b:0}, Object.assign({}, CFG.alreadyFlex, preset?.alreadyFlex || {}), 0);
-      const alreadyEl = document.querySelector('#slot-alreadyamember .amcopy');
-      if (CFG.alreadyFs || preset?.alreadyFs) alreadyEl.style.setProperty('--alreadyFs', (preset?.alreadyFs ?? CFG.alreadyFs) + 'px');
+placeFlex('alreadyamember','slot-alreadyamember',{l:0,r:0,t:0,b:0},
+  Object.assign({}, CFG.alreadyFlex, preset?.alreadyFlex || {}), bump(4));
+const alreadyEl = document.querySelector('#slot-alreadyamember .amcopy');
+if (CFG.alreadyFs || preset?.alreadyFs)
+  alreadyEl.style.setProperty('--alreadyFs', (preset?.alreadyFs ?? CFG.alreadyFs) + 'px');
 
-      /* 8) Inputs */
-      placeFlex('emailbox',    'slot-emailbox',    {l:0,r:0,t:0,b:0}, Object.assign({}, CFG.emailFlex,    preset?.emailFlex    || {}), 0);
-      placeFlex('passwordbox', 'slot-passwordbox', {l:0,r:0,t:0,b:0}, Object.assign({}, CFG.passwordFlex, preset?.passwordFlex || {}), 0);
-      const emailBox = document.getElementById('slot-emailbox');
-      const passBox  = document.getElementById('slot-passwordbox');
-      emailBox.style.setProperty('--emailFs',     (preset?.emailFs ?? CFG.emailFs) + 'px');
-      emailBox.style.setProperty('--emailRadius', (CFG.emailRadius) + 'px');
-      emailBox.style.setProperty('--emailPadX',   (CFG.emailPadX) + 'px');
-      passBox.style.setProperty('--passwordFs',     (preset?.passwordFs ?? CFG.passwordFs) + 'px');
-      passBox.style.setProperty('--passwordRadius', (CFG.passwordRadius) + 'px');
-      passBox.style.setProperty('--passwordPadX',   (CFG.passwordPadX) + 'px');
+/* 8) Inputs */
+placeFlex('emailbox','slot-emailbox',{l:0,r:0,t:0,b:0},
+  Object.assign({}, CFG.emailFlex, preset?.emailFlex || {}), bump(12));
+placeFlex('passwordbox','slot-passwordbox',{l:0,r:0,t:0,b:0},
+  Object.assign({}, CFG.passwordFlex, preset?.passwordFlex || {}), bump(24));
+const emailBox = document.getElementById('slot-emailbox');
+const passBox  = document.getElementById('slot-passwordbox');
+emailBox.style.setProperty('--emailFs', (preset?.emailFs ?? CFG.emailFs) + 'px');
+emailBox.style.setProperty('--emailRadius', (CFG.emailRadius) + 'px');
+emailBox.style.setProperty('--emailPadX', (CFG.emailPadX) + 'px');
+passBox.style.setProperty('--passwordFs', (preset?.passwordFs ?? CFG.passwordFs) + 'px');
+passBox.style.setProperty('--passwordRadius', (CFG.passwordRadius) + 'px');
+passBox.style.setProperty('--passwordPadX', (CFG.passwordPadX) + 'px');
 
-      /* 9) Login pill (independent) */
-      placeFlex('logintext', 'slot-logintext', {l:0,r:0,t:0,b:0}, Object.assign({}, CFG.loginFlex, preset?.loginFlex || {}), 0);
-      scalePill('slot-logintext'); // if your rect id is loginbar, change the first arg above
+/* 9) Login pill (independent) */
+placeFlex('logintext','slot-logintext',{l:0,r:0,t:0,b:0},
+  Object.assign({}, CFG.loginFlex, preset?.loginFlex || {}), bump(36));
+scalePill('slot-logintext');
 
-      /* 10) Forgot */
-      placeFlex('forgotpassword','slot-forgotpassword', {l:0,r:0,t:0,b:0}, Object.assign({}, CFG.forgotFlex, preset?.forgotFlex || {}), 0);
-      if (CFG.forgotFs || preset?.forgotFs) document.getElementById('slot-forgotpassword')
-        .style.setProperty('--forgotFs', (preset?.forgotFs ?? CFG.forgotFs) + 'px');
+/* 10) Forgot */
+placeFlex('forgotpassword','slot-forgotpassword',{l:0,r:0,t:0,b:0},
+  Object.assign({}, CFG.forgotFlex, preset?.forgotFlex || {}), bump(48));
+if (CFG.forgotFs || preset?.forgotFs)
+  document.getElementById('slot-forgotpassword')
+    .style.setProperty('--forgotFs', (preset?.forgotFs ?? CFG.forgotFs) + 'px');
 
-      /* 11) Badges */
-      placeFlex('appdownload','slot-appdownload', {l:0,r:0,t:0,b:0}, Object.assign({}, CFG.appstoreFlex, preset?.appstoreFlex || {}), 0);
-      placeFlex('androiddownload','slot-androiddownload', {l:0,r:0,t:0,b:0}, Object.assign({}, CFG.playFlex, preset?.playFlex || {}), 0);
+/* 11) Badges */
+placeFlex('appdownload','slot-appdownload',{l:0,r:0,t:0,b:0},
+  Object.assign({}, CFG.appstoreFlex, preset?.appstoreFlex || {}), bump(58));
+placeFlex('androiddownload','slot-androiddownload',{l:0,r:0,t:0,b:0},
+  Object.assign({}, CFG.playFlex, preset?.playFlex || {}), bump(58));
 
-      /* 12) Explore pill (independent) */
-      placeFlex('explorenemibox','slot-explorenemibox', {l:0,r:0,t:0,b:0}, Object.assign({}, CFG.exploreFlex, preset?.exploreFlex || {}), 0);
-      scalePill('slot-explorenemibox');
+/* 12) Explore pill (independent) */
+placeFlex('explorenemibox','slot-explorenemibox',{l:0,r:0,t:0,b:0},
+  Object.assign({}, CFG.exploreFlex, preset?.exploreFlex || {}), bump(60));
+scalePill('slot-explorenemibox');
 
-      /* 13) Apply line */
-      placeFlex('realtorapply','slot-realtorapply', {l:0,r:0,t:0,b:0}, Object.assign({}, CFG.realtorFlex, preset?.realtorFlex || {}), 0);
-      if (CFG.realtorFs || preset?.realtorFs) document.getElementById('slot-realtorapply')
-        .style.setProperty('--realtorFs', (preset?.realtorFs ?? CFG.realtorFs) + 'px');
+/* 13) Apply line */
+placeFlex('realtorapply','slot-realtorapply',{l:0,r:0,t:0,b:0},
+  Object.assign({}, CFG.realtorFlex, preset?.realtorFlex || {}), bump(68));
+if (CFG.realtorFs || preset?.realtorFs)
+  document.getElementById('slot-realtorapply')
+    .style.setProperty('--realtorFs', (preset?.realtorFs ?? CFG.realtorFs) + 'px');
 
       section.classList.remove('invisible');
     }
