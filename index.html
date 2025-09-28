@@ -8,29 +8,32 @@
   <link rel="preload" as="image" href="./assets/svgs/signinrenamed" type="image/svg+xml" />
 </head>
 <body class="bg-white text-slate-900">
-  <!-- Fixed background (SVG gets injected by JS; mobile only) -->
-  <div id="bgFixed" aria-hidden="true"></div>
-
-  <!-- Hero (overlay slots are positioned against the inline SVG) -->
+  <!-- =========================================================
+       [NEMI:MOBILE HERO] (9:16 container; SVG anchors + positioned slots)
+       ========================================================= -->
   <section id="nemiMobile"
     class="relative mx-auto w-[min(520px,96vw)] overflow-hidden invisible"
     style="aspect-ratio:9/16">
 
-    <!-- Frosted card bg (auto-resized on mobile) -->
+    <!-- Frosted card bg -->
     <div id="slot-loginboxbg" class="slot-bg absolute hidden" aria-hidden="true"></div>
 
-    <!-- SVG host used for geometry (we hide it visually on mobile) -->
+    <!-- SVG host -->
     <div id="mobileArt" class="absolute inset-0" style="z-index:1;"></div>
 
-    <!-- ===== Overlay slots ===== -->
+    <!-- ======================= [OVERLAY SLOTS] ======================= -->
+
+    <!-- Team icon (rect: #teamiconbox) -->
     <div id="slot-teamiconbox" class="slot absolute hidden">
       <img src="./assets/img/teamicon.svg" alt="Team" class="w-full h-full object-contain">
     </div>
 
+    <!-- Title (rect: #titletextbox) -->
     <div id="slot-titletextbox" class="slot absolute hidden">
       <div class="titlecopy text-slate-900" style="--fsTitle:22px;"></div>
     </div>
 
+    <!-- Two-line subtext (rect: #oneteam) -->
     <div id="slot-oneteam" class="slot absolute hidden">
       <div class="otcopy text-slate-800" style="--fsSub:16px;">
         <span id="ot-line1"></span>
@@ -38,28 +41,35 @@
       </div>
     </div>
 
+    <!-- CTA pill (rect: #getstartedwithnemi) -->
     <a id="slot-getstartedwithnemi" href="#"
        class="slot absolute hidden inline-flex items-center justify-center rounded-full border-2 border-slate-800/90 bg-yellow-400 font-semibold text-slate-900"></a>
 
+    <!-- Already a member (rect: #alreadyamember) -->
     <div id="slot-alreadyamember" class="slot absolute hidden">
       <p class="amcopy"></p>
     </div>
 
+    <!-- Email (rect: #emailbox) -->
     <div id="slot-emailbox" class="slot absolute hidden">
       <input class="w-full h-full rounded-full border-2 border-slate-300 px-3 text-[16px]"
              type="email" name="email" placeholder="Email" autocomplete="username">
     </div>
 
+    <!-- Password (rect: #passwordbox) -->
     <div id="slot-passwordbox" class="slot absolute hidden">
       <input class="w-full h-full rounded-full border-2 border-slate-300 px-3 text-[16px]"
              type="password" name="password" placeholder="Password" autocomplete="current-password">
     </div>
 
+    <!-- Login pill (rect: #logintext or #loginbar) -->
     <button id="slot-logintext" class="slot absolute hidden rounded-full border-2 font-semibold">🔒 Login</button>
 
+    <!-- Forgot (rect: #forgotpassword) -->
     <a id="slot-forgotpassword" href="/auth/forgot.php"
        class="slot absolute hidden underline text-center">Forgot Password?</a>
 
+    <!-- Store badges (rects: #appdownload, #androiddownload) -->
     <a id="slot-appdownload" href="#" class="slot absolute hidden block" aria-label="Download on the App Store">
       <img src="./assets/img/appstore.svg" class="w-full h-full object-contain" alt="">
     </a>
@@ -67,91 +77,151 @@
       <img src="./assets/img/googleplay.svg" class="w-full h-full object-contain" alt="">
     </a>
 
+    <!-- Explore Features pill (rect: #explorenemibox) -->
     <a id="slot-explorenemibox" href="#"
        class="slot absolute hidden inline-flex items-center justify-center rounded-full border-2 font-semibold"></a>
 
+    <!-- Apply line (rect: #realtorapply) -->
     <div id="slot-realtorapply" class="slot absolute hidden flex items-center justify-center text-slate-600 text-center">
       <span id="apply-line"></span>&nbsp;<a id="apply-link" href="/pros/apply" class="underline text-slate-800">Apply Here!</a>
     </div>
   </section>
 
+  <!-- ================== [NEMI:STYLES] ================== -->
   <style>
 /* iOS text zoom guard */
 html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
 
-/* Fixed background container (toggled by JS on mobile) */
-#bgFixed{
-  position: fixed; inset: 0; z-index: 0; pointer-events: none; overflow: hidden; display: none;
+/* Quick CSS knobs (visual only; copy knobs are in JS CONFIG) */
+#nemiMobile{
+  --card-opacity: .65;     /* .55–.80 */
+  --title-nudge-y: 2px;    /* +down / -up */
+  --oneteam-nudge-y: -1px; /* +down / -up */
+  --oneteam-gap: 4px;      /* space between the two subtext lines */
 }
-#bgFixed svg{ display:block; width:100vw; height:100vh; }
-
-/* Ensure the scrolling section is above the fixed background */
-#nemiMobile { position: relative; z-index: 1; }
-
-/* Visual knobs */
-#nemiMobile{ --card-opacity:.65; --title-nudge-y:2px; --oneteam-nudge-y:-1px; --oneteam-gap:4px; }
 
 /* Frosted card */
 #nemiMobile .slot-bg{
-  z-index:6; background:rgba(255,255,255,var(--card-opacity)); border-radius:24px;
-  box-shadow:0 10px 30px rgba(20,35,58,0.15); pointer-events:none;
-  backdrop-filter:blur(8px) saturate(1.1); -webkit-backdrop-filter:blur(8px) saturate(1.1);
-  border:1px solid rgba(255,255,255,0.35);
+  z-index: 6;
+  background: rgba(255,255,255,var(--card-opacity));
+  border-radius: 24px;
+  box-shadow: 0 10px 30px rgba(20,35,58,0.15);
+  pointer-events: none;
+  backdrop-filter: blur(8px) saturate(1.1);
+  -webkit-backdrop-filter: blur(8px) saturate(1.1);
+  border: 1px solid rgba(255,255,255,0.35);
 }
 
-/* Overlay slots sit above the SVGs */
-#nemiMobile .slot { z-index:10; }
+/* Overlay slots above SVG */
+#nemiMobile .slot { z-index: 10; }
 
-/* Title + subtext */
-#slot-titletextbox,#slot-oneteam{ display:flex; align-items:center; justify-content:center; overflow:hidden; }
+/* Title + Subtext containers */
+#slot-titletextbox, #slot-oneteam{
+  display:flex; align-items:center; justify-content:center; overflow:hidden;
+}
+
+/* Title (one line; size via --fsTitle) */
 #slot-titletextbox .titlecopy{
-  width:100%; white-space:nowrap; text-align:center; line-height:2; font-weight:800;
-  font-size:var(--fsTitle)!important; box-sizing:border-box; padding-inline:6px; letter-spacing:-0.15px;
-  transform:translateY(var(--title-nudge-y));
+  width:100%;
+  white-space:nowrap;
+  text-align:center;
+  line-height:2;
+  font-weight:800;
+  font-size:var(--fsTitle) !important;
+  box-sizing:border-box;
+  padding-inline:6px;
+  letter-spacing:-0.15px;
+  transform: translateY(var(--title-nudge-y));
 }
+
+/* Subtext block (two lines) */
 #slot-oneteam .otcopy{
-  width:100%; display:flex; flex-direction:column; align-items:center; justify-content:center;
-  text-align:center; padding-inline:2px; line-height:1.05; font-size:var(--fsSub);
-  transform:translateY(var(--oneteam-nudge-y));
+  width:100%;
+  display:flex; flex-direction:column; align-items:center; justify-content:center;
+  text-align:center; padding-inline:2px;
+  line-height:1.05;
+  font-size:var(--fsSub);
+  transform: translateY(var(--oneteam-nudge-y));
 }
-#slot-oneteam .otcopy>span{ display:block; white-space:nowrap; }
-#slot-oneteam .otcopy>span+span{ margin-top:var(--oneteam-gap); }
-#slot-oneteam{ z-index:11; }
+#slot-oneteam .otcopy > span{ display:block; white-space:nowrap; }
+#slot-oneteam .otcopy > span + span{ margin-top: var(--oneteam-gap); }
+#slot-oneteam{ z-index: 11; }
 
-/* Pills */
-#slot-getstartedwithnemi,
-#slot-logintext,
+/* === Pill themes (independent) ===================== */
+/* CTA pill (Get Started) */
+#slot-getstartedwithnemi{
+  z-index:15; display:flex !important; align-items:center; justify-content:center;
+  width:100%; height:100%; border-radius:9999px; text-decoration:none;
+  font-weight:800; letter-spacing:.2px; color:#0f1e3a;
+  border:3px solid #1c2c46;
+  background: linear-gradient(#f6d768, #e3be32);
+  box-shadow: 0 3px 0 #1c2c46, 0 6px 18px rgba(28,44,70,.25), inset 0 2px 0 rgba(255,255,255,.65);
+  font-size:inherit;
+}
+#slot-getstartedwithnemi:hover { filter: brightness(1.02); }
+#slot-getstartedwithnemi:active { transform: translateY(1px); box-shadow: 0 1px 0 #1c2c46, 0 4px 12px rgba(28,44,70,.22), inset 0 1px 0 rgba(255,255,255,.55); }
+#slot-getstartedwithnemi:focus-visible { outline:3px solid #0ea5e9; outline-offset:2px; }
+
+/* Login pill (independent) */
+#slot-logintext{
+  z-index:15; display:flex !important; align-items:center; justify-content:center;
+  width:100%; height:100%; border-radius:9999px; text-decoration:none;
+  font-weight:800; letter-spacing:.2px; color:#0f1e3a;
+  border:3px solid #1c2c46;
+  background: linear-gradient(#f6d768, #e3be32);
+  box-shadow: 0 3px 0 #1c2c46, 0 6px 18px rgba(28,44,70,.25), inset 0 2px 0 rgba(255,255,255,.65);
+  font-size:inherit;
+}
+#slot-logintext:hover { filter: brightness(1.02); }
+#slot-logintext:active { transform: translateY(1px); box-shadow: 0 1px 0 #1c2c46, 0 4px 12px rgba(28,44,70,.22), inset 0 1px 0 rgba(255,255,255,.55); }
+#slot-logintext:focus-visible { outline:3px solid #0ea5e9; outline-offset:2px; }
+
+/* Explore pill (independent theme; white pill) */
 #slot-explorenemibox{
-  z-index:15; display:flex!important; align-items:center; justify-content:center;
-  width:100%; height:100%; border-radius:9999px; text-decoration:none; font-weight:800; letter-spacing:.2px; color:#0f1e3a;
-  border:3px solid #1c2c46; font-size:inherit; box-shadow:0 3px 0 #1c2c46, 0 6px 18px rgba(28,44,70,.25), inset 0 2px 0 rgba(255,255,255,.65);
+  z-index:15; display:flex !important; align-items:center; justify-content:center;
+  width:100%; height:100%; border-radius:9999px; text-decoration:none;
+  font-weight:800; letter-spacing:.2px; color:#0f1e3a;
+  border:3px solid #1c2c46;
+  background: #ffffff;
+  box-shadow: 0 3px 0 #1c2c46, 0 6px 18px rgba(28,44,70,.18), inset 0 2px 0 rgba(255,255,255,.85);
+  font-size:inherit;
 }
-#slot-getstartedwithnemi{ background:linear-gradient(#f6d768,#e3be32); }
-#slot-logintext{ background:linear-gradient(#f6d768,#e3be32); }
-#slot-explorenemibox{ background:#fff; box-shadow:0 3px 0 #1c2c46,0 6px 18px rgba(28,44,70,.18), inset 0 2px 0 rgba(255,255,255,.85); }
-#slot-getstartedwithnemi:hover,#slot-logintext:hover{ filter:brightness(1.02); }
 
-/* Small text */
+/* Small text rows (overridable per-slot via CSS vars) */
 #slot-alreadyamember .amcopy{ font-size: var(--alreadyFs, calc(var(--bodyScale,1) * clamp(12px, 2.8vw, 14px))); }
-#slot-forgotpassword{ font-size: var(--forgotFs, calc(var(--bodyScale,1) * 12px)); }
-#slot-realtorapply{ font-size: var(--realtorFs, calc(var(--bodyScale,1) * 12px)); }
+#slot-forgotpassword     { font-size: var(--forgotFs,  calc(var(--bodyScale,1) * 12px)); }
+#slot-realtorapply       { font-size: var(--realtorFs, calc(var(--bodyScale,1) * 12px)); }
 
-/* Inputs */
+/* Inputs focus */
 #nemiMobile input:focus{ outline:none; border-color:#1c2c46; box-shadow:0 0 0 4px rgba(28,44,70,.12); }
-#slot-emailbox input{ font-size:var(--emailFs,16px); border-radius:var(--emailRadius,9999px); padding-inline:var(--emailPadX,12px); }
-#slot-passwordbox input{ font-size:var(--passwordFs,16px); border-radius:var(--passwordRadius,9999px); padding-inline:var(--passwordPadX,12px); }
 
-/* Tiny mobile nudges */
-@media (max-width:380px){
-  #nemiMobile{ --title-nudge-y:-6px; --oneteam-nudge-y:-2px; }
-  #slot-oneteam .otcopy{ padding-top:2px; }
-  #slot-realtorapply{ white-space:nowrap; }
+/* Mobile-only nudges */
+@media (max-width: 380px){
+  #nemiMobile{
+    --title-nudge-y:   -6px;
+    --oneteam-nudge-y: -2px;
+  }
+  #slot-oneteam .otcopy{ padding-top: 2px; }
+  #slot-realtorapply{ white-space: nowrap; }
+}
+
+/* Input sizing knobs (override Tailwind) */
+#slot-emailbox input{
+  font-size: var(--emailFs, 16px);
+  border-radius: var(--emailRadius, 9999px);
+  padding-inline: var(--emailPadX, 12px);
+}
+#slot-passwordbox input{
+  font-size: var(--passwordFs, 16px);
+  border-radius: var(--passwordRadius, 9999px);
+  padding-inline: var(--passwordPadX, 12px);
 }
   </style>
 
+  <!-- ============== [NEMI:SCRIPTS] ============== -->
   <script>
 (function(){
-  /* Copy + links */
+  /* ====================== CONFIG (copy/links/knobs) ====================== */
   const TEXT = {
     title: "Take Control of Your Homebuying Journey",
     sub1:  "One <strong>team</strong>. Every step, <strong>always</strong> clear.",
@@ -162,65 +232,132 @@ html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
     already: "Already a Nemi Member? Sign in below!",
     applyLead: "Have what it takes to be a Nemi Pro?"
   };
-  const LINKS = { cta:"/signup", explore:"/features", appstore:"#", play:"#", apply:"/pros/apply", forgot:"/auth/forgot.php" };
+  const LINKS = {
+    cta: "/signup", explore: "/features",
+    appstore: "#",  play: "#",
+    apply: "/pros/apply", forgot: "/auth/forgot.php"
+  };
 
-  /* Base config (desktop behavior unchanged) */
+  /* ---------- Base (desktop-ish) sizes + knobs (desktop unchanged) ---------- */
   const CFG = {
-    svgCandidates:[
+    svgCandidates: [
       'assets/svgs/signinrenamed','/assets/svgs/signinrenamed','/nemi/assets/svgs/signinrenamed',
       'assets/svgs/signinrenamed.svg','/assets/svgs/signinrenamed.svg','/nemi/assets/svgs/signinrenamed.svg'
     ],
-    cardGrowX:10,
-    titleInsetLR:-12, titleInsetT:3, titleInsetB:0,
-    titleFontMin:18, titleFontMax:32,
-    titleFlex:{dx:0,dy:0,growX:0,growY:0},
-    oneteamPadPx:0, oneteamBumpUp:8, oneteamExtraHeight:16,
-    oneteamFontMin:18, oneteamFontMax:22,
-    oneteamFlex:{dx:0,dy:0,growX:0,growY:0},
-    teamIconFlex:{dx:0,dy:0,growX:0,growY:0},
-    ctaInset:{l:-10,r:-10,t:0,b:0}, ctaNudgeY:4,
-    ctaFontMin:16, ctaFontMax:28, ctaScale:.50, ctaFlex:{dx:0,dy:-6,growX:8,growY:4},
-    loginFontMin:16, loginFontMax:28, loginScale:.50, loginFlex:{dx:0,dy:-6,growX:8,growY:4},
-    exploreFontMin:16, exploreFontMax:24, exploreScale:.46, exploreFlex:{dx:0,dy:0,growX:0,growY:0},
-    emailFlex:{dx:0,dy:0,growX:0,growY:0}, passwordFlex:{dx:0,dy:0,growX:0,growY:0},
-    emailFs:17, passwordFs:17, emailRadius:9999, passwordRadius:9999, emailPadX:14, passwordPadX:14,
-    alreadyFlex:{dx:0,dy:0,growX:0,growY:0}, alreadyFs:null,
-    forgotFlex:{dx:0,dy:0,growX:0,growY:0},  forgotFs:null,
-    realtorFlex:{dx:0,dy:0,growX:0,growY:0}, realtorFs:null,
-    appstoreFlex:{dx:0,dy:0,growX:0,growY:0}, playFlex:{dx:0,dy:0,growX:0,growY:0},
+    cardGrowX: 10,
+
+    /* Title block */
+    titleInsetLR: -12,  titleInsetT: 3, titleInsetB: 0,
+    titleFontMin: 18,   titleFontMax: 32,
+    titleFlex:    { dx: 0, dy: 0,  growX: 0, growY: 0 },
+
+    /* Subtext (“One team…”) */
+    oneteamPadPx: 0, oneteamBumpUp: 8, oneteamExtraHeight: 16,
+    oneteamFontMin: 18, oneteamFontMax: 22,
+    oneteamFlex:   { dx: 0, dy: 0,  growX: 0, growY: 0 },
+
+    /* Team icon */
+    teamIconFlex:  { dx: 0, dy: 0,  growX: 0, growY: 0 },
+
+    /* CTA pill (Get Started) */
+    ctaInset: { l:-10, r:-10, t:0, b:0 },
+    ctaNudgeY: 4,
+    ctaFontMin: 16, ctaFontMax: 28, ctaScale: 0.50,
+    ctaFlex:   { dx: 0, dy: -6, growX: 8,  growY: 4 },
+
+    /* Login pill (independent) */
+    loginFontMin: 16, loginFontMax: 28, loginScale: 0.50,
+    loginFlex: { dx: 0, dy: -6, growX: 8, growY: 4 },
+
+    /* Explore pill (independent) */
+    exploreFontMin: 16, exploreFontMax: 24, exploreScale: 0.46,
+    exploreFlex: { dx: 0, dy: 0, growX: 0, growY: 0 },
+
+    /* Inputs */
+    emailFlex: { dx: 0, dy: 0, growX: 0, growY: 0 },
+    passwordFlex: { dx: 0, dy: 0, growX: 0, growY: 0 },
+    emailFs: 17,  passwordFs: 17,
+    emailRadius: 9999, passwordRadius: 9999,
+    emailPadX: 14, passwordPadX: 14,
+
+    /* Small text rows */
+    alreadyFlex: { dx: 0, dy: 0, growX: 0, growY: 0 }, alreadyFs: null,
+    forgotFlex:  { dx: 0, dy: 0, growX: 0, growY: 0 }, forgotFs:  null,
+    realtorFlex: { dx: 0, dy: 0, growX: 0, growY: 0 }, realtorFs: null,
+
+    /* Badges */
+    appstoreFlex: { dx: 0, dy: 0, growX: 0, growY: 0 },
+    playFlex:     { dx: 0, dy: 0, growX: 0, growY: 0 }
   };
 
-  /* Mobile presets (first match wins) */
+  /* ===== Mobile presets (first match wins) — desktop unaffected ===== */
   const MOBILE_TUNING = [
-    { // ≤340
-      maxWidth:340, bodyScale:1.08, titleScale:1.0,
-      titleMax:24, titleMin:16, subMax:17, subMin:15, subTopPad:2, extraCtaNudge:8,
-      alreadyFlex:{dy:6}, emailFlex:{dy:12,growY:6}, passwordFlex:{dy:24,growY:6},
-      loginFlex:{dy:38}, forgotFlex:{dy:50}, forgotFs:12, exploreFlex:{dy:62},
-      appstoreFlex:{dy:70}, playFlex:{dy:70},
-      realtorFlex:{dy:74,growX:14}, realtorFs:12,
-      emailFs:19, passwordFs:19,
-      panelGrowY:16, panelGrowX:0,
-      panelLiftUp:56,           // ⬅ move panel top up to include the title
-      panelPadBottom:28         // extra space inside bottom of panel
+    { // Tiny phones (≤340px)
+      maxWidth: 340,
+      bodyScale: 1.08, titleScale: 1.00,
+      titleMax: 24, titleMin: 16,
+      subMax: 17,  subMin: 15,
+      subTopPad: 2,
+      extraCtaNudge: 8,
+
+      /* spacing between rows (no size change unless growY specified) */
+      alreadyFlex:  { dy:  6 },
+      emailFlex:    { dy: 12, growY: 6 },
+      passwordFlex: { dy: 24, growY: 6 },
+      loginFlex:    { dy: 38 },
+      forgotFlex:   { dy: 50, },  forgotFs: 12,
+      exploreFlex:  { dy: 62 },
+      appstoreFlex: { dy: 70 },
+      playFlex:     { dy: 70 },
+
+      /* One-line “Have what it takes…” */
+      realtorFlex: { dy: 74, growX: 14 },
+      realtorFs: 12,
+
+      /* Bigger input text on tiny phones */
+      emailFs: 19, passwordFs: 19,
+
+      /* Panel breathing room (expands frosted card on phones only) */
+      panelGrowY: 16, panelGrowX: 0
     },
-    { // ≤380
-      maxWidth:380, bodyScale:1.08, titleScale:1.0,
-      titleMax:26, titleMin:16, subMax:17, subMin:15, extraCtaNudge:6,
-      alreadyFlex:{dy:4}, emailFlex:{dy:10,growY:4}, passwordFlex:{dy:20,growY:4},
-      loginFlex:{dy:32}, forgotFlex:{dy:40}, forgotFs:12, exploreFlex:{dy:52},
-      appstoreFlex:{dy:60}, playFlex:{dy:60},
-      realtorFlex:{dy:64,growX:12}, realtorFs:12,
-      emailFs:18, passwordFs:18,
-      panelGrowY:12, panelGrowX:0,
-      panelLiftUp:48,
-      panelPadBottom:24
+    { // Small phones (≤380px)
+      maxWidth: 380,
+      bodyScale: 1.08, titleScale: 1.00,
+      titleMax: 26, titleMin: 16,
+      subMax: 17,  subMin: 15,
+      extraCtaNudge: 6,
+
+      alreadyFlex:  { dy:  4 },
+      emailFlex:    { dy: 10, growY: 4 },
+      passwordFlex: { dy: 20, growY: 4 },
+      loginFlex:    { dy: 32 },
+      forgotFlex:   { dy: 40 }, forgotFs: 12,
+      exploreFlex:  { dy: 52 },
+      appstoreFlex: { dy: 60 },
+      playFlex:     { dy: 60 },
+
+      realtorFlex: { dy: 64, growX: 12 },
+      realtorFs: 12,
+
+      emailFs: 18, passwordFs: 18,
+
+      panelGrowY: 12, panelGrowX: 0
     }
   ];
 
-  const DESKTOP_TUNING = { bodyScale:1, titleScale:1.15, titleMin:undefined, titleMax:28 };
+  /* Desktop/large screens */
+  const DESKTOP_TUNING = {
+    bodyScale: 1,
+    titleScale: 1.15,
+    titleMin: undefined,
+    titleMax: 28
+  };
 
-  function getMobileTuning(vw){ for (const p of MOBILE_TUNING) if (vw <= p.maxWidth) return p; return null; }
+  /* Helper: which mobile preset applies? */
+  function getMobileTuning(vw){
+    for (const p of MOBILE_TUNING) if (vw <= p.maxWidth) return p;
+    return null;
+  }
 
   /* Populate copy + links */
   document.querySelector('#slot-getstartedwithnemi').textContent = TEXT.cta;
@@ -238,168 +375,105 @@ html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
   document.querySelector('#apply-link').href = LINKS.apply;
   document.querySelector('#slot-forgotpassword').href = LINKS.forgot;
 
+  /* =============================== Boot + layout engine =============================== */
   const section = document.getElementById('nemiMobile');
   const host    = document.getElementById('mobileArt');
-  const bgFixed = document.getElementById('bgFixed');
 
   function fetchFirst(urls, done){
-    let i=0; (function next(){
-      if (i>=urls.length) return done(null);
-      fetch(urls[i],{cache:'no-cache'})
-        .then(r=>{ if(!r.ok) throw 0; return r.text(); })
-        .then(txt=>done(txt))
-        .catch(()=>{ i++; next(); });
+    let i = 0;
+    (function next(){
+      if (i >= urls.length) return done(null);
+      fetch(urls[i], { cache:'no-cache' })
+        .then(r => { if (!r.ok) throw 0; return r.text(); })
+        .then(txt => done(txt))
+        .catch(() => { i++; next(); });
     })();
   }
 
   fetchFirst(CFG.svgCandidates, function(svgText){
-    if (!svgText){ section.classList.remove('invisible'); return; }
-
+    if (!svgText) { section.classList.remove('invisible'); return; }
     host.innerHTML = svgText.replace('<svg','<svg id="mobileSVG" style="display:block;width:100%;height:100%;pointer-events:none"');
     const svg = document.getElementById('mobileSVG');
 
-    // same SVG as fixed bg (shown only on mobile)
-    bgFixed.innerHTML = svgText.replace('<svg','<svg id="bgSVG" style="display:block;width:100%;height:100%;pointer-events:none"');
-
-    // desktop aspect ratio lock
-    const vb = svg.viewBox?.baseVal;
+    const vb = svg.viewBox.baseVal;
     if (vb && vb.width && vb.height) section.style.aspectRatio = vb.width + ' / ' + vb.height;
-    const DESKTOP_AR = (vb && vb.width && vb.height) ? `${vb.width} / ${vb.height}` : '9 / 16';
 
-    /* ------- helpers ------- */
+    /* helpers */
     function placeInset(rectId, slotId, inset={}){
       const rEl = svg.querySelector('#'+rectId);
       const slot= document.getElementById(slotId);
       if (!rEl || !slot) return;
       const hb = host.getBoundingClientRect(), r = rEl.getBoundingClientRect();
       const l = inset.l||0, t = inset.t||0, rr = inset.r||0, b = inset.b||0;
-      slot.style.position='absolute'; slot.style.display='block';
+      slot.style.position='absolute';
+      slot.style.display='block';
       slot.style.left   = (r.left - hb.left + l) + 'px';
       slot.style.top    = (r.top  - hb.top  + t) + 'px';
       slot.style.width  = (r.width  - l - rr) + 'px';
       slot.style.height = (r.height - t - b) + 'px';
     }
-    function place(rectId,slotId,pad=0){ placeInset(rectId,slotId,{l:pad,r:pad,t:pad,b:pad}); }
-    function placeFlex(rectId,slotId,baseInset,flex,extraDy){
+    function place(rectId, slotId, pad=0){ placeInset(rectId,slotId,{l:pad,r:pad,t:pad,b:pad}); }
+    function placeFlex(rectId, slotId, baseInset, flex, extraDy){
       const inset = Object.assign({l:0,r:0,t:0,b:0}, baseInset||{});
-      const dx=(flex?.dx||0), dy=(flex?.dy||0)+(extraDy||0);
-      const gx=(flex?.growX||0), gy=(flex?.growY||0);
-      inset.l+=dx; inset.r-=dx; inset.t+=dy; inset.b-=dy;
-      inset.l-=gx; inset.r-=gx; inset.t-=gy; inset.b-=gy;
-      placeInset(rectId,slotId,inset);
+      const dx = (flex?.dx||0), dy = (flex?.dy||0) + (extraDy||0);
+      const gx = (flex?.growX||0), gy = (flex?.growY||0);
+      inset.l += dx; inset.r -= dx; inset.t += dy; inset.b -= dy;   // shift
+      inset.l -= gx; inset.r -= gx; inset.t -= gy; inset.b -= gy;   // grow sym.
+      placeInset(rectId, slotId, inset);
     }
-    function fitVar(slotSel,blockSel,varName,minPx,maxPx){
-      const slot=document.querySelector(slotSel); const block=slot?slot.querySelector(blockSel):null;
-      if (!slot||!block) return minPx;
-      let lo=minPx,hi=maxPx,best=minPx;
+    function fitVar(slotSel, blockSel, varName, minPx, maxPx){
+      const slot  = document.querySelector(slotSel);
+      const block = slot ? slot.querySelector(blockSel) : null;
+      if (!slot || !block) return minPx;
+      let lo=minPx, hi=maxPx, best=minPx;
       for (let i=0;i<12;i++){
-        const mid=(lo+hi)/2; block.style.setProperty(varName, mid+'px');
-        const fits=(block.scrollWidth<=slot.clientWidth+0.5)&&(block.scrollHeight<=slot.clientHeight+0.5);
-        if (fits){ best=mid; lo=mid; } else { hi=mid; }
+        const mid=(lo+hi)/2;
+        block.style.setProperty(varName, mid+'px');
+        const fits = (block.scrollWidth <= slot.clientWidth + 0.5) &&
+                     (block.scrollHeight <= slot.clientHeight + 0.5);
+        if (fits) { best=mid; lo=mid; } else { hi=mid; }
       }
-      block.style.setProperty(varName, Math.floor(best)+'px'); return best;
+      block.style.setProperty(varName, Math.floor(best)+'px');
+      return best;
     }
-    function fitOneLine(slotSel,blockSel,varName,minPx,maxPx){
-      const slot=document.querySelector(slotSel); const block=slot?slot.querySelector(blockSel):null;
-      if (!slot||!block) return minPx;
-      const isiOS=/iP(hone|ad|od)/.test(navigator.platform)||(navigator.userAgent.includes('Mac')&&'ontouchend'in document);
-      const SAFETY=isiOS?32:18; let lo=minPx,hi=maxPx,best=minPx;
+    function fitOneLine(slotSel, blockSel, varName, minPx, maxPx){
+      const slot  = document.querySelector(slotSel);
+      const block = slot ? slot.querySelector(blockSel) : null;
+      if (!slot || !block) return minPx;
+      const isiOS = /iP(hone|ad|od)/.test(navigator.platform) ||
+                    (navigator.userAgent.includes('Mac') && 'ontouchend' in document);
+      const SAFETY = isiOS ? 32 : 18;
+      let lo=minPx, hi=maxPx, best=minPx;
       for (let i=0;i<12;i++){
-        const mid=(lo+hi)/2; block.style.setProperty(varName, mid+'px');
-        const fitsW=block.scrollWidth<=(slot.clientWidth-SAFETY);
-        const fitsH=block.getBoundingClientRect().height<=slot.clientHeight;
-        if (fitsW&&fitsH){ best=mid; lo=mid; } else { hi=mid; }
+        const mid=(lo+hi)/2;
+        block.style.setProperty(varName, mid+'px');
+        const fitsW = block.scrollWidth <= (slot.clientWidth - SAFETY);
+        const fitsH = block.getBoundingClientRect().height <= slot.clientHeight;
+        if (fitsW && fitsH){ best=mid; lo=mid; } else { hi=mid; }
       }
-      block.style.setProperty(varName, Math.max(minPx,Math.floor(best)-1)+'px'); return best;
+      block.style.setProperty(varName, Math.max(minPx, Math.floor(best)-1) + 'px');
+      return best;
     }
     function scalePill(slotId){
-      const el=document.getElementById(slotId); if(!el) return;
-      let min,max,scale;
-      if (slotId==='slot-getstartedwithnemi'){ min=CFG.ctaFontMin; max=CFG.ctaFontMax; scale=CFG.ctaScale; }
-      else if (slotId==='slot-logintext'){ min=CFG.loginFontMin; max=CFG.loginFontMax; scale=CFG.loginScale; }
-      else if (slotId==='slot-explorenemibox'){ min=CFG.exploreFontMin; max=CFG.exploreFontMax; scale=CFG.exploreScale; }
-      else { min=16; max=28; scale=.5; }
-      const h=el.clientHeight||0; const fs=Math.max(min,Math.min(max,Math.floor(h*scale)));
-      el.style.fontSize=fs+'px'; el.style.lineHeight='1'; el.style.whiteSpace='nowrap';
-    }
-    // Grow frosted panel to last row (mobile)
-    function autoGrowPanel(slotIds, extraBottomPx){
-      const panel=document.getElementById('slot-loginboxbg'); if(!panel) return;
-      const hb=host.getBoundingClientRect();
-      const pTop=panel.getBoundingClientRect().top - hb.top;
-      let maxBottom=0;
-      for(const id of slotIds){
-        const el=document.getElementById(id);
-        if(!el||el.offsetParent===null) continue;
-        const r=el.getBoundingClientRect();
-        maxBottom=Math.max(maxBottom, r.bottom - hb.top);
-      }
-      const pad=Math.max(0,extraBottomPx|0);
-      const newH=Math.max(0, Math.ceil(maxBottom - pTop + pad));
-      if (newH){ panel.style.height=newH+'px'; panel.style.minHeight=newH+'px'; }
-    }
-    // Make section tall enough so page can scroll (mobile)
-    function growSectionToContent(slotIds, bottomPadPx){
-      const sb=section.getBoundingClientRect(); let maxBottom=0;
-      for(const id of slotIds){
-        const el=document.getElementById(id);
-        if(!el||el.offsetParent===null) continue;
-        const r=el.getBoundingClientRect(); maxBottom=Math.max(maxBottom, r.bottom - sb.top);
-      }
-      if(maxBottom){
-        const h=Math.ceil(maxBottom + (bottomPadPx|0));
-        section.style.height=h+'px'; section.style.minHeight=h+'px';
-      }
-    
-      // Make the frosted panel start at (or above) the title on mobile
-function coverTitleWithPanel(topPadPx){
-  const panel = document.getElementById('slot-loginboxbg');
-  const title = document.getElementById('slot-titletextbox');
-  if (!panel || !title) return;
-
-  const hb   = host.getBoundingClientRect();
-  const pNow = panel.getBoundingClientRect();
-  const tBox = title.getBoundingClientRect();
-
-  // desired new top: a bit above the title
-  const newTop = Math.max(0, Math.min(pNow.top, tBox.top) - hb.top - (topPadPx|0));
-
-  if (newTop < (pNow.top - hb.top)) {
-    const delta = (pNow.top - hb.top) - newTop;   // how much we moved up
-    panel.style.top       = newTop + 'px';
-    panel.style.height    = (pNow.height + delta) + 'px'; // keep bottom where it was
-    panel.style.minHeight = panel.style.height;
-  }
-}
-
-
+      const el = document.getElementById(slotId);
+      if (!el) return;
+      let min, max, scale;
+      if (slotId === 'slot-getstartedwithnemi'){ min = CFG.ctaFontMin;    max = CFG.ctaFontMax;    scale = CFG.ctaScale; }
+      else if (slotId === 'slot-logintext'){     min = CFG.loginFontMin;  max = CFG.loginFontMax;  scale = CFG.loginScale; }
+      else if (slotId === 'slot-explorenemibox'){min = CFG.exploreFontMin;max = CFG.exploreFontMax;scale = CFG.exploreScale; }
+      else { min = 16; max = 28; scale = 0.5; }
+      const h  = el.clientHeight || 0;
+      const fs = Math.max(min, Math.min(max, Math.floor(h * scale)));
+      el.style.fontSize   = fs + 'px';
+      el.style.lineHeight = '1';
+      el.style.whiteSpace = 'nowrap';
     }
 
-    /* ------- layout ------- */
+    /* ---------- layout ---------- */
     function layout(){
       const vw = section.clientWidth;
       const preset = getMobileTuning(vw);
       const small  = !!preset;
-
-      // mobile vs desktop toggles
-      if (preset) {
-  // MOBILE: show fixed bg; keep inline SVG only for geometry
-  bgFixed.style.display = 'block';
-  host.style.opacity = '0';
-  host.style.pointerEvents = 'none';
-  section.style.aspectRatio = DESKTOP_AR;   // keep a measuring box for placements
-} else {
-  // DESKTOP: normal behavior
-  bgFixed.style.display = 'none';
-  host.style.opacity = '1';
-  host.style.pointerEvents = '';
-  section.style.aspectRatio = DESKTOP_AR;
-   section.style.height = '';
-  section.style.minHeight = '';
-  const panel = document.getElementById('slot-loginboxbg');
-  if (panel) { panel.style.height = ''; panel.style.minHeight = ''; }
-}
-
 
       const bodyScale  = preset ? (preset.bodyScale ?? 1)  : (DESKTOP_TUNING.bodyScale ?? 1);
       const titleScale = preset ? (preset.titleScale ?? 1) : (DESKTOP_TUNING.titleScale ?? 1);
@@ -415,17 +489,11 @@ function coverTitleWithPanel(topPadPx){
       section.style.setProperty('--bodyScale', bodyScale);
       if (preset?.oneteamGap != null) section.style.setProperty('--oneteam-gap', preset.oneteamGap + 'px');
 
-      /* 1) Frosted panel */
+      /* 1) Frosted panel — desktop unchanged, mobile can grow */
       const baseInset = 3;
       const growX = preset?.panelGrowX || 0;
       const growY = preset?.panelGrowY || 0;
-      const lift  = preset?.panelLiftUp || 0; // move panel top higher on mobile
-      placeInset('loginbox','slot-loginboxbg', {
-        l: baseInset - growX,
-        r: baseInset - growX,
-        t: baseInset - growY - lift,  // lift the top to cover the title
-        b: baseInset - growY
-      });
+      placeInset('loginbox','slot-loginboxbg', { l: baseInset - growX, r: baseInset - growX, t: baseInset - growY, b: baseInset - growY });
       (function syncRadius(){
         const rEl = svg.querySelector('#loginbox'); if (!rEl) return;
         const rx = parseFloat(rEl.getAttribute('rx') || 0);
@@ -449,10 +517,6 @@ function coverTitleWithPanel(topPadPx){
       const ot = document.querySelector('#slot-oneteam .otcopy');
       ot.style.paddingTop = (preset?.subTopPad || 0) + 'px';
 
-    // MOBILE ONLY: lift panel top to actually cover the title
-if (preset) coverTitleWithPanel(10);  // try 10–14px if you want a touch more air
-
-
       /* 5) Fit text */
       fitVar('#slot-oneteam', '.otcopy', '--fsSub', subMin, subMax);
       fitOneLine('#slot-titletextbox', '.titlecopy', '--fsTitle', titleMin, titleMax);
@@ -469,57 +533,43 @@ if (preset) coverTitleWithPanel(10);  // try 10–14px if you want a touch more 
       if (CFG.alreadyFs || preset?.alreadyFs) alreadyEl.style.setProperty('--alreadyFs', (preset?.alreadyFs ?? CFG.alreadyFs) + 'px');
 
       /* 8) Inputs */
-      placeFlex('emailbox','slot-emailbox',{l:0,r:0,t:0,b:0}, Object.assign({}, CFG.emailFlex, preset?.emailFlex || {}), 0);
-      placeFlex('passwordbox','slot-passwordbox',{l:0,r:0,t:0,b:0}, Object.assign({}, CFG.passwordFlex, preset?.passwordFlex || {}), 0);
+      placeFlex('emailbox',    'slot-emailbox',    {l:0,r:0,t:0,b:0}, Object.assign({}, CFG.emailFlex,    preset?.emailFlex    || {}), 0);
+      placeFlex('passwordbox', 'slot-passwordbox', {l:0,r:0,t:0,b:0}, Object.assign({}, CFG.passwordFlex, preset?.passwordFlex || {}), 0);
       const emailBox = document.getElementById('slot-emailbox');
       const passBox  = document.getElementById('slot-passwordbox');
-      emailBox.style.setProperty('--emailFs', (preset?.emailFs ?? CFG.emailFs) + 'px');
+      emailBox.style.setProperty('--emailFs',     (preset?.emailFs ?? CFG.emailFs) + 'px');
       emailBox.style.setProperty('--emailRadius', (CFG.emailRadius) + 'px');
-      emailBox.style.setProperty('--emailPadX', (CFG.emailPadX) + 'px');
-      passBox.style.setProperty('--passwordFs', (preset?.passwordFs ?? CFG.passwordFs) + 'px');
+      emailBox.style.setProperty('--emailPadX',   (CFG.emailPadX) + 'px');
+      passBox.style.setProperty('--passwordFs',     (preset?.passwordFs ?? CFG.passwordFs) + 'px');
       passBox.style.setProperty('--passwordRadius', (CFG.passwordRadius) + 'px');
-      passBox.style.setProperty('--passwordPadX', (CFG.passwordPadX) + 'px');
+      passBox.style.setProperty('--passwordPadX',   (CFG.passwordPadX) + 'px');
 
-      /* 9) Login pill */
-      placeFlex('logintext','slot-logintext',{l:0,r:0,t:0,b:0}, Object.assign({}, CFG.loginFlex, preset?.loginFlex || {}), 0);
-      scalePill('slot-logintext');
+      /* 9) Login pill (independent) */
+      placeFlex('logintext', 'slot-logintext', {l:0,r:0,t:0,b:0}, Object.assign({}, CFG.loginFlex, preset?.loginFlex || {}), 0);
+      scalePill('slot-logintext'); // if your rect id is loginbar, change the first arg above
 
       /* 10) Forgot */
-      placeFlex('forgotpassword','slot-forgotpassword',{l:0,r:0,t:0,b:0}, Object.assign({}, CFG.forgotFlex, preset?.forgotFlex || {}), 0);
+      placeFlex('forgotpassword','slot-forgotpassword', {l:0,r:0,t:0,b:0}, Object.assign({}, CFG.forgotFlex, preset?.forgotFlex || {}), 0);
       if (CFG.forgotFs || preset?.forgotFs) document.getElementById('slot-forgotpassword')
         .style.setProperty('--forgotFs', (preset?.forgotFs ?? CFG.forgotFs) + 'px');
 
       /* 11) Badges */
-      placeFlex('appdownload','slot-appdownload',{l:0,r:0,t:0,b:0}, Object.assign({}, CFG.appstoreFlex, preset?.appstoreFlex || {}), 0);
-      placeFlex('androiddownload','slot-androiddownload',{l:0,r:0,t:0,b:0}, Object.assign({}, CFG.playFlex, preset?.playFlex || {}), 0);
+      placeFlex('appdownload','slot-appdownload', {l:0,r:0,t:0,b:0}, Object.assign({}, CFG.appstoreFlex, preset?.appstoreFlex || {}), 0);
+      placeFlex('androiddownload','slot-androiddownload', {l:0,r:0,t:0,b:0}, Object.assign({}, CFG.playFlex, preset?.playFlex || {}), 0);
 
-      /* 12) Explore */
-      placeFlex('explorenemibox','slot-explorenemibox',{l:0,r:0,t:0,b:0}, Object.assign({}, CFG.exploreFlex, preset?.exploreFlex || {}), 0);
+      /* 12) Explore pill (independent) */
+      placeFlex('explorenemibox','slot-explorenemibox', {l:0,r:0,t:0,b:0}, Object.assign({}, CFG.exploreFlex, preset?.exploreFlex || {}), 0);
       scalePill('slot-explorenemibox');
 
       /* 13) Apply line */
-      placeFlex('realtorapply','slot-realtorapply',{l:0,r:0,t:0,b:0}, Object.assign({}, CFG.realtorFlex, preset?.realtorFlex || {}), 0);
+      placeFlex('realtorapply','slot-realtorapply', {l:0,r:0,t:0,b:0}, Object.assign({}, CFG.realtorFlex, preset?.realtorFlex || {}), 0);
       if (CFG.realtorFs || preset?.realtorFs) document.getElementById('slot-realtorapply')
         .style.setProperty('--realtorFs', (preset?.realtorFs ?? CFG.realtorFs) + 'px');
-
-      /* Mobile: extend panel + allow page scroll */
-      if (preset){
-        const ids = [
-  'slot-titletextbox','slot-oneteam',              // <— add these two
-  'slot-getstartedwithnemi','slot-alreadyamember','slot-emailbox',
-  'slot-passwordbox','slot-logintext','slot-forgotpassword',
-  'slot-appdownload','slot-androiddownload','slot-explorenemibox','slot-realtorapply'
-];
-        autoGrowPanel(ids, preset.panelPadBottom ?? 24);
-        growSectionToContent(ids, preset.panelPadBottom ?? 24);
-      }
- 
-  
 
       section.classList.remove('invisible');
     }
 
-    (document.fonts && document.fonts.ready?.then ? document.fonts.ready.then(layout) : layout());
+    (document.fonts && document.fonts.ready?.then) ? document.fonts.ready.then(layout) : layout();
     window.addEventListener('resize', layout, { passive:true });
     window.addEventListener('orientationchange', layout, { passive:true });
     window.addEventListener('pageshow', layout, { passive:true });
