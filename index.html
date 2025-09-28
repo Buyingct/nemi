@@ -104,6 +104,10 @@ html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
   overflow: hidden;
   display: none;            /* JS will turn on for mobile */
 }
+
+/* Ensure the scrolling section sits above the fixed bg */
+#nemiMobile { position: relative; z-index: 1; }
+
 #bgFixed svg{
   display: block;
   width: 100vw;
@@ -429,8 +433,12 @@ bgFixed.innerHTML = svgText.replace(
 );
 
 
-    const vb = svg.viewBox.baseVal;
-    if (vb && vb.width && vb.height) section.style.aspectRatio = vb.width + ' / ' + vb.height;
+    // Keep container aspect
+const vb = svg.viewBox.baseVal;
+if (vb && vb.width && vb.height) section.style.aspectRatio = vb.width + ' / ' + vb.height;
+
+// ADD THIS LINE (stores the desktop aspect-ratio for later):
+const DESKTOP_AR = (vb && vb.width && vb.height) ? `${vb.width} / ${vb.height}` : '9 / 16';
 
     /* helpers */
     function placeInset(rectId, slotId, inset={}){
@@ -555,12 +563,19 @@ function growSectionToContent(slotIds, bottomPadPx){
 
       // Toggle fixed background & section sizing based on preset (mobile vs desktop)
 if (preset){
-  bgFixed.style.display = 'block';  // show fixed bg on mobile
-  section.style.aspectRatio = '';   // allow content to make the section tall
+  // MOBILE: show fixed bg, let the section grow tall (so page scrolls)
+  bgFixed.style.display = 'block';
+  section.style.aspectRatio = '';     // free height to scroll
 } else {
-  bgFixed.style.display = 'none';   // desktop: keep behavior as before
-  // (desktop keeps its aspectRatio from the viewBox logic earlier)
+  // DESKTOP: hide fixed bg, restore aspect ratio + clear any mobile heights
+  bgFixed.style.display = 'none';
+  section.style.aspectRatio = DESKTOP_AR;   // ← restore desktop behavior
+  section.style.height = '';
+  section.style.minHeight = '';
+  const panel = document.getElementById('slot-loginboxbg');
+  if (panel){ panel.style.height = ''; panel.style.minHeight = ''; }
 }
+
 
 
       const bodyScale  = preset ? (preset.bodyScale ?? 1)  : (DESKTOP_TUNING.bodyScale ?? 1);
@@ -659,29 +674,10 @@ if (CFG.realtorFs || preset?.realtorFs) document.getElementById('slot-realtorapp
   .style.setProperty('--realtorFs', (preset?.realtorFs ?? CFG.realtorFs) + 'px');
 
 /* 👇 NEW: auto-extend frosted panel on mobile only */
-if (preset){
-  autoGrowPanel(
-    [
-      'slot-getstartedwithnemi','slot-alreadyamember',
-      'slot-emailbox','slot-passwordbox','slot-logintext',
-      'slot-forgotpassword','slot-appdownload','slot-androiddownload',
-      'slot-explorenemibox','slot-realtorapply'
-    ],
-    preset.panelPadBottom ?? 14 // extra bottom padding inside the panel
-  );
-}
+
 
     // On mobile, let the whole page scroll by making the section tall enough
-if (preset){
-  growSectionToContent(
-    [
-      'slot-getstartedwithnemi','slot-alreadyamember','slot-emailbox',
-      'slot-passwordbox','slot-logintext','slot-forgotpassword',
-      'slot-appdownload','slot-androiddownload','slot-explorenemibox','slot-realtorapply'
-    ],
-    preset.panelPadBottom ?? 16 // a little breathing room at the bottom
-  );
-}
+
 
     // Make the section tall and the frosted panel tall enough on MOBILE
 if (preset){
