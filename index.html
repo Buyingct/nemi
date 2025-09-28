@@ -477,7 +477,9 @@ html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
   const small  = !!preset;
 
   // 🔽 Use a broader phone check so iPhone 390/414/430 hit the tall path
-  const isPhone = vw <= 520;
+  // Use the viewport, not the capped section width
+const isPhone = window.matchMedia('(max-width: 600px)').matches; // or 640px to match Tailwind "sm"
+const bump = n => (isPhone ? n : 0);
 
   const MOBILE_TALL = 1.14;
 if (isPhone) {
@@ -488,8 +490,7 @@ if (isPhone) {
   section.style.aspectRatio = vb.width + ' / ' + vb.height;
 }
 
-// Add progressive spacing only on phones
-const bump = (n)=> (isPhone ? n : 0);
+
 
 
 
