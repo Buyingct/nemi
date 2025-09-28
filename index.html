@@ -318,7 +318,7 @@ html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
       emailFs: 19, passwordFs: 19,
 
       /* Panel breathing room (expands frosted card on phones only) */
-      panelGrowY: 16, panelGrowX: 0
+      panelGrowY: 20, panelGrowX: 0
     },
     { // Small phones (≤380px)
       maxWidth: 380,
@@ -341,7 +341,7 @@ html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
 
       emailFs: 18, passwordFs: 18,
 
-      panelGrowY: 12, panelGrowX: 0
+      panelGrowY: 16, panelGrowX: 0
     }
   ];
 
@@ -397,6 +397,7 @@ html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
 
     const vb = svg.viewBox.baseVal;
     if (vb && vb.width && vb.height) section.style.aspectRatio = vb.width + ' / ' + vb.height;
+    const vbRatio = (vb && vb.width) ? (vb.height / vb.width) : (16/9);
 
     /* helpers */
     function placeInset(rectId, slotId, inset={}){
@@ -474,6 +475,19 @@ html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
       const vw = section.clientWidth;
       const preset = getMobileTuning(vw);
       const small  = !!preset;
+
+      // Make phones a bit taller without touching desktop
+const MOBILE_TALL = 1.14; // ↑ increase to 1.18–1.22 if you want more length
+if (preset) {
+  // Phones: free the aspect-ratio and set explicit height from width
+  section.style.aspectRatio = '';
+  section.style.height = Math.round(vw * vbRatio * MOBILE_TALL) + 'px';
+} else {
+  // Desktop/tablet: original behavior
+  section.style.height = '';
+  section.style.aspectRatio = vb.width + ' / ' + vb.height;
+}
+
 
       const bodyScale  = preset ? (preset.bodyScale ?? 1)  : (DESKTOP_TUNING.bodyScale ?? 1);
       const titleScale = preset ? (preset.titleScale ?? 1) : (DESKTOP_TUNING.titleScale ?? 1);
