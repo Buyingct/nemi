@@ -305,9 +305,10 @@ html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
 
     /* Per-slot fine-tune (applied on top of SVG rects) */
     slotTweak: {
-      /* Example: move title 4px up and widen by 6px per side
-      titletextbox: { dx: 0, dy: -4, growX: 6, growY: 0 }, */
-    },
+  titletextbox: { dy: -4 },
+  emailbox:     { dy: 6 },
+  getstartedwithnemi: { dx: 4, growX: 8 }
+},
 
     /* Optional images injected into MOBILE background SVG (by element id) */
     bgImages: {
