@@ -478,19 +478,31 @@ html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
 
   // 🔽 Use a broader phone check so iPhone 390/414/430 hit the tall path
   // Use the viewport, not the capped section width
-const isPhone = window.matchMedia('(max-width: 600px)').matches; // or 640px to match Tailwind "sm"
-const bump = n => (isPhone ? n : 0);
+// Phone detection by viewport, not section width (desktop card can be 520px but still desktop)
+const isPhone = window.matchMedia('(max-width: 600px)').matches;
 
-  const MOBILE_TALL = 1.14;
+// Compute a robust mobile height (prefers 100dvh if available)
+let mobileHeight;
+if (isPhone) {
+  // Try CSS 100dvh via JS (Safari iOS safe-areas handled by the browser)
+  // Fallback to innerHeight if needed
+  const vh = Math.max(window.innerHeight || 0, document.documentElement.clientHeight || 0);
+  // Clamp to a friendly range so all rows have room, but we don’t get absurdly tall on huge phones
+  mobileHeight = Math.max(720, Math.min(Math.round(vh * 1.08), 1000));
+}
+
+// Apply section sizing (independent from desktop)
 if (isPhone) {
   section.style.aspectRatio = '';
-  section.style.height = Math.round(vw * vbRatio * MOBILE_TALL) + 'px';
+  section.style.height = mobileHeight + 'px';
 } else {
   section.style.height = '';
   section.style.aspectRatio = vb.width + ' / ' + vb.height;
 }
 
-
+// Scaled mobile bump: numbers you pass will scale with the phone’s height
+const bumpScale = isPhone ? Math.max(0.9, Math.min(1.35, mobileHeight / 820)) : 1;
+const bump = n => (isPhone ? Math.round(n * bumpScale) : 0);
 
 
 
@@ -548,16 +560,16 @@ if (isPhone) {
 
       /* 7) Already a member */
 placeFlex('alreadyamember','slot-alreadyamember',{l:0,r:0,t:0,b:0},
-  Object.assign({}, CFG.alreadyFlex, preset?.alreadyFlex || {}), bump(4));
+  Object.assign({}, CFG.alreadyFlex, preset?.alreadyFlex || {}), bump(6));
 const alreadyEl = document.querySelector('#slot-alreadyamember .amcopy');
 if (CFG.alreadyFs || preset?.alreadyFs)
   alreadyEl.style.setProperty('--alreadyFs', (preset?.alreadyFs ?? CFG.alreadyFs) + 'px');
 
 /* 8) Inputs */
 placeFlex('emailbox','slot-emailbox',{l:0,r:0,t:0,b:0},
-  Object.assign({}, CFG.emailFlex, preset?.emailFlex || {}), bump(12));
+  Object.assign({}, CFG.emailFlex, preset?.emailFlex || {}), bump(16));
 placeFlex('passwordbox','slot-passwordbox',{l:0,r:0,t:0,b:0},
-  Object.assign({}, CFG.passwordFlex, preset?.passwordFlex || {}), bump(24));
+  Object.assign({}, CFG.passwordFlex, preset?.passwordFlex || {}), bump(32));
 const emailBox = document.getElementById('slot-emailbox');
 const passBox  = document.getElementById('slot-passwordbox');
 emailBox.style.setProperty('--emailFs', (preset?.emailFs ?? CFG.emailFs) + 'px');
@@ -567,32 +579,32 @@ passBox.style.setProperty('--passwordFs', (preset?.passwordFs ?? CFG.passwordFs)
 passBox.style.setProperty('--passwordRadius', (CFG.passwordRadius) + 'px');
 passBox.style.setProperty('--passwordPadX', (CFG.passwordPadX) + 'px');
 
-/* 9) Login pill (independent) */
+/* 9) Login pill */
 placeFlex('logintext','slot-logintext',{l:0,r:0,t:0,b:0},
-  Object.assign({}, CFG.loginFlex, preset?.loginFlex || {}), bump(36));
+  Object.assign({}, CFG.loginFlex, preset?.loginFlex || {}), bump(46));
 scalePill('slot-logintext');
 
 /* 10) Forgot */
 placeFlex('forgotpassword','slot-forgotpassword',{l:0,r:0,t:0,b:0},
-  Object.assign({}, CFG.forgotFlex, preset?.forgotFlex || {}), bump(48));
+  Object.assign({}, CFG.forgotFlex, preset?.forgotFlex || {}), bump(60));
 if (CFG.forgotFs || preset?.forgotFs)
   document.getElementById('slot-forgotpassword')
     .style.setProperty('--forgotFs', (preset?.forgotFs ?? CFG.forgotFs) + 'px');
 
 /* 11) Badges */
 placeFlex('appdownload','slot-appdownload',{l:0,r:0,t:0,b:0},
-  Object.assign({}, CFG.appstoreFlex, preset?.appstoreFlex || {}), bump(58));
+  Object.assign({}, CFG.appstoreFlex, preset?.appstoreFlex || {}), bump(72));
 placeFlex('androiddownload','slot-androiddownload',{l:0,r:0,t:0,b:0},
-  Object.assign({}, CFG.playFlex, preset?.playFlex || {}), bump(58));
+  Object.assign({}, CFG.playFlex, preset?.playFlex || {}), bump(72));
 
-/* 12) Explore pill (independent) */
+/* 12) Explore pill */
 placeFlex('explorenemibox','slot-explorenemibox',{l:0,r:0,t:0,b:0},
-  Object.assign({}, CFG.exploreFlex, preset?.exploreFlex || {}), bump(60));
+  Object.assign({}, CFG.exploreFlex, preset?.exploreFlex || {}), bump(82));
 scalePill('slot-explorenemibox');
 
 /* 13) Apply line */
 placeFlex('realtorapply','slot-realtorapply',{l:0,r:0,t:0,b:0},
-  Object.assign({}, CFG.realtorFlex, preset?.realtorFlex || {}), bump(68));
+  Object.assign({}, CFG.realtorFlex, preset?.realtorFlex || {}), bump(92));
 if (CFG.realtorFs || preset?.realtorFs)
   document.getElementById('slot-realtorapply')
     .style.setProperty('--realtorFs', (preset?.realtorFs ?? CFG.realtorFs) + 'px');
