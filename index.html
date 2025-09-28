@@ -434,6 +434,8 @@ html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
     );
     const svg = document.getElementById('mobileSVG');
 
+    loadMobileBgIfPhone();
+
     // Optional fixed background for phones
     if (bgText) {
       bgFixed.innerHTML = bgText.replace(
@@ -519,6 +521,23 @@ html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
       el.style.whiteSpace = 'nowrap';
     }
 
+    const bgFixed = document.getElementById('bgFixed');
+const mqPhone = '(max-width: 600px)';
+
+function loadMobileBgIfPhone() {
+  if (window.matchMedia(mqPhone).matches) {
+    fetchFirst(CFG.mobileBgCandidates, function(bgText){
+      if (bgText) {
+        bgFixed.innerHTML = bgText.replace(
+          '<svg',
+          '<svg id="mobileSVGBg" preserveAspectRatio="xMidYMid slice" style="display:block;width:100%;height:100%;pointer-events:none"'
+        );
+      }
+    });
+  }
+}
+
+
     /* ---------- layout ---------- */
     function layout(){
       const vw = section.clientWidth;
@@ -526,25 +545,28 @@ html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
       const small  = !!preset;
 
       // Decide phone by viewport (NOT the 520px card width)
-      const isPhone = window.matchMedia('(max-width: 600px)').matches;
+      const isPhone = window.matchMedia(mqPhone).matches;
 
-      // Robust phone height with clamps
-      let mobileHeight;
-      if (isPhone) {
-        const vh = Math.max(window.innerHeight || 0, document.documentElement.clientHeight || 0);
-        mobileHeight = Math.max(720, Math.min(Math.round(vh * 1.06), 1000));
-        section.style.aspectRatio = '';
-        section.style.height = mobileHeight + 'px';
-        bgFixed.style.display = bgFixed.innerHTML ? 'block' : 'none';
-        host.style.opacity = '1';
-        host.style.pointerEvents = 'none';
-      } else {
-        section.style.height = '';
-        bgFixed.style.display = 'none';
-        section.style.aspectRatio = (vb && vb.width && vb.height) ? (vb.width + ' / ' + vb.height) : '9 / 16';
-        host.style.opacity = '1';
-        host.style.pointerEvents = '';
-      }
+let mobileHeight;
+if (isPhone) {
+  const vh = Math.max(window.innerHeight || 0, document.documentElement.clientHeight || 0);
+  mobileHeight = Math.max(720, Math.min(Math.round(vh * 1.06), 1000));
+  section.style.aspectRatio = '';
+  section.style.height = mobileHeight + 'px';
+
+  // show fixed bg if we loaded it; hide overlay visuals (still used for geometry)
+  bgFixed.style.display = bgFixed.innerHTML ? 'block' : 'none';
+  host.style.opacity = '0';
+  host.style.pointerEvents = 'none';
+} else {
+  section.style.height = '';
+  section.style.aspectRatio = vb.width + ' / ' + vb.height;
+
+  bgFixed.style.display = 'none';
+  host.style.opacity = '1';
+  host.style.pointerEvents = '';
+}
+
 
       // Scaled mobile bump for spacing
       const bumpScale = isPhone ? Math.max(0.9, Math.min(1.35, (mobileHeight||820)/820)) : 1;
