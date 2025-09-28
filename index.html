@@ -265,38 +265,34 @@ html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
 
   /* ============================================================
      ✅ CUSTOMIZATION (MOBILE ONLY) — tweak safely here
-     - Nothing in this block affects desktop behavior.
-     - All values are optional; defaults below are sensible.
      ============================================================ */
   const MOBILE_KNOBS = {
-    /* Section height: derived from viewport height with clamps */
+    /* Section height from viewport with clamps */
     height: { min: 720, scale: 1.06, max: 1000 },
-      
-    /* NEW — global spacing control (mobile only) */
-  spacing: {
-    density: 0.85,   // < 1 pulls rows closer (e.g., 0.85 = 15% tighter)
-    minRowGap: 8,    // safety: never let rows get closer than 8px
-    globalLiftY: -8  // negative lifts everything up a bit; try -6 to -12
-  },
 
-  /* NEW — move “One team…” up/down specifically */  
+    /* Global spacing control */
+    spacing: {
+      density: 0.88,  // < 1 pulls rows closer (0.88 = 12% tighter)
+      minRowGap: 12,  // safety gap so rows never collide
+      globalLiftY: -8 // NOT used directly here; keep for future
+    },
 
-    /* Font limits for auto-fit routines on mobile */
+    /* Font limits (mobile clamps) */
     fonts: {
-      titleMin: 16, titleMax: 28,   // clamp for title auto-fit
-      subMin:   15, subMax:   18,   // clamp for two-line subtitle
-      emailFs:  17, passwordFs: 17, // input text sizes
-      alreadyFs: null, forgotFs: 12, realtorFs: 12 // small rows (null = use default)
+      titleMin: 16, titleMax: 28,
+      subMin:   15, subMax:   18,
+      emailFs:  17, passwordFs: 17,
+      alreadyFs: null, forgotFs: 12, realtorFs: 12
     },
 
-    /* Pill scales (font size = scale * pill height, clamped by min/max below) */
+    /* Pill font scaling */
     pills: {
-      cta:    { scale: 0.50, min: 16, max: 28, extraNudgeY: -8 },
-      login:  { scale: 0.50, min: 16, max: 28, extraNudgeY: 0 },
-      explore:{ scale: 0.46, min: 16, max: 24, extraNudgeY: 0 }
+      cta:     { scale: 0.50, min: 16, max: 28, extraNudgeY: -8 },
+      login:   { scale: 0.50, min: 16, max: 28, extraNudgeY:  0 },
+      explore: { scale: 0.46, min: 16, max: 24, extraNudgeY:  0 }
     },
 
-    /* Vertical spacing “bumps” (in px) BELOW the CTA — per row */
+    /* Vertical spacing “bumps” BELOW the CTA — per row */
     bumps: {
       already:   4,
       email:     12,
@@ -309,42 +305,36 @@ html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
       realtor:   80
     },
 
-    /* Scale bumps based on phone height (1.0 = off) */
     bumpScaleMin: 0.90,
     bumpScaleMax: 1.35,
     bumpBaseHeight: 820,
 
-    /* Extra growth to frosted panel on phones (visual padding) */
+    /* Extra frosted panel padding (mobile only) */
     panelGrow: { x: 0, y: 16 },
 
-    /* Per-slot fine-tune (applied on top of SVG rects) */
-    /* Per-slot fine-tune (applied on top of SVG rects) */
-slotTweak: {
-  // headline rows
-  titletextbox: { dy: -4 },   // negative = move up
-  oneteam:      { dy: -10 },  // lift “One team…” block
+    /* Per-slot fine-tune (mobile only) */
+    slotTweak: {
+      // headline rows
+      titletextbox:       { dy: -4 },   // negative = move up
+      oneteam:            { dy: -10 },  // lift “One team…” block
+      // CTA + inputs
+      getstartedwithnemi: { dx: 0, dy: -8, growX: 8 },
+      alreadyamember:     { dy: -8 },
+      emailbox:           { dy: -4 },
+      passwordbox:        { dy: -4 },
+      logintext:          { dy: -4 },
+      forgotpassword:     { dy: -4 }
+    },
 
-  // CTA + inputs
-  getstartedwithnemi: { dx: 0, dy: -6, growX: 8 },
-  getstartedwithnemi: { dy: -8 },
-  alreadyamember:     { dy: -40 },
-  emailbox:           { dy: -4 },
-  passwordbox:        { dy: -4 },
-  logintext:          { dy: -6 },
-  forgotpassword:     { dy: -4 }  
-  // add more here if needed: passwordbox, logintext, etc.
-},
-
-    /* Optional images injected into MOBILE background SVG (by element id) */
+    /* Optional images injected into mobile background SVG */
     bgImages: {
-      // These only apply on mobile (since bg SVG is mobile-only)
       nemilogo:  { src: 'assets/img/nemilogo.png',  preserve: 'xMidYMid meet'  },
       finalgoal: { src: 'assets/img/finalgoal.png', preserve: 'xMidYMid meet'  }
     }
   };
 
   /* ============================================================
-     BASE CFG (desktop baseline; unchanged) + sensible defaults
+     BASE CFG (desktop baseline; unchanged)
      ============================================================ */
   const CFG = {
     /* Desktop combined SVG (unchanged) */
@@ -366,7 +356,7 @@ slotTweak: {
       '/nemi/assets/svgs/loginboxmobile.svg'
     ],
 
-    /* Title block (desktop baseline; mobile clamps via MOBILE_KNOBS.fonts) */
+    /* Title block (desktop baseline) */
     titleInsetLR: -12,  titleInsetT: 3, titleInsetB: 0,
     titleFontMin: 18,   titleFontMax: 32,
     titleFlex:    { dx: 0, dy: 0,  growX: 0, growY: 0 },
@@ -420,7 +410,6 @@ slotTweak: {
       subTopPad: 2,
       extraCtaNudge: 8,
 
-      /* spacing between rows (only affects geometry if growY) */
       alreadyFlex:  { dy:  6 },
       emailFlex:    { dy: 12, growY: 6 },
       passwordFlex: { dy: 24, growY: 6 },
@@ -520,14 +509,12 @@ slotTweak: {
       try { el.setAttributeNS(xlinkNS, 'xlink:href', val); } catch(e){}
     }
 
-    // If it's already an <image>, just set href
     if (anchor.tagName.toLowerCase() === 'image'){
       setHref(anchor, src);
       if (preserve) anchor.setAttribute('preserveAspectRatio', preserve);
       return;
     }
 
-    // If it's a rect (or anything with x/y/width/height), create an <image> in place
     const bb = {
       x: parseFloat(anchor.getAttribute('x') || 0),
       y: parseFloat(anchor.getAttribute('y') || 0),
@@ -542,7 +529,6 @@ slotTweak: {
       img.setAttribute('height', bb.height);
       img.setAttribute('preserveAspectRatio', preserve || 'xMidYMid meet');
       setHref(img, src);
-      // Keep anchor in DOM (for reference) but make it invisible
       anchor.setAttribute('fill', 'none');
       anchor.setAttribute('stroke', 'none');
       anchor.parentNode.insertBefore(img, anchor.nextSibling);
@@ -566,7 +552,6 @@ slotTweak: {
         '<svg',
         '<svg id="mobileSVGBg" preserveAspectRatio="xMidYMid slice" style="display:block;width:100%;height:100%;pointer-events:none"'
       );
-      // Inject images into bg if anchors exist (mobile only)
       const bgSVG = document.getElementById('mobileSVGBg');
       const imgs = MOBILE_KNOBS.bgImages || {};
       if (bgSVG){
@@ -580,7 +565,7 @@ slotTweak: {
     const vb = svg.viewBox?.baseVal || null;
     if (vb && vb.width && vb.height) section.style.aspectRatio = vb.width + ' / ' + vb.height;
 
-    /* ---------- helpers (scoped to this svg) ---------- */
+    /* ---------- position helpers ---------- */
     function placeInset(rectId, slotId, inset={}){
       const rEl = svg.querySelector('#'+rectId);
       const slot= document.getElementById(slotId);
@@ -663,14 +648,13 @@ slotTweak: {
         section.style.aspectRatio = '';
         section.style.height = mobileHeight + 'px';
 
-        // show fixed bg if we loaded it; hide overlay visuals (still used for geometry)
         bgFixed.style.display = bgFixed.innerHTML ? 'block' : 'none';
         host.style.opacity = '0';
         host.style.pointerEvents = 'none';
       } else {
         section.style.height = '';
         bgFixed.style.display = 'none';
-        section.style.aspectRatio = '9 / 16'; // overridden by vb below if present
+        section.style.aspectRatio = '9 / 16';
         const vb = document.getElementById('mobileSVG')?.viewBox?.baseVal || null;
         if (vb && vb.width && vb.height) section.style.aspectRatio = vb.width + ' / ' + vb.height;
         host.style.opacity = '1';
@@ -678,37 +662,47 @@ slotTweak: {
       }
 
       // Scaled mobile bump for spacing
-      const bs = MOBILE_KNOBS.bumpBaseHeight || 820;
-      // Existing scale that adapts to phone height
-const bumpScale = isPhone
-  ? Math.max(0.9, Math.min(1.35, (mobileHeight || 820) / 820))
-  : 1;
+      const bumpScale = isPhone
+        ? Math.max(MOBILE_KNOBS.bumpScaleMin, Math.min(MOBILE_KNOBS.bumpScaleMax, (mobileHeight || 820) / (MOBILE_KNOBS.bumpBaseHeight || 820)))
+        : 1;
 
-// NEW: global spacing controls (mobile only)
-const DENSITY   = 0.88; // < 1 pulls rows closer; try 0.90, 0.85, 0.80
-const MIN_GAP   = 12;    // pixels; safety so rows never get too close
+      const DENSITY = MOBILE_KNOBS.spacing?.density ?? 1;
+      const MIN_GAP = MOBILE_KNOBS.spacing?.minRowGap ?? 8;
 
-// Replace your old bump() with this:
-const bump = n => {
-  if (!isPhone) return 0;
-  const v = Math.round(n * bumpScale * DENSITY);
-  return Math.max(v, MIN_GAP);
-};
+      const bump = n => {
+        if (!isPhone) return 0;
+        const v = Math.round(n * bumpScale * DENSITY);
+        return Math.max(v, MIN_GAP);
+      };
 
-      // Fonts (mobile clamps)
+      // Fonts (mobile clamps only on phones)
       const F = MOBILE_KNOBS.fonts || {};
       const bodyScale  = preset ? (preset.bodyScale ?? 1)  : (DESKTOP_TUNING.bodyScale ?? 1);
       const titleScale = preset ? (preset.titleScale ?? 1) : (DESKTOP_TUNING.titleScale ?? 1);
-      const titleMin = Math.round((F.titleMin ?? preset?.titleMin ?? CFG.titleFontMin) * titleScale);
-      const titleMax = Math.round((F.titleMax ?? preset?.titleMax ?? CFG.titleFontMax) * titleScale);
-      const subMin   = Math.round((F.subMin   ?? preset?.subMin   ?? CFG.oneteamFontMin) * bodyScale);
-      const subMax   = Math.round((F.subMax   ?? preset?.subMax   ?? CFG.oneteamFontMax) * bodyScale);
+
+      const titleMinBase = isPhone
+        ? (F.titleMin ?? preset?.titleMin ?? CFG.titleFontMin)
+        : (DESKTOP_TUNING.titleMin ?? CFG.titleFontMin);
+      const titleMaxBase = isPhone
+        ? (F.titleMax ?? preset?.titleMax ?? CFG.titleFontMax)
+        : (DESKTOP_TUNING.titleMax ?? CFG.titleFontMax);
+      const subMinBase = isPhone
+        ? (F.subMin ?? preset?.subMin ?? CFG.oneteamFontMin)
+        : CFG.oneteamFontMin;
+      const subMaxBase = isPhone
+        ? (F.subMax ?? preset?.subMax ?? CFG.oneteamFontMax)
+        : CFG.oneteamFontMax;
+
+      const titleMin = Math.round(titleMinBase * titleScale);
+      const titleMax = Math.round(titleMaxBase * titleScale);
+      const subMin   = Math.round(subMinBase   * bodyScale);
+      const subMax   = Math.round(subMaxBase   * bodyScale);
 
       section.style.setProperty('--bodyScale', bodyScale);
       if (preset?.oneteamGap != null) section.style.setProperty('--oneteam-gap', preset.oneteamGap + 'px');
 
-      /* 1) Frosted panel (mobile panel can grow via MOBILE_KNOBS.panelGrow) */
-      const pg = MOBILE_KNOBS.panelGrow || {x:0,y:0};
+      /* 1) Frosted panel (MOBILE padding only) */
+      const pg = isPhone ? (MOBILE_KNOBS.panelGrow || {x:0,y:0}) : {x:0,y:0};
       const growX = (preset?.panelGrowX || 0) + (pg.x||0);
       const growY = (preset?.panelGrowY || 0) + (pg.y||0);
       placeInset('loginbox','slot-loginboxbg', { l: 3 - growX, r: 3 - growX, t: 3 - growY, b: 3 - growY });
@@ -720,28 +714,37 @@ const bump = n => {
         if (bg && (rx || ry)) bg.style.borderRadius = Math.max(rx, ry) + 'px';
       })();
 
-      /* Utility to merge per-slot mobile tweaks */
-      function flexPlus(base, slotKey){
-        const t = (MOBILE_KNOBS.slotTweak || {})[slotKey] || {};
+      /* Utility: merge per-slot tweaks, but ONLY on phones */
+      function flexPlus(base, slotKey, apply) {
         const merged = Object.assign({}, base);
-        if (t.dx)    merged.dx    = (merged.dx||0)    + t.dx;
-        if (t.dy)    merged.dy    = (merged.dy||0)    + t.dy;
-        if (t.growX) merged.growX = (merged.growX||0) + t.growX;
-        if (t.growY) merged.growY = (merged.growY||0) + t.growY;
+        if (!apply) return merged; // desktop/tablet: ignore mobile tweaks
+        const t = (MOBILE_KNOBS.slotTweak || {})[slotKey] || {};
+        if (t.dx != null)    merged.dx    = (merged.dx    || 0) + t.dx;
+        if (t.dy != null)    merged.dy    = (merged.dy    || 0) + t.dy;
+        if (t.growX != null) merged.growX = (merged.growX || 0) + t.growX;
+        if (t.growY != null) merged.growY = (merged.growY || 0) + t.growY;
         return merged;
       }
 
       /* 2) Team icon */
-      placeFlex('teamiconbox','slot-teamiconbox', {l:0,r:0,t:0,b:0}, flexPlus(Object.assign({}, CFG.teamIconFlex, preset?.teamIconFlex || {}), 'teamiconbox'), 0);
+      placeFlex('teamiconbox','slot-teamiconbox', {l:0,r:0,t:0,b:0},
+        flexPlus(Object.assign({}, CFG.teamIconFlex, preset?.teamIconFlex || {}), 'teamiconbox', isPhone), 0);
 
       /* 3) Title */
       const titleInsetLR = small ? Math.min(-6, CFG.titleInsetLR) : CFG.titleInsetLR;
       const baseTitle = { l:titleInsetLR, r:titleInsetLR, t:CFG.titleInsetT, b:CFG.titleInsetB };
-      placeFlex('titletextbox','slot-titletextbox', baseTitle, flexPlus(Object.assign({}, CFG.titleFlex, preset?.titleFlex || {}), 'titletextbox'), 0);
+      placeFlex('titletextbox','slot-titletextbox', baseTitle,
+        flexPlus(Object.assign({}, CFG.titleFlex, preset?.titleFlex || {}), 'titletextbox', isPhone), 0);
 
       /* 4) Subtext */
-      const baseSub = { l:CFG.oneteamPadPx|0, r:CFG.oneteamPadPx|0, t:(CFG.oneteamPadPx|0)-(CFG.oneteamBumpUp|0), b:(CFG.oneteamPadPx|0)+(CFG.oneteamBumpUp|0)-(CFG.oneteamExtraHeight|0) };
-      placeFlex('oneteam','slot-oneteam', baseSub, flexPlus(Object.assign({}, CFG.oneteamFlex, preset?.oneteamFlex || {}), 'oneteam'), 0);
+      const baseSub = {
+        l:CFG.oneteamPadPx|0,
+        r:CFG.oneteamPadPx|0,
+        t:(CFG.oneteamPadPx|0)-(CFG.oneteamBumpUp|0),
+        b:(CFG.oneteamPadPx|0)+(CFG.oneteamBumpUp|0)-(CFG.oneteamExtraHeight|0)
+      };
+      placeFlex('oneteam','slot-oneteam', baseSub,
+        flexPlus(Object.assign({}, CFG.oneteamFlex, preset?.oneteamFlex || {}), 'oneteam', isPhone), 0);
       document.querySelector('#slot-oneteam .otcopy').style.paddingTop = (preset?.subTopPad || 0) + 'px';
 
       /* 5) Fit text */
@@ -751,20 +754,29 @@ const bump = n => {
       /* 6) CTA pill */
       const pills = MOBILE_KNOBS.pills || {};
       const ctaSpec = { scale: pills.cta?.scale ?? CFG.ctaScale, min: pills.cta?.min ?? CFG.ctaFontMin, max: pills.cta?.max ?? CFG.ctaFontMax };
-      const ctaNudge = (CFG.ctaNudgeY + (preset?.extraCtaNudge || 0) + (pills.cta?.extraNudgeY || 0));
+      const ctaNudge = CFG.ctaNudgeY
+        + (preset?.extraCtaNudge || 0)
+        + (isPhone ? (pills.cta?.extraNudgeY || 0) : 0);
       const baseCTA = { l: CFG.ctaInset.l - CFG.cardGrowX, r: CFG.ctaInset.r - CFG.cardGrowX, t: CFG.ctaInset.t, b: CFG.ctaInset.b };
-      placeFlex('getstartedwithnemi', 'slot-getstartedwithnemi', baseCTA, flexPlus(Object.assign({}, CFG.ctaFlex, preset?.ctaFlex || {}), 'getstartedwithnemi'), ctaNudge);
+      placeFlex('getstartedwithnemi', 'slot-getstartedwithnemi', baseCTA,
+        flexPlus(Object.assign({}, CFG.ctaFlex, preset?.ctaFlex || {}), 'getstartedwithnemi', isPhone), ctaNudge);
       scalePill('slot-getstartedwithnemi', ctaSpec);
 
       /* 7) Already a member */
-      placeFlex('alreadyamember','slot-alreadyamember',{l:0,r:0,t:0,b:0}, flexPlus(Object.assign({}, CFG.alreadyFlex, preset?.alreadyFlex || {}), 'alreadyamember'), bump(MOBILE_KNOBS.bumps.already||6));
+      placeFlex('alreadyamember','slot-alreadyamember',{l:0,r:0,t:0,b:0},
+        flexPlus(Object.assign({}, CFG.alreadyFlex, preset?.alreadyFlex || {}), 'alreadyamember', isPhone),
+        bump(MOBILE_KNOBS.bumps.already||6));
       const alreadyEl = document.querySelector('#slot-alreadyamember .amcopy');
       const af = (MOBILE_KNOBS.fonts.alreadyFs ?? CFG.alreadyFs);
       if (af) alreadyEl.style.setProperty('--alreadyFs', af + 'px');
 
       /* 8) Inputs */
-      placeFlex('emailbox','slot-emailbox',{l:0,r:0,t:0,b:0},    flexPlus(Object.assign({}, CFG.emailFlex,    preset?.emailFlex    || {}), 'emailbox'),    bump(MOBILE_KNOBS.bumps.email||16));
-      placeFlex('passwordbox','slot-passwordbox',{l:0,r:0,t:0,b:0},flexPlus(Object.assign({}, CFG.passwordFlex, preset?.passwordFlex || {}), 'passwordbox'), bump(MOBILE_KNOBS.bumps.password||32));
+      placeFlex('emailbox','slot-emailbox',{l:0,r:0,t:0,b:0},
+        flexPlus(Object.assign({}, CFG.emailFlex, preset?.emailFlex || {}), 'emailbox', isPhone),
+        bump(MOBILE_KNOBS.bumps.email||16));
+      placeFlex('passwordbox','slot-passwordbox',{l:0,r:0,t:0,b:0},
+        flexPlus(Object.assign({}, CFG.passwordFlex, preset?.passwordFlex || {}), 'passwordbox', isPhone),
+        bump(MOBILE_KNOBS.bumps.password||32));
       const emailBox = document.getElementById('slot-emailbox');
       const passBox  = document.getElementById('slot-passwordbox');
       emailBox.style.setProperty('--emailFs', (MOBILE_KNOBS.fonts.emailFs ?? preset?.emailFs ?? CFG.emailFs) + 'px');
@@ -776,25 +788,37 @@ const bump = n => {
 
       /* 9) Login pill */
       const loginSpec = { scale: pills.login?.scale ?? CFG.loginScale, min: pills.login?.min ?? CFG.loginFontMin, max: pills.login?.max ?? CFG.loginFontMax };
-      placeFlex('logintext','slot-logintext',{l:0,r:0,t:0,b:0}, flexPlus(Object.assign({}, CFG.loginFlex, preset?.loginFlex || {}), 'logintext'), bump(MOBILE_KNOBS.bumps.login||46) + (pills.login?.extraNudgeY||0));
+      placeFlex('logintext','slot-logintext',{l:0,r:0,t:0,b:0},
+        flexPlus(Object.assign({}, CFG.loginFlex, preset?.loginFlex || {}), 'logintext', isPhone),
+        bump(MOBILE_KNOBS.bumps.login||46) + (isPhone ? (pills.login?.extraNudgeY||0) : 0));
       scalePill('slot-logintext', loginSpec);
 
       /* 10) Forgot */
-      placeFlex('forgotpassword','slot-forgotpassword',{l:0,r:0,t:0,b:0}, flexPlus(Object.assign({}, CFG.forgotFlex, preset?.forgotFlex || {}), 'forgotpassword'), bump(MOBILE_KNOBS.bumps.forgot||60));
+      placeFlex('forgotpassword','slot-forgotpassword',{l:0,r:0,t:0,b:0},
+        flexPlus(Object.assign({}, CFG.forgotFlex, preset?.forgotFlex || {}), 'forgotpassword', isPhone),
+        bump(MOBILE_KNOBS.bumps.forgot||60));
       const ff = (MOBILE_KNOBS.fonts.forgotFs ?? CFG.forgotFs);
       if (ff) document.getElementById('slot-forgotpassword').style.setProperty('--forgotFs', ff + 'px');
 
       /* 11) Badges */
-      placeFlex('appdownload','slot-appdownload',{l:0,r:0,t:0,b:0}, flexPlus(Object.assign({}, CFG.appstoreFlex, preset?.appstoreFlex || {}), 'appdownload'), bump(MOBILE_KNOBS.bumps.appstore||72));
-      placeFlex('androiddownload','slot-androiddownload',{l:0,r:0,t:0,b:0}, flexPlus(Object.assign({}, CFG.playFlex, preset?.playFlex || {}), 'androiddownload'), bump(MOBILE_KNOBS.bumps.play||72));
+      placeFlex('appdownload','slot-appdownload',{l:0,r:0,t:0,b:0},
+        flexPlus(Object.assign({}, CFG.appstoreFlex, preset?.appstoreFlex || {}), 'appdownload', isPhone),
+        bump(MOBILE_KNOBS.bumps.appstore||72));
+      placeFlex('androiddownload','slot-androiddownload',{l:0,r:0,t:0,b:0},
+        flexPlus(Object.assign({}, CFG.playFlex, preset?.playFlex || {}), 'androiddownload', isPhone),
+        bump(MOBILE_KNOBS.bumps.play||72));
 
       /* 12) Explore pill */
       const exploreSpec = { scale: pills.explore?.scale ?? CFG.exploreScale, min: pills.explore?.min ?? CFG.exploreFontMin, max: pills.explore?.max ?? CFG.exploreFontMax };
-      placeFlex('explorenemibox','slot-explorenemibox',{l:0,r:0,t:0,b:0}, flexPlus(Object.assign({}, CFG.exploreFlex, preset?.exploreFlex || {}), 'explorenemibox'), bump(MOBILE_KNOBS.bumps.explore||82) + (pills.explore?.extraNudgeY||0));
+      placeFlex('explorenemibox','slot-explorenemibox',{l:0,r:0,t:0,b:0},
+        flexPlus(Object.assign({}, CFG.exploreFlex, preset?.exploreFlex || {}), 'explorenemibox', isPhone),
+        bump(MOBILE_KNOBS.bumps.explore||82) + (isPhone ? (pills.explore?.extraNudgeY||0) : 0));
       scalePill('slot-explorenemibox', exploreSpec);
 
       /* 13) Apply line */
-      placeFlex('realtorapply','slot-realtorapply',{l:0,r:0,t:0,b:0}, flexPlus(Object.assign({}, CFG.realtorFlex, preset?.realtorFlex || {}), 'realtorapply'), bump(MOBILE_KNOBS.bumps.realtor||92));
+      placeFlex('realtorapply','slot-realtorapply',{l:0,r:0,t:0,b:0},
+        flexPlus(Object.assign({}, CFG.realtorFlex, preset?.realtorFlex || {}), 'realtorapply', isPhone),
+        bump(MOBILE_KNOBS.bumps.realtor||92));
       const rf = (MOBILE_KNOBS.fonts.realtorFs ?? CFG.realtorFs);
       if (rf) document.getElementById('slot-realtorapply').style.setProperty('--realtorFs', rf + 'px');
 
