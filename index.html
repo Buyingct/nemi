@@ -287,14 +287,14 @@ html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
 
     /* Pill font scaling */
     pills: {
-      cta:     { scale: 0.50, min: 16, max: 28, extraNudgeY: -8 },
-      login:   { scale: 0.50, min: 16, max: 28, extraNudgeY:  0 },
-      explore: { scale: 0.46, min: 16, max: 24, extraNudgeY:  0 }
-    },
+  cta: { scale: 0.50, min: 16, max: 28, extraNudgeY: -14 }, // was -8
+  login: { scale: 0.50, min: 16, max: 28, extraNudgeY: 0 },
+  explore: { scale: 0.46, min: 16, max: 24, extraNudgeY: 0 }
+},
 
     /* Vertical spacing “bumps” BELOW the CTA — per row */
     bumps: {
-      already:   -4,
+      already:   4,
       email:     12,
       password:  26,
       login:     38,
@@ -318,7 +318,7 @@ html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
       titletextbox:       { dy: -4 },   // negative = move up
       oneteam:            { dy: -10 },  // lift “One team…” block
       // CTA + inputs
-      getstartedwithnemi: { dx: 0, dy: -8, growX: 8 },
+      getstartedwithnemi: { dx: 0, dy: -12, growX: 8 },
       alreadyamember:     { dy: -8 },
       emailbox:           { dy: -4 },
       passwordbox:        { dy: -4 },
