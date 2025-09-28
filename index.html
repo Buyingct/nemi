@@ -488,7 +488,7 @@ if (isPhone) {
   // Fallback to innerHeight if needed
   const vh = Math.max(window.innerHeight || 0, document.documentElement.clientHeight || 0);
   // Clamp to a friendly range so all rows have room, but we don’t get absurdly tall on huge phones
-  mobileHeight = Math.max(720, Math.min(Math.round(vh * 1.08), 1000));
+  mobileHeight = Math.max(720, Math.min(Math.round(vh * 1), 1000));
 }
 
 // Apply section sizing (independent from desktop)
