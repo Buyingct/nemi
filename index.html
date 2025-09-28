@@ -11,7 +11,10 @@
   <!-- =========================================================
        [NEMI:MOBILE HERO] (9:16 container; SVG anchors + positioned slots)
        ========================================================= -->
-  <section id="nemiMobile"
+     <!-- Fixed background (SVG injected by JS; shown on mobile only) -->
+<div id="bgFixed" aria-hidden="true"></div>
+  
+       <section id="nemiMobile"
     class="relative mx-auto w-[min(520px,96vw)] overflow-hidden invisible"
     style="aspect-ratio:9/16">
 
@@ -91,6 +94,24 @@
   <style>
 /* iOS text zoom guard */
 html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
+
+/* Fixed background behind everything (mobile only via JS toggle) */
+#bgFixed{
+  position: fixed;
+  inset: 0;
+  z-index: 0;               /* behind the scrolling section */
+  pointer-events: none;     /* clicks pass through */
+  overflow: hidden;
+  display: none;            /* JS will turn on for mobile */
+}
+#bgFixed svg{
+  display: block;
+  width: 100vw;
+  height: 100vh;
+  /* default preserveAspectRatio keeps it nicely centered */
+}
+
+
 
 /* Quick CSS knobs (visual only; copy knobs are in JS CONFIG) */
 #nemiMobile{
@@ -309,7 +330,7 @@ html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
       exploreFlex:  { dy: 62 },
       appstoreFlex: { dy: 70 },
       playFlex:     { dy: 70 },
-      panelPadBottom: 14,   // extra white space under the lowest row
+      panelPadBottom: 20,   // extra white space under the lowest row
 
       /* One-line “Have what it takes…” */
       realtorFlex: { dy: 74, growX: 14 },
@@ -337,7 +358,7 @@ html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
       exploreFlex:  { dy: 52 },
       appstoreFlex: { dy: 60 },
       playFlex:     { dy: 60 },
-      panelPadBottom: 14,   // extra white space under the lowest row
+      panelPadBottom: 20,   // extra white space under the lowest row
 
       realtorFlex: { dy: 64, growX: 12 },
       realtorFs: 12,
@@ -382,6 +403,9 @@ html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
   const section = document.getElementById('nemiMobile');
   const host    = document.getElementById('mobileArt');
 
+   const bgFixed = document.getElementById('bgFixed'); // NEW: fixed background host
+
+
   function fetchFirst(urls, done){
     let i = 0;
     (function next(){
@@ -397,6 +421,13 @@ html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
     if (!svgText) { section.classList.remove('invisible'); return; }
     host.innerHTML = svgText.replace('<svg','<svg id="mobileSVG" style="display:block;width:100%;height:100%;pointer-events:none"');
     const svg = document.getElementById('mobileSVG');
+
+    // Paint the same SVG as a fixed background (mobile only; we toggle it in layout)
+bgFixed.innerHTML = svgText.replace(
+  '<svg',
+  '<svg id="bgSVG" style="display:block;width:100%;height:100%;pointer-events:none"'
+);
+
 
     const vb = svg.viewBox.baseVal;
     if (vb && vb.width && vb.height) section.style.aspectRatio = vb.width + ' / ' + vb.height;
@@ -494,13 +525,38 @@ function autoGrowPanel(slotIds, extraBottomPx){
   if (newH) panel.style.height = newH + 'px';
 }
 
-     
+     // Ensure the section is tall enough to contain the lowest slot
+function growSectionToContent(slotIds, bottomPadPx){
+  const sb = section.getBoundingClientRect();
+  let maxBottom = 0;
+  for (const id of slotIds){
+    const el = document.getElementById(id);
+    if (!el || el.offsetParent === null) continue;
+    const r = el.getBoundingClientRect();
+    maxBottom = Math.max(maxBottom, r.bottom - sb.top);
+  }
+  if (maxBottom){
+    section.style.height = Math.ceil(maxBottom + (bottomPadPx|0)) + 'px';
+    section.style.minHeight = section.style.height; // keep it stable
+  }
+}
+
        
     /* ---------- layout ---------- */
     function layout(){
       const vw = section.clientWidth;
       const preset = getMobileTuning(vw);
       const small  = !!preset;
+
+      // Toggle fixed background & section sizing based on preset (mobile vs desktop)
+if (preset){
+  bgFixed.style.display = 'block';  // show fixed bg on mobile
+  section.style.aspectRatio = '';   // allow content to make the section tall
+} else {
+  bgFixed.style.display = 'none';   // desktop: keep behavior as before
+  // (desktop keeps its aspectRatio from the viewBox logic earlier)
+}
+
 
       const bodyScale  = preset ? (preset.bodyScale ?? 1)  : (DESKTOP_TUNING.bodyScale ?? 1);
       const titleScale = preset ? (preset.titleScale ?? 1) : (DESKTOP_TUNING.titleScale ?? 1);
@@ -609,6 +665,19 @@ if (preset){
     preset.panelPadBottom ?? 14 // extra bottom padding inside the panel
   );
 }
+
+    // On mobile, let the whole page scroll by making the section tall enough
+if (preset){
+  growSectionToContent(
+    [
+      'slot-getstartedwithnemi','slot-alreadyamember','slot-emailbox',
+      'slot-passwordbox','slot-logintext','slot-forgotpassword',
+      'slot-appdownload','slot-androiddownload','slot-explorenemibox','slot-realtorapply'
+    ],
+    preset.panelPadBottom ?? 16 // a little breathing room at the bottom
+  );
+}
+
 
       section.classList.remove('invisible');
     }
