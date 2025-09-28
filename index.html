@@ -298,15 +298,15 @@ html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
 
     /* Vertical spacing “bumps” (in px) BELOW the CTA — per row */
     bumps: {
-      already:   6,
-      email:     16,
-      password:  32,
-      login:     46,
-      forgot:    60,
-      appstore:  72,
-      play:      72,
-      explore:   82,
-      realtor:   92
+      already:   4,
+      email:     12,
+      password:  26,
+      login:     38,
+      forgot:    50,
+      appstore:  60,
+      play:      60,
+      explore:   70,
+      realtor:   80
     },
 
     /* Scale bumps based on phone height (1.0 = off) */
@@ -321,13 +321,17 @@ html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
     /* Per-slot fine-tune (applied on top of SVG rects) */
 slotTweak: {
   // headline rows
-  titletextbox: { dy: -6 },   // negative = move up
-  oneteam:      { dy: -12 },  // lift “One team…” block
+  titletextbox: { dy: -4 },   // negative = move up
+  oneteam:      { dy: -10 },  // lift “One team…” block
 
   // CTA + inputs
-  getstartedwithnemi: { dx: 0, dy: 0, growX: 8 },
-  emailbox:           { dy: 6 }
-
+  getstartedwithnemi: { dx: 0, dy: -6, growX: 8 },
+   getstartedwithnemi: { dy: -6 },
+  alreadyamember:     { dy: -2 },
+  emailbox:           { dy: -4 },
+  passwordbox:        { dy: -4 },
+  logintext:          { dy: -6 },
+  forgotpassword:     { dy: -4 }  
   // add more here if needed: passwordbox, logintext, etc.
 },
 
