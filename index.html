@@ -291,7 +291,7 @@ html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
 
     /* Pill scales (font size = scale * pill height, clamped by min/max below) */
     pills: {
-      cta:    { scale: 0.50, min: 16, max: 28, extraNudgeY: 6 },
+      cta:    { scale: 0.50, min: 16, max: 28, extraNudgeY: -8 },
       login:  { scale: 0.50, min: 16, max: 28, extraNudgeY: 0 },
       explore:{ scale: 0.46, min: 16, max: 24, extraNudgeY: 0 }
     },
@@ -681,7 +681,7 @@ const bumpScale = isPhone
   : 1;
 
 // NEW: global spacing controls (mobile only)
-const DENSITY   = 0.92; // < 1 pulls rows closer; try 0.90, 0.85, 0.80
+const DENSITY   = 0.88; // < 1 pulls rows closer; try 0.90, 0.85, 0.80
 const MIN_GAP   = 12;    // pixels; safety so rows never get too close
 
 // Replace your old bump() with this:
