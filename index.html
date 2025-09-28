@@ -509,7 +509,7 @@ function autoGrowPanel(slotIds, extraBottomPx){
   if (!panel) return;
   const hb = host.getBoundingClientRect();
   const pTop = panel.getBoundingClientRect().top - hb.top; // current top (px from host)
-
+  
   // find bottom-most visible slot
   let maxBottom = 0;
   for (const id of slotIds){
@@ -519,10 +519,15 @@ function autoGrowPanel(slotIds, extraBottomPx){
     maxBottom = Math.max(maxBottom, r.bottom - hb.top);
   }
 
+  
   // set new height = (bottom-most – panelTop) + padding
   const pad = Math.max(0, extraBottomPx|0);
   const newH = Math.max(0, Math.ceil(maxBottom - pTop + pad));
-  if (newH) panel.style.height = newH + 'px';
+if (newH){
+  panel.style.height = newH + 'px';
+  panel.style.minHeight = newH + 'px'; // <- keeps it stable
+}
+
 }
 
      // Ensure the section is tall enough to contain the lowest slot
@@ -678,7 +683,27 @@ if (preset){
   );
 }
 
+    // Make the section tall and the frosted panel tall enough on MOBILE
+if (preset){
+  const ids = [
+    'slot-getstartedwithnemi','slot-alreadyamember','slot-emailbox',
+    'slot-passwordbox','slot-logintext','slot-forgotpassword',
+    'slot-appdownload','slot-androiddownload','slot-explorenemibox','slot-realtorapply'
+  ];
 
+  // grow the frosted panel to cover everything inside it
+  autoGrowPanel(ids, preset.panelPadBottom ?? 16);
+
+  // let the whole page scroll by giving the section enough height
+  growSectionToContent(ids, preset.panelPadBottom ?? 16);
+} else {
+  // DESKTOP reset (so resizing from mobile → desktop doesn’t keep mobile heights)
+  const panel = document.getElementById('slot-loginboxbg');
+  if (panel){ panel.style.height = ''; panel.style.minHeight = ''; }
+  section.style.height = '';
+  section.style.minHeight = '';
+}
+   
       section.classList.remove('invisible');
     }
 
