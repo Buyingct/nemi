@@ -216,10 +216,11 @@ html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
 #nemiMobile input:focus{ outline:none; border-color:#1c2c46; box-shadow:0 0 0 4px rgba(28,44,70,.12); }
 
 /* Mobile-only nudges */
-@media (max-width: 380px){
+@media (max-width: 600px){
   #nemiMobile{
     --title-nudge-y:   -6px;
     --oneteam-nudge-y: -2px;
+    --oneteam-gap:      2px;
   }
   #slot-oneteam .otcopy{ padding-top: 2px; }
   #slot-realtorapply{ white-space: nowrap; }
@@ -266,6 +267,19 @@ html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
   const MOBILE_KNOBS = {
     /* Section height: derived from viewport height with clamps */
     height: { min: 720, scale: 1.06, max: 1000 },
+      
+    /* NEW — global spacing control (mobile only) */
+  spacing: {
+    density: 0.85,   // < 1 pulls rows closer (e.g., 0.85 = 15% tighter)
+    minRowGap: 8,    // safety: never let rows get closer than 8px
+    globalLiftY: -8  // negative lifts everything up a bit; try -6 to -12
+  },
+
+  /* NEW — move “One team…” up/down specifically */
+  slotTweak: {
+    oneteam: { dy: -10 }, // negative = higher. Try -8 to -14
+    // you can keep/add other tweaks here (titletextbox, emailbox, etc.)
+  },   
 
     /* Font limits for auto-fit routines on mobile */
     fonts: {
@@ -285,14 +299,14 @@ html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
     /* Vertical spacing “bumps” (in px) BELOW the CTA — per row */
     bumps: {
       already:   6,
-      email:     7,
-      password:  8,
-      login:     9,
-      forgot:    10,
-      appstore:  11,
-      play:      11,
-      explore:   12,
-      realtor:   13
+      email:     16,
+      password:  32,
+      login:     46,
+      forgot:    60,
+      appstore:  72,
+      play:      72,
+      explore:   82,
+      realtor:   92
     },
 
     /* Scale bumps based on phone height (1.0 = off) */
@@ -654,9 +668,21 @@ html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
 
       // Scaled mobile bump for spacing
       const bs = MOBILE_KNOBS.bumpBaseHeight || 820;
-      const bumpScale = isPhone ? Math.max(MOBILE_KNOBS.bumpScaleMin || 0.9,
-                         Math.min(MOBILE_KNOBS.bumpScaleMax || 1.35, (mobileHeight||bs)/bs)) : 1;
-      const bump = n => (isPhone ? Math.round(n * bumpScale) : 0);
+      // Existing scale that adapts to phone height
+const bumpScale = isPhone
+  ? Math.max(0.9, Math.min(1.35, (mobileHeight || 820) / 820))
+  : 1;
+
+// NEW: global spacing controls (mobile only)
+const DENSITY   = 0.85; // < 1 pulls rows closer; try 0.90, 0.85, 0.80
+const MIN_GAP   = 8;    // pixels; safety so rows never get too close
+
+// Replace your old bump() with this:
+const bump = n => {
+  if (!isPhone) return 0;
+  const v = Math.round(n * bumpScale * DENSITY);
+  return Math.max(v, MIN_GAP);
+};
 
       // Fonts (mobile clamps)
       const F = MOBILE_KNOBS.fonts || {};
