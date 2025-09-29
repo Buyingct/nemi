@@ -1,5 +1,5 @@
 <?php
-// Admin: Create Buyer case and link roles by email
+// Admin: Create case (buyer or seller) and link roles by email
 declare(strict_types=1);
 session_start();
 
@@ -23,12 +23,15 @@ if ($_SERVER['REQUEST_METHOD']==='POST') {
   if (($cfg['ADMIN_KEY'] ?? '') === '' || ($_POST['key'] ?? '') !== $cfg['ADMIN_KEY']) {
     $msg = 'Forbidden: bad admin key.';
   } else {
-    $title = trim($_POST['title'] ?? 'Buyer Timeline');
+    $title         = trim($_POST['title'] ?? 'Buyer Timeline');
     $clientEmail   = strtolower(trim($_POST['client']   ?? ''));
     $realtorEmail  = strtolower(trim($_POST['realtor']  ?? ''));
     $lenderEmail   = strtolower(trim($_POST['lender']   ?? ''));
     $attorneyEmail = strtolower(trim($_POST['attorney'] ?? ''));
     $sendInvites   = !empty($_POST['send_invites']);
+
+    $type = strtolower(trim($_POST['type'] ?? 'buyer'));
+    if (!in_array($type, ['buyer','seller'], true)) $type = 'buyer';
 
     if (!$clientEmail || !filter_var($clientEmail,FILTER_VALIDATE_EMAIL)) {
       $msg = 'Client email is required and must be valid.';
@@ -53,7 +56,8 @@ if ($_SERVER['REQUEST_METHOD']==='POST') {
         return [$index[$key], null, false];
       };
 
-      [$clientId,  $clientPwd,  $newClient]  = $resolve($clientEmail,  'client');
+      $primaryRole = ($type === 'seller') ? 'seller' : 'buyer';
+      [$clientId,  $clientPwd,  $newClient]  = $resolve($clientEmail, $primaryRole);
       [$realtorId, $realtorPwd, $newRealtor] = $realtorEmail  ? $resolve($realtorEmail, 'realtor')   : [null,null,false];
       [$lenderId,  $lenderPwd,  $newLender]  = $lenderEmail   ? $resolve($lenderEmail,  'lender')    : [null,null,false];
       [$attyId,    $attyPwd,    $newAtty]    = $attorneyEmail ? $resolve($attorneyEmail,'attorney')  : [null,null,false];
@@ -62,32 +66,59 @@ if ($_SERVER['REQUEST_METHOD']==='POST') {
 
       // create case
       @mkdir($CASES_DIR,0770,true);
-      $caseId = 'case_buyer_'.date('Ymd_His');
+      $caseId = 'case_' . $type . '_' . date('Ymd_His');
       $caseFile = $CASES_DIR . "/{$caseId}.json";
 
+      // Choose assets with a safe fallback to buyer visuals
+      $svgBuyer  = 'assets/svgs/timeline_buyer.svg';
+      $mapBuyer  = 'data/timeline_map_buyer.json';
+      $svgSeller = 'assets/svgs/timeline_seller.svg';
+      $mapSeller = 'data/timeline_map_seller.json';
+
+      $root = __DIR__ . '/../';
+      if ($type === 'seller'
+          && is_file($root . $svgSeller)
+          && is_file($root . $mapSeller)) {
+        $assets = ['svg' => $svgSeller, 'map' => $mapSeller];
+      } else {
+        $assets = ['svg' => $svgBuyer,  'map' => $mapBuyer];
+      }
+
+      // Team: keep 'client' as generic primary; mirror into 'seller' for seller cases
+      $team = [
+        'client'   => [$clientId],
+        'seller'   => ($type === 'seller') ? [$clientId] : [],
+        'realtor'  => $realtorId ? [$realtorId] : [],
+        'lender'   => $lenderId  ? [$lenderId]  : [],
+        'attorney' => $attyId    ? [$attyId]    : []
+      ];
+
       $case = [
-        'id'=>$caseId,
-        'type'=>'buyer',
-        'title'=>$title ?: 'Buyer Timeline',
-        'assets'=>[
-          'svg'=>'assets/svgs/timeline_buyer.svg',
-          'map'=>'data/timeline_map_buyer.json'
-        ],
-        'team'=>[
-          'client'=>[$clientId],
-          'realtor'=>$realtorId?[$realtorId]:[],
-          'lender'=>$lenderId?[$lenderId]:[],
-          'attorney'=>$attyId?[$attyId]:[]
-        ],
+        'id'    => $caseId,
+        'type'  => $type,
+        'title' => $title ?: ($type === 'seller' ? 'Seller Timeline' : 'Buyer Timeline'),
+        'assets'=> $assets,
+        'team'  => $team,
         'timeline'=>[
-          'states'=>[
-            'preapproval'=>['done'=>false,'title'=>'Get Pre‑Approved','meta'=>'Lender • 1–3 days'],
-            'home_search'=>['done'=>false,'title'=>'Home Search','meta'=>'Realtor • ongoing'],
-            'offer'      =>['done'=>false,'title'=>'Make an Offer','meta'=>'Realtor • 1 day'],
-            'inspection' =>['done'=>false,'title'=>'Inspection','meta'=>'3–5 days'],
-            'appraisal'  =>['done'=>false,'title'=>'Appraisal','meta'=>'Lender • 1–2 weeks'],
-            'ctc'        =>['done'=>false,'title'=>'Clear to Close','meta'=>'Title/Lender']
-          ],
+          'states'=> ($type === 'seller'
+            ? [
+                // stub seller flow — customize later
+                'listing'      => ['done'=>false,'title'=>'List the Home','meta'=>'Realtor • 1–3 days'],
+                'showings'     => ['done'=>false,'title'=>'Showings','meta'=>'Realtor • ongoing'],
+                'offer'        => ['done'=>false,'title'=>'Offer Accepted','meta'=>'Realtor • 1 day'],
+                'inspection'   => ['done'=>false,'title'=>'Inspection','meta'=>'3–5 days'],
+                'title_search' => ['done'=>false,'title'=>'Title Search','meta'=>'Attorney • 1–2 weeks'],
+                'closing'      => ['done'=>false,'title'=>'Closing','meta'=>'Title/Attorney']
+              ]
+            : [
+                // buyer flow
+                'preapproval'=>['done'=>false,'title'=>'Get Pre-Approved','meta'=>'Lender • 1–3 days'],
+                'home_search'=>['done'=>false,'title'=>'Home Search','meta'=>'Realtor • ongoing'],
+                'offer'      =>['done'=>false,'title'=>'Make an Offer','meta'=>'Realtor • 1 day'],
+                'inspection' =>['done'=>false,'title'=>'Inspection','meta'=>'3–5 days'],
+                'appraisal'  =>['done'=>false,'title'=>'Appraisal','meta'=>'Lender • 1–2 weeks'],
+                'ctc'        =>['done'=>false,'title'=>'Clear to Close','meta'=>'Title/Lender']
+              ]),
           'notes'=>[
             'why-credit'=>['title'=>'Why credit matters','body'=>'Better credit can lower your rate.']
           ]
@@ -105,15 +136,15 @@ if ($_SERVER['REQUEST_METHOD']==='POST') {
 
       $caseIndex = jread($CASE_INDEX);
       $caseIndex[$caseId] = [
-        'type'=>'buyer',
-        'client_id'=>$clientId,
-        'roles'=>[
-          'realtor'=>$realtorId,
-          'lender'=>$lenderId,
-          'attorney'=>$attyId
+        'type'      => $type,
+        'client_id' => $clientId, // primary party (buyer OR seller)
+        'roles'     => [
+          'realtor'  => $realtorId,
+          'lender'   => $lenderId,
+          'attorney' => $attyId
         ],
-        'created'=>date('c'),
-        'status'=>'active'
+        'created'   => date('c'),
+        'status'    => 'active'
       ];
       jwrite($CASE_INDEX,$caseIndex);
 
@@ -124,7 +155,7 @@ if ($_SERVER['REQUEST_METHOD']==='POST') {
           if (!$to) return;
           $html = "<p>Your Nemi account was set up.</p>"
                 . "<p><b>Email:</b> {$to}" . ($pwd ? "<br><b>Temp password:</b> {$pwd}" : "") . "</p>"
-                . "<p>Sign in: <a href=\"{$app}/auth/login.html\">{$app}/auth/login.html</a></p>";
+                . "<p>Sign in: <a href=\"{$app}/auth/login_form.php\">{$app}/auth/login_form.php</a></p>";
           @send_email($to, 'Welcome to Nemi', $html);
         };
         $send($clientEmail,  $clientPwd);
@@ -141,12 +172,12 @@ if ($_SERVER['REQUEST_METHOD']==='POST') {
 <!doctype html>
 <html lang="en"><head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Nemi Admin — Create Buyer Case</title>
+<title>Nemi Admin — Create Case</title>
 <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="bg-slate-50 min-h-screen flex items-center justify-center">
   <div class="w-full max-w-lg bg-white rounded-xl shadow p-6">
-    <h1 class="text-xl font-bold">Create Buyer Case</h1>
+    <h1 class="text-xl font-bold">Create Case</h1>
     <?php if ($msg): ?><div class="mt-3 rounded border p-3 bg-amber-50 border-amber-300 text-amber-900"><?=htmlspecialchars($msg)?></div><?php endif; ?>
     <form class="mt-4 space-y-3" method="post">
       <label class="block">
@@ -155,8 +186,16 @@ if ($_SERVER['REQUEST_METHOD']==='POST') {
       </label>
       <label class="block">
         <span class="text-sm font-medium">Case title</span>
-        <input class="mt-1 w-full rounded border-slate-300" name="title" placeholder="Buyer – 123 Main St">
+        <input class="mt-1 w-full rounded border-slate-300" name="title" placeholder="123 Main St — Buyer or Seller">
       </label>
+      <label class="block">
+        <span class="text-sm font-medium">Case type</span>
+        <select class="mt-1 w-full rounded border-slate-300" name="type">
+          <option value="buyer" selected>Buyer</option>
+          <option value="seller">Seller</option>
+        </select>
+      </label>
+
       <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
         <label class="block">
           <span class="text-sm font-medium">Client email *</span>
@@ -175,10 +214,12 @@ if ($_SERVER['REQUEST_METHOD']==='POST') {
           <input class="mt-1 w-full rounded border-slate-300" name="attorney" type="email">
         </label>
       </div>
+
       <label class="inline-flex items-center gap-2">
         <input type="checkbox" name="send_invites" value="1" checked>
         <span>Send invites with temp passwords</span>
       </label>
+
       <button class="w-full mt-2 rounded-lg bg-indigo-600 text-white font-semibold py-2">Create Case</button>
     </form>
   </div>

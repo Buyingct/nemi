@@ -1,7 +1,18 @@
 <?php
-// [NEMI:PATCH login.php] — email + password login with diagnostics
-declare(strict_types=1);
-session_start();
+  declare(strict_types=1);
+  session_start();
+
+// Harden PHP session cookies (set BEFORE session_start)
+session_set_cookie_params([
+  'lifetime' => 0,
+  'path'     => '/',
+  'domain'   => '',           // set if you need a specific domain
+  'secure'   => true,         // require HTTPS in prod
+  'httponly' => true,
+  'samesite' => 'Lax',
+]);
+
+  // [NEMI:PATCH login.php] — email + password login with diagnostics
 
 // Always regenerate on login to prevent session fixation
 session_regenerate_id(true);
@@ -25,16 +36,28 @@ function nemi_fail(int $code, string $why): void {
 $idxPath = __DIR__ . '/../data/user_index.json';
 $usrPath = __DIR__ . '/../data/users.json';
 
-// ---------- Read inputs ----------
+// ---------- Require POST ----------
 if (($_SERVER['REQUEST_METHOD'] ?? 'GET') !== 'POST') {
   nemi_fail(405, 'Non-POST to login');
 }
+
+// ---------- Read inputs ----------
 $email = strtolower(trim($_POST['email'] ?? ''));
 $pass  = $_POST['password'] ?? '';
+$csrf  = $_POST['csrf'] ?? ''; // token created on the FORM page, not here
 
 if ($email === '' || $pass === '') {
   nemi_fail(400, 'Missing email or password');
 }
+if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+  nemi_fail(400, "Invalid email format: $email");
+}
+
+// ---------- Verify CSRF ----------
+if (!is_string($csrf) || !hash_equals($_SESSION['csrf_login'] ?? '', $csrf)) {
+  nemi_fail(400, 'Bad CSRF token');
+}
+unset($_SESSION['csrf_login']); // one-time use
 
 // ---------- Load stores (robust against missing/empty files) ----------
 $index = json_decode(@file_get_contents($idxPath) ?: '[]', true);
@@ -55,15 +78,10 @@ if (!$uid) {
     }
   }
 }
-
-if (!$uid) {
-  nemi_fail(401, "No UID for email:$email in user_index.json @ $idxPath");
-}
+if (!$uid) { nemi_fail(401, "No UID for email:$email in user_index.json @ $idxPath"); }
 
 $user = $users[$uid] ?? null;
-if (!$user) {
-  nemi_fail(401, "UID $uid not found in users.json @ $usrPath");
-}
+if (!$user) { nemi_fail(401, "UID $uid not found in users.json @ $usrPath"); }
 
 // ---------- Verify password ----------
 $hash = $user['password_hash'] ?? '';
@@ -74,13 +92,24 @@ if (!password_verify($pass, $hash)) {
   nemi_fail(401, "password_verify failed for UID $uid (email:$email)");
 }
 
-// ---------- Success: set session ----------
-$_SESSION['user_id'] = $uid;              // keep your existing key
-$_SESSION['uid']     = $uid;              // add for future code
-$_SESSION['email']   = $email;
-$_SESSION['role']    = $user['role'] ?? 'buyer';
+// Upgrade old/weak hashes transparently
+if (password_needs_rehash($hash, PASSWORD_DEFAULT)) {
+  $users[$uid]['password_hash'] = password_hash($pass, PASSWORD_DEFAULT);
+  @file_put_contents($usrPath, json_encode($users, JSON_PRETTY_PRINT|JSON_UNESCAPED_SLASHES));
+  @chmod($usrPath, 0660);
+}
 
-// Clear any device PIN cookie for web (keep flags secure/httponly)
+// ---------- Success: set session ----------
+$roleRaw = strtolower((string)($user['role'] ?? 'buyer'));
+$roleMap = ['client' => 'buyer']; // normalize legacy roles
+$role    = $roleMap[$roleRaw] ?? $roleRaw;
+
+$_SESSION['user_id'] = $uid;   // keep your existing key
+$_SESSION['uid']     = $uid;
+$_SESSION['email']   = $email;
+$_SESSION['role']    = $role;
+
+// Clear any device PIN cookie for web
 setcookie('nemi_device', '', time() - 3600, '/', '', true, true);
 
 // ---------- Optional: route by case assignment ----------
@@ -102,6 +131,13 @@ if (!empty($userCases)) {
   exit;
 }
 
-// Default: go to buyer timeline
-header('Location: /app/timeline.php');
+// Route by role if no case
+switch ($role) {
+  case 'buyer':   header('Location: /tools/dashboard/buyer.html'); break;
+  case 'seller':  header('Location: /tools/dashboard/seller.html'); break;
+  case 'realtor': header('Location: /tools/dashboard/realtor.html'); break;
+  case 'lender':  header('Location: /tools/dashboard/lender.html'); break;
+  case 'attorney':header('Location: /tools/dashboard/attorney.html'); break;
+  default:        header('Location: /tools/dashboard/index.html'); break;
+}
 exit;
