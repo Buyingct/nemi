@@ -1,8 +1,7 @@
 <?php
-  declare(strict_types=1);
-  session_start();
+declare(strict_types=1);
 
-// Harden PHP session cookies (set BEFORE session_start)
+// Harden PHP session cookies (MUST be set BEFORE session_start)
 session_set_cookie_params([
   'lifetime' => 0,
   'path'     => '/',
@@ -12,7 +11,9 @@ session_set_cookie_params([
   'samesite' => 'Lax',
 ]);
 
-  // [NEMI:PATCH login.php] — email + password login with diagnostics
+session_start();
+
+// [NEMI:PATCH login.php] — email + password login with diagnostics
 
 // Always regenerate on login to prevent session fixation
 session_regenerate_id(true);
@@ -131,13 +132,19 @@ if (!empty($userCases)) {
   exit;
 }
 
-// Route by role if no case
+// NEMI ROLE ROUTING — Realtor goes to your new portal
 switch ($role) {
-  case 'buyer':   header('Location: /tools/dashboard/buyer.html'); break;
-  case 'seller':  header('Location: /tools/dashboard/seller.html'); break;
-  case 'realtor': header('Location: /tools/dashboard/realtor.html'); break;
-  case 'lender':  header('Location: /tools/dashboard/lender.html'); break;
-  case 'attorney':header('Location: /tools/dashboard/attorney.html'); break;
-  default:        header('Location: /tools/dashboard/index.html'); break;
+  case 'buyer':
+    header('Location: /tools/dashboard/buyer.html'); break;
+  case 'seller':
+    header('Location: /tools/dashboard/seller.html'); break;
+  case 'realtor':
+    header('Location: /app/realtor_portal.php'); break; // ✅ your portal
+  case 'lender':
+    header('Location: /tools/dashboard/lender.html'); break;
+  case 'attorney':
+    header('Location: /tools/dashboard/attorney.html'); break;
+  default:
+    header('Location: /tools/dashboard/index.html'); break;
 }
 exit;
