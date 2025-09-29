@@ -237,6 +237,11 @@ html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
   text-align:center;          /* centered */
 }
 
+ #slot-appdownload,
+  #slot-androiddownload,
+  #slot-explorenemibox,
+  #slot-realtorapply { overflow: visible; }
+  
 }
 
 /* Input sizing knobs (override Tailwind) */
@@ -305,6 +310,8 @@ html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
   explore: { scale: 0.46, min: 16, max: 24, extraNudgeY: 0 }
 },
 
+      afterForgotLift: -40,         // negative = lift all rows AFTER "Forgot Password?" (badges, Explore, Realtor)
+    
     /* Vertical spacing “bumps” BELOW the CTA — per row */
     bumps: {
       already:   4,
@@ -312,10 +319,10 @@ html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
       password:  26,
       login:     38,
       forgot:    50,
-      appstore:  48,
-      play:      48,
-      explore:   70,
-      realtor:   80
+      appstore:  44,
+      play:      44,
+      explore:   56,
+      realtor:   64
     },
 
     bumpScaleMin: 0.90,
@@ -337,11 +344,11 @@ html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
       passwordbox:        { dy: -80 },
       logintext:          { dy: -90 },
       forgotpassword:     { dy: -100 },
-      appstore:           { dy: -1 } ,
-      play:               { dy: -1 },
-      explore:            { dy: -200 },
-      realtor:            { dy: -200 },
-    
+      appdownload:     { dy: -12, growX: 10, growY: 6 },   // App Store badge
+    androiddownload: { dy: -12, growX: 10, growY: 6 },   // Google Play badge
+    explorenemibox:  { dy: -18, growX: 8,  growY: 4 },   // Explore pill
+    realtorapply:    { dy: -14,              growY: 2 }  // "Apply" row
+  
     },
 
     /* Optional images injected into mobile background SVG */
@@ -683,6 +690,8 @@ html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
       const bumpScale = isPhone
         ? Math.max(MOBILE_KNOBS.bumpScaleMin, Math.min(MOBILE_KNOBS.bumpScaleMax, (mobileHeight || 820) / (MOBILE_KNOBS.bumpBaseHeight || 820)))
         : 1;
+   
+        const LIFT = isPhone ? (MOBILE_KNOBS.afterForgotLift || 0) : 0;
 
       const DENSITY = MOBILE_KNOBS.spacing?.density ?? 1;
       const MIN_GAP = MOBILE_KNOBS.spacing?.minRowGap ?? 8;
@@ -821,22 +830,22 @@ html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
       /* 11) Badges */
       placeFlex('appdownload','slot-appdownload',{l:0,r:0,t:0,b:0},
         flexPlus(Object.assign({}, CFG.appstoreFlex, preset?.appstoreFlex || {}), 'appdownload', isPhone),
-        bump(MOBILE_KNOBS.bumps.appstore||72));
+        bump(MOBILE_KNOBS.bumps.appstore||72) + LIFT);
       placeFlex('androiddownload','slot-androiddownload',{l:0,r:0,t:0,b:0},
         flexPlus(Object.assign({}, CFG.playFlex, preset?.playFlex || {}), 'androiddownload', isPhone),
-        bump(MOBILE_KNOBS.bumps.play||72));
+        bump(MOBILE_KNOBS.bumps.play||72) + LIFT);
 
       /* 12) Explore pill */
       const exploreSpec = { scale: pills.explore?.scale ?? CFG.exploreScale, min: pills.explore?.min ?? CFG.exploreFontMin, max: pills.explore?.max ?? CFG.exploreFontMax };
       placeFlex('explorenemibox','slot-explorenemibox',{l:0,r:0,t:0,b:0},
         flexPlus(Object.assign({}, CFG.exploreFlex, preset?.exploreFlex || {}), 'explorenemibox', isPhone),
-        bump(MOBILE_KNOBS.bumps.explore||82) + (isPhone ? (pills.explore?.extraNudgeY||0) : 0));
+        bump(MOBILE_KNOBS.bumps.explore||82) + (isPhone ? (pills.explore?.extraNudgeY||0) : 0) + LIFT);
       scalePill('slot-explorenemibox', exploreSpec);
 
       /* 13) Apply line */
       placeFlex('realtorapply','slot-realtorapply',{l:0,r:0,t:0,b:0},
         flexPlus(Object.assign({}, CFG.realtorFlex, preset?.realtorFlex || {}), 'realtorapply', isPhone),
-        bump(MOBILE_KNOBS.bumps.realtor||92));
+        bump(MOBILE_KNOBS.bumps.realtor||92) + LIFT);
       const rf = (MOBILE_KNOBS.fonts.realtorFs ?? CFG.realtorFs);
       if (rf) document.getElementById('slot-realtorapply').style.setProperty('--realtorFs', rf + 'px');
 
