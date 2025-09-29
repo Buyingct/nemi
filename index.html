@@ -351,6 +351,9 @@ html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
   
     },
 
+    // MOBILE_KNOBS …
+panelBottomTrim: 28,   // pixels to remove from the BOTTOM of the frosted card (phones only)
+
     /* Optional images injected into mobile background SVG */
     bgImages: {
       nemilogo:  { src: 'assets/img/nemilogo.png',  preserve: 'xMidYMid meet'  },
@@ -447,7 +450,10 @@ html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
       realtorFlex:  { dy: 74, growX: 14 }, realtorFs: 12,
       emailFs: 19, passwordFs: 19,
 
-      panelGrowY: -6, panelGrowX: 0
+      panelGrowY: -6, panelGrowX: 0,
+      // In MOBILE_TUNING tiny phones (≤340px)
+panelBottomTrim: 16,
+
     },
     { // Small phones (≤380px)
       maxWidth: 380,
@@ -468,7 +474,10 @@ html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
       realtorFlex:  { dy: 64, growX: 12 }, realtorFs: 12,
       emailFs: 18, passwordFs: 18,
 
-      panelGrowY: -4, panelGrowX: 0
+      panelGrowY: -4, panelGrowX: 0,
+      // In MOBILE_TUNING small phones (≤380px)
+panelBottomTrim: 20,
+
     }
   ];
 
@@ -732,7 +741,15 @@ html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
       const pg = isPhone ? (MOBILE_KNOBS.panelGrow || {x:0,y:0}) : {x:0,y:0};
       const growX = (preset?.panelGrowX || 0) + (pg.x||0);
       const growY = (preset?.panelGrowY || 0) + (pg.y||0);
-      placeInset('loginbox','slot-loginboxbg', { l: 3 - growX, r: 3 - growX, t: 3 - growY, b: 3 - growY });
+      const trimBottom = isPhone ? ((MOBILE_KNOBS.panelBottomTrim || 0) + (preset?.panelBottomTrim || 0)) : 0;
+
+placeInset('loginbox','slot-loginboxbg', {
+  l: 3 - growX,
+  r: 3 - growX,
+  t: isPhone ? 3 : (3 - growY),                // keep top fixed on mobile
+  b: isPhone ? (3 + trimBottom) : (3 - growY)  // shave only the bottom on mobile
+});
+
       (function syncRadius(){
         const rEl = svg.querySelector('#loginbox'); if (!rEl) return;
         const rx = parseFloat(rEl.getAttribute('rx') || 0);
