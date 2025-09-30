@@ -11,9 +11,9 @@ session_start();
 
 $ADMINS = [
   // Only these emails can run the seeder
-  'viviana@buyingct.com',
+  'help@buyingct.com',
   'v.rocharealtor@gmail.com',
-  'you@example.com',
+
 ];
 
 if (!isset($_SESSION['email'])) { header('Location: /auth/login_form.php'); exit; }
@@ -38,7 +38,7 @@ $CSRF = $_SESSION['csrf_seed'];
 function jread($p){ return file_exists($p) ? (json_decode(file_get_contents($p), true) ?: []) : []; }
 function jwrite($p,$a){ @mkdir(dirname($p),0770,true); $ok=file_put_contents($p,json_encode($a,JSON_PRETTY_PRINT|JSON_UNESCAPED_SLASHES)); @chmod($p,0660); return $ok!==false; }
 function new_uid(){ return 'u_' . bin2hex(random_bytes(8)); }
-function temp_password(){ return substr(str_shuffle('ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz23456789'),0,10); }
+function temp_password(){ return substr(str_shuffle('CATSandMORECATS.'),0,10); }
 function h($s){ return htmlspecialchars((string)$s, ENT_QUOTES, 'UTF-8'); }
 
 $do   = isset($_POST['do']) && $_POST['do'] === '1';
