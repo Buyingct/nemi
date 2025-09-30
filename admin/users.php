@@ -8,9 +8,9 @@ session_start();
    ========================= */
 
 $ADMINS = [
-  // Only these emails can access (add yours)
+  // ✅ Only these emails can access (put yours here)
+  'viviana@buyingct.com',
   'you@example.com',
-  'viviana@buyingct.com'
 ];
 
 // Must be logged in + authorized
@@ -57,12 +57,17 @@ $CSRF = $_SESSION['csrf_admin_users'];
   .btn.bad{ border-color:var(--bad); }
   .muted{ color:var(--muted); font-size:12px; }
   table{ width:100%; border-collapse:collapse; }
-  th, td{ padding:10px; border-bottom:1px solid #e6ebf2; text-align:left; font-size:14px; }
+  th, td{ padding:10px; border-bottom:1px solid #e6ebf2; text-align:left; font-size:14px; vertical-align:middle; }
   th{ background:#f1f4fa; position:sticky; top:0; z-index:1; }
   .actions button{ margin-right:6px; }
   .pill{ display:inline-block; padding:2px 8px; border-radius:999px; border:2px solid var(--edge); font-size:12px; }
   .pill.on{ border-color:var(--ok); }
   .searchbar{ display:flex; gap:8px; margin-bottom:10px; }
+  .casebox{ display:flex; gap:6px; flex-wrap:wrap; }
+  .case{ padding:2px 8px; border:1px dashed #b7c3d0; border-radius:8px; font-size:12px; }
+  .case a{ color:var(--bad); text-decoration:none; margin-left:6px; font-weight:800; }
+  .toast{ position:fixed; right:16px; bottom:16px; background:#0d1330; color:#fff; padding:10px 12px; border-radius:10px; box-shadow:0 8px 24px rgba(0,0,0,.2); opacity:0; transform:translateY(8px); transition:.25s; }
+  .toast.show{ opacity:1; transform:none; }
 </style>
 </head>
 <body>
@@ -117,7 +122,7 @@ $CSRF = $_SESSION['csrf_admin_users'];
 
       <h2>Bulk import (CSV)</h2>
       <div class="body">
-        <form id="csvForm">
+        <form id="csvForm" onsubmit="return false;">
           <label>CSV file (headers: name,email,role,enabled)</label>
           <input id="csvFile" type="file" accept=".csv">
           <div style="margin-top:10px; display:flex; gap:10px;">
@@ -147,19 +152,142 @@ $CSRF = $_SESSION['csrf_admin_users'];
             <tbody></tbody>
           </table>
         </div>
-        <p class="muted">Click “Role” to change. Use actions to reset password, enable/disable, attach/detach to case.</p>
+        <p class="muted">Click role to change. Use actions to reset password, enable/disable, and attach/detach to a case.</p>
       </div>
     </section>
 
   </div>
 </div>
 
+<div id="toast" class="toast"></div>
+
 <script>
 const CSRF = <?=json_encode($CSRF)?>;
 let rows = [];
 
-async function api(path, payload){
+function toast(msg){
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'), 3200);
+}
+
+async function api(action, payload){
   const res = await fetch('/admin/users_api.php', {
     method: 'POST',
     headers: {'Content-Type':'application/json'},
-    body: JSON.stringify(Object.assign({csrf:CSRF, action
+    body: JSON.stringify(Object.assign({csrf:CSRF, action}, payload||{}))
+  });
+  if(!res.ok){ toast('API error '+res.status); throw new Error('HTTP '+res.status); }
+  return res.json();
+}
+
+async function refresh(){
+  const q = document.getElementById('q').value.trim();
+  const data = await api('list', {q});
+  rows = data.users || [];
+  render();
+}
+
+function render(){
+  const q = document.getElementById('q').value.toLowerCase();
+  const tb = document.querySelector('#tbl tbody');
+  tb.innerHTML = '';
+  (rows||[]).filter(r=>{
+    if(!q) return true;
+    return (r.name||'').toLowerCase().includes(q) || (r.email||'').toLowerCase().includes(q);
+  }).forEach(r=>{
+    const tr = document.createElement('tr');
+
+    const tdName = document.createElement('td'); tdName.textContent = r.name||'—';
+    const tdEmail= document.createElement('td'); tdEmail.textContent= r.email||'—';
+
+    const tdRole = document.createElement('td');
+    const sel = document.createElement('select');
+    ['buyer','seller','realtor','lender','attorney','admin'].forEach(v=>{
+      const o = document.createElement('option'); o.value=v; o.textContent=v;
+      if ((r.role||'').toLowerCase()===v) o.selected=true;
+      sel.appendChild(o);
+    });
+    sel.onchange = async ()=>{
+      await api('set_role', {uid:r.uid, role:sel.value});
+      toast('Role updated'); refresh();
+    };
+    tdRole.appendChild(sel);
+
+    const tdStatus = document.createElement('td');
+    const pill = document.createElement('span');
+    pill.className = 'pill '+(r.enabled?'on':'');
+    pill.textContent = r.enabled ? 'Enabled' : 'Disabled';
+    pill.style.cursor='pointer';
+    pill.onclick = async()=>{
+      await api('set_enabled', {uid:r.uid, enabled: r.enabled?0:1});
+      toast('Status updated'); refresh();
+    };
+    tdStatus.appendChild(pill);
+
+    const tdCases = document.createElement('td');
+    const box = document.createElement('div'); box.className='casebox';
+    (r.cases||[]).forEach(cid=>{
+      const c = document.createElement('span'); c.className='case';
+      c.textContent = cid;
+      const a = document.createElement('a'); a.href='#'; a.textContent='✕';
+      a.onclick = async (e)=>{ e.preventDefault(); await api('detach_case',{uid:r.uid, case_id:cid}); toast('Detached'); refresh(); };
+      c.appendChild(a); box.appendChild(c);
+    });
+    // add attach input
+    const addWrap = document.createElement('div');
+    addWrap.style.marginTop='6px';
+    addWrap.innerHTML = '<input type="text" placeholder="case_..." style="width:220px;padding:6px 8px;border:1px solid #b7c3d0;border-radius:8px"> <button class="btn" style="padding:6px 10px">Attach</button>';
+    const btn = addWrap.querySelector('button');
+    const inp = addWrap.querySelector('input');
+    btn.onclick = async ()=>{
+      if(!inp.value.trim()) return;
+      await api('attach_case',{uid:r.uid, case_id:inp.value.trim()});
+      toast('Attached'); refresh();
+    };
+    tdCases.appendChild(box); tdCases.appendChild(addWrap);
+
+    const tdAct = document.createElement('td'); tdAct.className='actions';
+    const b1 = document.createElement('button'); b1.className='btn'; b1.textContent='Reset PW';
+    b1.onclick = async()=>{ const out=await api('reset_password',{uid:r.uid}); toast('Temp password: '+out.temp_password); refresh(); };
+    const b2 = document.createElement('button'); b2.className='btn bad'; b2.textContent='Delete';
+    b2.onclick = async()=>{ if(!confirm('Delete user '+(r.email||'')+'?')) return; await api('delete_user',{uid:r.uid}); toast('Deleted'); refresh(); };
+    tdAct.appendChild(b1); tdAct.appendChild(b2);
+
+    tr.appendChild(tdName); tr.appendChild(tdEmail); tr.appendChild(tdRole); tr.appendChild(tdStatus); tr.appendChild(tdCases); tr.appendChild(tdAct);
+    tb.appendChild(tr);
+  });
+}
+
+function resetForm(){
+  document.getElementById('c_name').value='';
+  document.getElementById('c_email').value='';
+  document.getElementById('c_role').value='buyer';
+  document.getElementById('c_enabled').value='1';
+}
+
+async function createUser(){
+  const name = document.getElementById('c_name').value.trim();
+  const email= document.getElementById('c_email').value.trim();
+  const role = document.getElementById('c_role').value;
+  const enabled = parseInt(document.getElementById('c_enabled').value,10);
+  if(!email){ toast('Email required'); return; }
+  const out = await api('create', {name,email,role,enabled});
+  toast('Created. Temp password: '+ out.temp_password);
+  resetForm();
+  refresh();
+}
+
+async function importCSV(){
+  const f = document.getElementById('csvFile').files[0];
+  if(!f){ toast('Choose a CSV first'); return; }
+  const text = await f.text();
+  const out = await api('import_csv', {csv:text});
+  toast('Imported '+(out.imported||0)+' users');
+  refresh();
+}
+
+refresh(); // initial
+</script>
+</body>
+</html>
