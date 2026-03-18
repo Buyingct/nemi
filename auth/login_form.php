@@ -9,7 +9,7 @@ if (empty($_SESSION['csrf_login'])) {
 }
 $csrf = $_SESSION['csrf_login'];
 
-// Pull one-time error from session if login.php set it
+// One-time login error from login.php
 $loginError = $_SESSION['login_error'] ?? '';
 unset($_SESSION['login_error']);
 
@@ -17,8 +17,8 @@ unset($_SESSION['login_error']);
 $sent = isset($_GET['sent']);
 $ok   = isset($_GET['ok']);
 
-// Prefill identifier if you want
-$prefillIdentifier = $_GET['identifier'] ?? '';
+// Optional prefill
+$prefillIdentifier = (string)($_GET['identifier'] ?? '');
 ?>
 <!doctype html>
 <html lang="en">
@@ -58,7 +58,7 @@ $prefillIdentifier = $_GET['identifier'] ?? '';
 
     <?php if ($ok): ?>
       <div class="mb-4 rounded-2xl border border-emerald-300 bg-emerald-50 px-4 py-3 text-sm text-emerald-900">
-        Password updated. You can sign in now.
+        PIN updated. You can sign in now.
       </div>
     <?php endif; ?>
 
@@ -75,7 +75,7 @@ $prefillIdentifier = $_GET['identifier'] ?? '';
           autofocus
           autocomplete="username"
           placeholder="you@example.com or 2035551234"
-          value="<?php echo htmlspecialchars((string)$prefillIdentifier, ENT_QUOTES, 'UTF-8'); ?>"
+          value="<?php echo htmlspecialchars($prefillIdentifier, ENT_QUOTES, 'UTF-8'); ?>"
         >
       </label>
 
@@ -94,7 +94,6 @@ $prefillIdentifier = $_GET['identifier'] ?? '';
         >
       </label>
 
-      <!-- For now this can stay fixed to your current device record -->
       <input type="hidden" name="device_id" value="d_abc123">
 
       <button class="w-full rounded-xl bg-indigo-600 py-3 font-semibold text-white shadow hover:bg-indigo-700 transition">
