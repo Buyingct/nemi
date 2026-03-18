@@ -6,7 +6,7 @@ session_start();
 function j($p){ return file_exists($p) ? (json_decode(file_get_contents($p), true) ?: []) : []; }
 
 // Not logged in? → go to login form
-if (empty($_SESSION['email'])) {
+if (empty($_SESSION['uid'])) {
   header('Location: /auth/login_form.php'); exit;
 }
 
