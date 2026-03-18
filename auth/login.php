@@ -1,44 +1,264 @@
-$_SESSION['uid']   = $uid;
-$_SESSION['email'] = $email;
-$_SESSION['role']  = $role;
+<?php
+declare(strict_types=1);
 
-// ---------- If this user has assigned cases, send them straight to first case ----------
+/**
+ * Nemi login.php
+ *
+ * Supports:
+ * - email OR phone as identifier
+ * - 4-digit PIN login against a device pin_hash
+ * - role-based redirect
+ * - case redirect if assigned
+ * - basic device lockout protection
+ *
+ * Expected POST fields from login form:
+ * - identifier   (email or phone)
+ * - pin          (4-digit PIN)
+ * - device_id    (optional; if omitted, first device is used)
+ *
+ * users.json structure example:
+ * {
+ *   "u_12345": {
+ *     "email": "v.rocharealtor@gmail.com",
+ *     "phone": "+12039102125",
+ *     "role": "realtor",
+ *     "devices": {
+ *       "d_abc123": {
+ *         "name": "iPhone 14",
+ *         "pin_hash": "$2y$10$realhashhere",
+ *         "created_at": 1734444000,
+ *         "locked_until": 0,
+ *         "fail_count": 0
+ *       }
+ *     },
+ *     "otp": { "code": null, "expires_at": 0, "for_device": null },
+ *     "reset": { "token": null, "expires_at": 0 }
+ *   }
+ * }
+ */
+
+ini_set('display_errors', '1');
+error_reporting(E_ALL);
+
+$secureCookie = (
+    (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off')
+    || (($_SERVER['SERVER_PORT'] ?? '') == '443')
+);
+
+session_set_cookie_params([
+    'lifetime' => 0,
+    'path'     => '/',
+    'domain'   => '',
+    'secure'   => $secureCookie,
+    'httponly' => true,
+    'samesite' => 'Lax',
+]);
+
+session_start();
+
+const MAX_FAILS = 5;
+const LOCK_SECONDS = 900; // 15 minutes
+
+function fail_and_exit(string $message, string $redirect = '/auth/login_form.php'): void
+{
+    $_SESSION['login_error'] = $message;
+    header('Location: ' . $redirect);
+    exit;
+}
+
+function normalize_phone(string $value): string
+{
+    return preg_replace('/\D+/', '', $value) ?? '';
+}
+
+function save_users(string $path, array $users): void
+{
+    $json = json_encode($users, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);
+    if ($json === false) {
+        fail_and_exit('Could not save user data.');
+    }
+    file_put_contents($path, $json, LOCK_EX);
+}
+
+if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+    fail_and_exit('Invalid request method.');
+}
+
+$identifier = trim((string)($_POST['identifier'] ?? ''));
+$pin        = trim((string)($_POST['pin'] ?? ''));
+$deviceId   = trim((string)($_POST['device_id'] ?? ''));
+
+if ($identifier === '' || $pin === '') {
+    fail_and_exit('Please enter your email or phone and your PIN.');
+}
+
+if (!preg_match('/^\d{4}$/', $pin)) {
+    fail_and_exit('PIN must be exactly 4 digits.');
+}
+
+$usersPath = __DIR__ . '/../data/users.json';
+if (!is_file($usersPath)) {
+    fail_and_exit('User database not found.');
+}
+
+$users = json_decode((string)file_get_contents($usersPath), true);
+if (!is_array($users)) {
+    fail_and_exit('User database is invalid.');
+}
+
+/**
+ * Find user by email or phone.
+ */
+$uid = null;
+$user = null;
+
+$identifierPhone = normalize_phone($identifier);
+$identifierEmail = mb_strtolower($identifier);
+
+foreach ($users as $candidateUid => $candidateUser) {
+    if (!is_array($candidateUser)) {
+        continue;
+    }
+
+    $candidateEmail = mb_strtolower((string)($candidateUser['email'] ?? ''));
+    $candidatePhone = normalize_phone((string)($candidateUser['phone'] ?? ''));
+
+    if ($candidateEmail !== '' && $candidateEmail === $identifierEmail) {
+        $uid = (string)$candidateUid;
+        $user = $candidateUser;
+        break;
+    }
+
+    if ($identifierPhone !== '' && $candidatePhone !== '' && $candidatePhone === $identifierPhone) {
+        $uid = (string)$candidateUid;
+        $user = $candidateUser;
+        break;
+    }
+}
+
+if ($uid === null || !is_array($user)) {
+    fail_and_exit('Account not found.');
+}
+
+$email = (string)($user['email'] ?? '');
+$role  = (string)($user['role'] ?? '');
+
+if ($role === '') {
+    fail_and_exit('This account does not have a role assigned. Add "role" in users.json.');
+}
+
+$devices = $user['devices'] ?? [];
+if (!is_array($devices) || empty($devices)) {
+    fail_and_exit('No registered device found for this account.');
+}
+
+/**
+ * Pick device:
+ * - use submitted device_id if valid
+ * - otherwise use first device on record
+ */
+if ($deviceId !== '' && isset($devices[$deviceId]) && is_array($devices[$deviceId])) {
+    $device = $devices[$deviceId];
+} else {
+    $deviceId = (string)array_key_first($devices);
+    $device = $devices[$deviceId] ?? null;
+}
+
+if (!is_array($device)) {
+    fail_and_exit('Device not found.');
+}
+
+$pinHash     = (string)($device['pin_hash'] ?? '');
+$lockedUntil = (int)($device['locked_until'] ?? 0);
+$failCount   = (int)($device['fail_count'] ?? 0);
+
+if ($pinHash === '') {
+    fail_and_exit('This device does not have a PIN configured.');
+}
+
+$now = time();
+
+if ($lockedUntil > $now) {
+    $minutesLeft = (int)ceil(($lockedUntil - $now) / 60);
+    fail_and_exit('Too many attempts. Try again in ' . $minutesLeft . ' minute(s).');
+}
+
+/**
+ * Verify PIN
+ */
+if (!password_verify($pin, $pinHash)) {
+    $failCount++;
+    $users[$uid]['devices'][$deviceId]['fail_count'] = $failCount;
+
+    if ($failCount >= MAX_FAILS) {
+        $users[$uid]['devices'][$deviceId]['locked_until'] = $now + LOCK_SECONDS;
+        $users[$uid]['devices'][$deviceId]['fail_count'] = 0;
+    }
+
+    save_users($usersPath, $users);
+    fail_and_exit('Invalid PIN.');
+}
+
+/**
+ * Successful login: reset lock/fails
+ */
+$users[$uid]['devices'][$deviceId]['fail_count'] = 0;
+$users[$uid]['devices'][$deviceId]['locked_until'] = 0;
+save_users($usersPath, $users);
+
+/**
+ * Secure session setup
+ */
+session_regenerate_id(true);
+
+$_SESSION['uid']       = $uid;
+$_SESSION['email']     = $email;
+$_SESSION['role']      = $role;
+$_SESSION['device_id'] = $deviceId;
+
+/**
+ * If this user has assigned cases, send them to the first case timeline.
+ */
 $assignPath = __DIR__ . '/../data/cases/user_cases.json';
 if (is_file($assignPath)) {
-    $caseIndex = json_decode(file_get_contents($assignPath), true) ?: [];
+    $caseIndex = json_decode((string)file_get_contents($assignPath), true) ?: [];
     $userCases = $caseIndex[$uid] ?? [];
-    if (!empty($userCases)) {
-        // redirect to the first assigned case timeline
-        header('Location: /app/client/timeline.php?case=' . urlencode($userCases[0]));
+
+    if (is_array($userCases) && !empty($userCases)) {
+        header('Location: /app/client/timeline.php?case=' . urlencode((string)$userCases[0]));
         exit;
     }
 }
 
-
+/**
+ * Role-based redirect
+ */
 switch ($role) {
-  case 'admin':
-    header('Location: /admin/users.php'); 
-    break;
+    case 'admin':
+        header('Location: /admin/users.php');
+        break;
 
-  case 'realtor':
-    header('Location: /app/realtor_portal.php'); 
-    break;
+    case 'realtor':
+        header('Location: /app/realtor_portal.php');
+        break;
 
-  case 'buyer':
-  case 'seller':
-    header('Location: /app/timeline.php'); 
-    break;
+    case 'buyer':
+    case 'seller':
+        header('Location: /app/timeline.php');
+        break;
 
-  case 'lender':
-    header('Location: /tools/dashboard/lender.html'); 
-    break;
+    case 'lender':
+        header('Location: /tools/dashboard/lender.html');
+        break;
 
-  case 'attorney':
-    header('Location: /tools/dashboard/attorney.html'); 
-    break;
+    case 'attorney':
+        header('Location: /tools/dashboard/attorney.html');
+        break;
 
-  default:
-    header('Location: /tools/dashboard/index.html'); 
-    break;
+    default:
+        header('Location: /tools/dashboard/index.html');
+        break;
 }
-exit; // <-- ensure no more output after redirect
+
+
+exit;

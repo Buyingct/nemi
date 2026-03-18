@@ -1,35 +1,180 @@
 <?php
+declare(strict_types=1);
+
 session_start();
 
-$idxPath = __DIR__.'/../data/user_index.json';
-$usrPath = __DIR__.'/../data/users.json';
+ini_set('display_errors', '1');
+error_reporting(E_ALL);
 
-$email = strtolower(trim($_POST['email'] ?? ''));
-$pass  = $_POST['password'] ?? '';
+$usrPath = __DIR__ . '/../data/users.json';
 
-if (!$email || !$pass) { http_response_code(400); echo "Missing fields"; exit; }
-if (!filter_var($email, FILTER_VALIDATE_EMAIL)) { http_response_code(400); echo "Invalid email"; exit; }
-if (strlen($pass) < 8) { http_response_code(400); echo "Password too short"; exit; }
+function fail_and_exit(string $message, int $status = 400): void
+{
+    http_response_code($status);
+    echo $message;
+    exit;
+}
 
-$index = file_exists($idxPath)? json_decode(file_get_contents($idxPath), true): [];
-$users = file_exists($usrPath)? json_decode(file_get_contents($usrPath), true): [];
+function normalize_phone(string $value): string
+{
+    return preg_replace('/\D+/', '', $value) ?? '';
+}
 
-if (!empty($index['email:'.$email])) { http_response_code(409); echo "Email already registered"; exit; }
+function load_json_array(string $path): array
+{
+    if (!is_file($path)) {
+        return [];
+    }
 
-$uid = 'u_'.bin2hex(random_bytes(4));
+    $data = json_decode((string)file_get_contents($path), true);
+    return is_array($data) ? $data : [];
+}
+
+function save_json_array(string $path, array $data): void
+{
+    $json = json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);
+    if ($json === false) {
+        fail_and_exit('Could not encode JSON.', 500);
+    }
+
+    if (file_put_contents($path, $json, LOCK_EX) === false) {
+        fail_and_exit('Could not save file.', 500);
+    }
+}
+
+if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+    fail_and_exit('Invalid request method.', 405);
+}
+
+/**
+ * Expected fields:
+ * - email
+ * - phone (optional but recommended)
+ * - role (buyer, seller, realtor, lender, attorney, admin)
+ * - pin (4 digits)
+ * - device_name (optional; defaults to Web Browser)
+ */
+$email      = mb_strtolower(trim((string)($_POST['email'] ?? '')));
+$phoneRaw   = trim((string)($_POST['phone'] ?? ''));
+$phone      = normalize_phone($phoneRaw);
+$role       = trim((string)($_POST['role'] ?? 'buyer'));
+$pin        = trim((string)($_POST['pin'] ?? ''));
+$deviceName = trim((string)($_POST['device_name'] ?? 'Web Browser'));
+
+if ($email === '') {
+    fail_and_exit('Email is required.');
+}
+
+if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+    fail_and_exit('Invalid email.');
+}
+
+if ($pin === '') {
+    fail_and_exit('PIN is required.');
+}
+
+if (!preg_match('/^\d{4}$/', $pin)) {
+    fail_and_exit('PIN must be exactly 4 digits.');
+}
+
+$allowedRoles = ['admin', 'realtor', 'buyer', 'seller', 'lender', 'attorney'];
+if (!in_array($role, $allowedRoles, true)) {
+    $role = 'buyer';
+}
+
+$users = load_json_array($usrPath);
+
+/**
+ * Prevent duplicate email or duplicate phone.
+ */
+foreach ($users as $existingUid => $existingUser) {
+    if (!is_array($existingUser)) {
+        continue;
+    }
+
+    $existingEmail = mb_strtolower((string)($existingUser['email'] ?? ''));
+    $existingPhone = normalize_phone((string)($existingUser['phone'] ?? ''));
+
+    if ($existingEmail !== '' && $existingEmail === $email) {
+        fail_and_exit('Email already registered.', 409);
+    }
+
+    if ($phone !== '' && $existingPhone !== '' && $existingPhone === $phone) {
+        fail_and_exit('Phone already registered.', 409);
+    }
+}
+
+/**
+ * Create new user and first device
+ */
+$uid = 'u_' . bin2hex(random_bytes(4));
+$deviceId = 'd_' . bin2hex(random_bytes(4));
+$now = time();
+
 $users[$uid] = [
-  'email'=>$email,
-  'phone'=>'',
-  'password_hash'=>password_hash($pass, PASSWORD_DEFAULT),
-  'devices'=>[],
-  'otp'=>['code'=>null,'expires_at'=>0,'for_device'=>null],
-  'reset'=>['token'=>null,'expires_at'=>0]
+    'email' => $email,
+    'phone' => $phoneRaw, // store as entered for display
+    'role'  => $role,
+    'devices' => [
+        $deviceId => [
+            'name'         => $deviceName !== '' ? $deviceName : 'Web Browser',
+            'pin_hash'     => password_hash($pin, PASSWORD_DEFAULT),
+            'created_at'   => $now,
+            'locked_until' => 0,
+            'fail_count'   => 0
+        ]
+    ],
+    'otp' => [
+        'code'       => null,
+        'expires_at' => 0,
+        'for_device' => null
+    ],
+    'reset' => [
+        'token'      => null,
+        'expires_at' => 0
+    ]
 ];
-$index['email:'.$email] = $uid;
 
-file_put_contents($usrPath, json_encode($users, JSON_PRETTY_PRINT|JSON_UNESCAPED_SLASHES));
-file_put_contents($idxPath, json_encode($index, JSON_PRETTY_PRINT|JSON_UNESCAPED_SLASHES));
+save_json_array($usrPath, $users);
 
-$_SESSION['user_id'] = $uid;
-header('Location: /app/timeline.php');
+/**
+ * Log them in immediately
+ */
+session_regenerate_id(true);
+
+$_SESSION['uid']       = $uid;
+$_SESSION['email']     = $email;
+$_SESSION['role']      = $role;
+$_SESSION['device_id'] = $deviceId;
+
+/**
+ * Redirect by role
+ */
+switch ($role) {
+    case 'admin':
+        header('Location: /admin/users.php');
+        break;
+
+    case 'realtor':
+        header('Location: /app/realtor_portal.php');
+        break;
+
+    case 'buyer':
+    case 'seller':
+        header('Location: /app/timeline.php');
+        break;
+
+    case 'lender':
+        header('Location: /tools/dashboard/lender.html');
+        break;
+
+    case 'attorney':
+        header('Location: /tools/dashboard/attorney.html');
+        break;
+
+    default:
+        header('Location: /tools/dashboard/index.html');
+        break;
+}
+
 exit;

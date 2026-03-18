@@ -1,25 +1,103 @@
 <!doctype html>
 <html lang="en">
 <head>
-<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Nemi – Create account</title>
-<script src="https://cdn.tailwindcss.com"></script>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Nemi — Create account</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    body { font-family: Inter, system-ui, sans-serif; }
+  </style>
 </head>
-<body class="bg-slate-50 min-h-screen flex items-center justify-center">
-  <div class="w-full max-w-md bg-white rounded-2xl shadow p-8">
-    <h1 class="text-2xl font-bold text-center">Create your Nemi account</h1>
+<body class="bg-slate-100 min-h-screen flex items-center justify-center px-4">
+  <div class="w-full max-w-md bg-white rounded-3xl shadow-xl border border-slate-200 p-8">
+    <div class="text-center">
+      <div class="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-indigo-600 text-white text-xl font-bold shadow">
+        N
+      </div>
+      <h1 class="mt-4 text-2xl font-extrabold text-slate-900">Create your Nemi account</h1>
+      <p class="mt-2 text-sm text-slate-500">
+        Set up your account with email, role, and a 4-digit PIN.
+      </p>
+    </div>
+
     <form class="mt-6 space-y-4" method="post" action="/auth/register.php">
       <div>
-        <label class="block text-sm font-medium">Email</label>
-        <input name="email" type="email" required class="mt-1 w-full rounded-lg border-slate-300 shadow-sm">
+        <label class="block text-sm font-semibold text-slate-700">Email</label>
+        <input
+          name="email"
+          type="email"
+          required
+          autocomplete="email"
+          class="mt-1 w-full rounded-xl border border-slate-300 px-4 py-3 outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200"
+          placeholder="you@example.com"
+        >
       </div>
+
       <div>
-        <label class="block text-sm font-medium">Password</label>
-        <input name="password" type="password" required minlength="8" class="mt-1 w-full rounded-lg border-slate-300 shadow-sm">
+        <label class="block text-sm font-semibold text-slate-700">Phone</label>
+        <input
+          name="phone"
+          type="text"
+          autocomplete="tel"
+          class="mt-1 w-full rounded-xl border border-slate-300 px-4 py-3 outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200"
+          placeholder="203-555-1212"
+        >
       </div>
-      <button class="w-full rounded-lg bg-indigo-600 text-white font-semibold py-2">Create account</button>
+
+      <div>
+        <label class="block text-sm font-semibold text-slate-700">Role</label>
+        <select
+          name="role"
+          class="mt-1 w-full rounded-xl border border-slate-300 px-4 py-3 outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200"
+          required
+        >
+          <option value="buyer">Buyer</option>
+          <option value="seller">Seller</option>
+          <option value="realtor">Realtor</option>
+          <option value="lender">Lender</option>
+          <option value="attorney">Attorney</option>
+        </select>
+      </div>
+
+      <div>
+        <label class="block text-sm font-semibold text-slate-700">4-digit PIN</label>
+        <input
+          name="pin"
+          type="password"
+          required
+          maxlength="4"
+          pattern="\d{4}"
+          inputmode="numeric"
+          autocomplete="new-password"
+          class="mt-1 w-full rounded-xl border border-slate-300 px-4 py-3 text-center tracking-[0.35em] text-lg outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200"
+          placeholder="••••"
+        >
+      </div>
+
+      <div>
+        <label class="block text-sm font-semibold text-slate-700">Device name</label>
+        <input
+          name="device_name"
+          type="text"
+          value="Web Browser"
+          class="mt-1 w-full rounded-xl border border-slate-300 px-4 py-3 outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200"
+          placeholder="Viviana Laptop"
+        >
+      </div>
+
+      <button class="w-full rounded-xl bg-indigo-600 text-white font-semibold py-3 shadow hover:bg-indigo-700 transition">
+        Create account
+      </button>
     </form>
-    <p class="mt-4 text-sm"><a class="underline" href="/auth/login.html">Have an account? Sign in</a></p>
+
+    <p class="mt-5 text-sm text-center text-slate-600">
+      Already have an account?
+      <a class="underline hover:text-slate-900" href="/auth/login_form.php">Sign in</a>
+    </p>
   </div>
 </body>
 </html>
