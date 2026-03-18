@@ -6,7 +6,7 @@ session_start();
 ini_set('display_errors', '1');
 error_reporting(E_ALL);
 
-$usrPath = __DIR__ . '/../data/users.json';
+$usrPath = __DIR__ . '/../auth_storage/users.json';
 
 function fail_and_exit(string $message, int $status = 400): void
 {

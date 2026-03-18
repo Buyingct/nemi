@@ -62,7 +62,7 @@ if (!preg_match('/^\d{4}$/', $pin)) {
     fail_and_exit('PIN must be exactly 4 digits.');
 }
 
-$usersPath = __DIR__ . '/../data/users.json';
+$usersPath = __DIR__ . '/../auth_storage/users.json';
 if (!is_file($usersPath)) {
     fail_and_exit('User database not found.');
 }
