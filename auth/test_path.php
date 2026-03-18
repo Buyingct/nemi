@@ -1,2 +1,2 @@
 <?php
-echo __DIR__ . '/../data/users.json';
+echo __DIR__ . '/../auth_storage/users.json';
