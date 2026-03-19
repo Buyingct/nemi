@@ -2,6 +2,9 @@
 declare(strict_types=1);
 session_start();
 
+echo $_SESSION['uid'];
+exit;
+
 if (empty($_SESSION['uid'])) {
     header('Location: /auth/login_form.php');
     exit;
