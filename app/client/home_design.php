@@ -59,14 +59,18 @@ if ($modelUrl === '') {
 
     <div class="card">
       <model-viewer
-        src="<?= htmlspecialchars($modelUrl, ENT_QUOTES, 'UTF-8') ?>"
-        alt="<?= htmlspecialchars($title, ENT_QUOTES, 'UTF-8') ?>"
-        camera-controls
-        touch-action="pan-y"
-        shadow-intensity="1"
-        exposure="1"
-        ar>
-      </model-viewer>
+  src="<?= htmlspecialchars($modelUrl) ?>"
+  camera-controls
+  auto-rotate
+  camera-orbit="0deg 75deg 2.5m"
+  field-of-view="30deg"
+  exposure="1.2"
+  shadow-intensity="1"
+  shadow-softness="0.8"
+  environment-image="neutral"
+  skybox-image="https://modelviewer.dev/shared-assets/environments/aircraft_workshop_01_1k.hdr"
+  style="width:100%; height:80vh;">
+</model-viewer>
 
       <div class="meta">
         <h2>Home Preview</h2>
