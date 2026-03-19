@@ -54,7 +54,7 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
  * - pin (4 digits)
  * - device_name (optional; defaults to Web Browser)
  */
-$email      = mb_strtolower(trim((string)($_POST['email'] ?? '')));
+$email      = strtolower(trim((string)($_POST['email'] ?? '')));
 $phoneRaw   = trim((string)($_POST['phone'] ?? ''));
 $phone      = normalize_phone($phoneRaw);
 $role       = trim((string)($_POST['role'] ?? 'buyer'));
@@ -92,7 +92,7 @@ foreach ($users as $existingUid => $existingUser) {
         continue;
     }
 
-    $existingEmail = mb_strtolower((string)($existingUser['email'] ?? ''));
+    $existingEmail = strtolower((string)($existingUser['email'] ?? ''));
     $existingPhone = normalize_phone((string)($existingUser['phone'] ?? ''));
 
     if ($existingEmail !== '' && $existingEmail === $email) {
@@ -113,7 +113,7 @@ $now = time();
 
 $users[$uid] = [
     'email' => $email,
-    'phone' => $phoneRaw, // store as entered for display
+    'phone' => $phoneRaw,
     'role'  => $role,
     'devices' => [
         $deviceId => [
@@ -146,6 +146,7 @@ $_SESSION['uid']       = $uid;
 $_SESSION['email']     = $email;
 $_SESSION['role']      = $role;
 $_SESSION['device_id'] = $deviceId;
+$_SESSION['name']      = preg_replace('/@.*$/', '', $email);
 
 /**
  * Redirect by role

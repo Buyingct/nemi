@@ -77,14 +77,14 @@ $uid = null;
 $user = null;
 
 $identifierPhone = normalize_phone($identifier);
-$identifierEmail = mb_strtolower($identifier);
+$identifierEmail = strtolower($identifier);
 
 foreach ($users as $candidateUid => $candidateUser) {
     if (!is_array($candidateUser)) {
         continue;
     }
 
-    $candidateEmail = mb_strtolower((string)($candidateUser['email'] ?? ''));
+    $candidateEmail = strtolower((string)($candidateUser['email'] ?? ''));
     $candidatePhone = normalize_phone((string)($candidateUser['phone'] ?? ''));
 
     if ($candidateEmail !== '' && $candidateEmail === $identifierEmail) {
