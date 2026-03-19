@@ -1,64 +1,77 @@
 <?php
-session_start();
-if (empty($_SESSION['user_id'])) { header('Location: /auth/login_form.php'); exit; }
+declare(strict_types=1);
 
-$userId  = $_SESSION['user_id'];
-$role    = strtolower($_SESSION['role']  ?? '');
-$email   = strtolower($_SESSION['email'] ?? '');
-$showPin = false; // ← disable PIN on web
+session_start();
+
+if (empty($_SESSION['uid'])) {
+    header('Location: /');
+    exit;
+}
+
+$userId  = (string)($_SESSION['uid'] ?? '');
+$role    = strtolower((string)($_SESSION['role'] ?? ''));
+$email   = strtolower((string)($_SESSION['email'] ?? ''));
+$showPin = false; // keep disabled on web
 
 $cfg = include __DIR__ . '/../config/.env.php';
 
-// --- CASE LOADING (new path) ---------------------------------
-$caseId   = trim($_GET['case'] ?? '');
-$case     = [];
-$hasCase  = false;
-$hasRealtor = false;
-$isAdmin  = ($role === 'admin') || in_array($email, (array)($cfg['ADMINS'] ?? []), true);
+// --- CASE LOADING -------------------------------------------------
+$caseId      = trim((string)($_GET['case'] ?? ''));
+$case        = [];
+$hasCase     = false;
+$hasRealtor  = false;
+$hasHomeDesign = false;
+$isAdmin     = ($role === 'admin') || in_array($email, (array)($cfg['ADMINS'] ?? []), true);
 
 if ($caseId !== '') {
-  $caseFile = __DIR__ . '/../data/cases/' . basename($caseId) . '.json';
-  if (is_file($caseFile)) {
-    $case = json_decode(file_get_contents($caseFile), true) ?: [];
-    $hasCase = true;
-    $hasRealtor = !empty($case['team']['realtor']);
-  }
+    $caseFile = __DIR__ . '/../data/cases/' . basename($caseId) . '.json';
+    if (is_file($caseFile)) {
+        $case = json_decode((string)file_get_contents($caseFile), true) ?: [];
+        $hasCase = true;
+        $hasRealtor = !empty($case['team']['realtor']);
+
+        // Home design exists if project/model info is assigned in case
+        $hasHomeDesign = !empty($case['project_id']) || !empty($case['model_file']) || !empty($case['home_design']);
+    }
 }
 
-// --- LEGACY CLIENT-ASSETS (fallback) --------------------------
+// --- LEGACY CLIENT-ASSETS (fallback) ------------------------------
 $clientsJson = __DIR__ . '/../data/clients.json';
 $client = [
-  'svg'           => 'assets/svgs/timeline.svg',
-  'timeline_data' => 'data/clients/default.json'
+    'svg'           => 'assets/svgs/timeline.svg',
+    'timeline_data' => 'data/clients/default.json'
 ];
+
 if (!$hasCase && file_exists($clientsJson)) {
-  $all = json_decode(file_get_contents($clientsJson), true) ?: [];
-  if (!empty($all[$userId])) $client = array_merge($client, $all[$userId]);
+    $all = json_decode((string)file_get_contents($clientsJson), true) ?: [];
+    if (!empty($all[$userId])) {
+        $client = array_merge($client, $all[$userId]);
+    }
 }
 
-// --- ASSET RESOLUTION ----------------------------------------
+// --- ASSET RESOLUTION ---------------------------------------------
 if ($hasCase) {
-  // Case assets from the case file (with sensible defaults)
-  $svgRel   = $case['assets']['svg'] ?? 'assets/svgs/timeline_buyer.svg';
-  $mapRel   = $case['assets']['map'] ?? 'data/timeline_map_buyer.json';
-  $svgPath  = __DIR__ . '/../' . ltrim($svgRel, '/');
-  $mapPath  = __DIR__ . '/../' . ltrim($mapRel, '/');
-  // states/notes from case
-  $states   = $case['timeline']['states'] ?? [];
-  $notes    = $case['timeline']['notes']  ?? [];
-  $pageTitle = $case['title'] ?? 'Timeline';
+    $svgRel    = $case['assets']['svg'] ?? 'assets/svgs/timeline_buyer.svg';
+    $mapRel    = $case['assets']['map'] ?? 'data/timeline_map_buyer.json';
+    $svgPath   = __DIR__ . '/../' . ltrim($svgRel, '/');
+    $mapPath   = __DIR__ . '/../' . ltrim($mapRel, '/');
+    $states    = $case['timeline']['states'] ?? [];
+    $notes     = $case['timeline']['notes'] ?? [];
+    $pageTitle = $case['title'] ?? 'Timeline';
 } else {
-  // Legacy fallback
-  $svgPath   = __DIR__ . '/../' . $client['svg'];
-  $dataPath  = __DIR__ . '/../' . $client['timeline_data'];
-  $timeline  = file_exists($dataPath) ? (json_decode(file_get_contents($dataPath), true) ?: []) : [];
-  $states    = $timeline['states'] ?? [];
-  $notes     = $timeline['notes'] ?? [];
-  $mapPath   = __DIR__ . '/../data/timeline_map_buyer.json';
-  $pageTitle = 'Timeline';
+    $svgPath   = __DIR__ . '/../' . $client['svg'];
+    $dataPath  = __DIR__ . '/../' . $client['timeline_data'];
+    $timeline  = file_exists($dataPath) ? (json_decode((string)file_get_contents($dataPath), true) ?: []) : [];
+    $states    = $timeline['states'] ?? [];
+    $notes     = $timeline['notes'] ?? [];
+    $mapPath   = __DIR__ . '/../data/timeline_map_buyer.json';
+    $pageTitle = 'Timeline';
 }
 
-$svg = file_exists($svgPath) ? file_get_contents($svgPath) : '<!-- missing SVG -->';
+$svg = file_exists($svgPath) ? (string)file_get_contents($svgPath) : '<!-- missing SVG -->';
+
+// Choose correct map file for JS boot
+$mapJson = (is_readable($mapPath) ? (json_decode((string)file_get_contents($mapPath), true) ?: new stdClass()) : new stdClass());
 ?>
 <!doctype html>
 <html>
@@ -67,7 +80,30 @@ $svg = file_exists($svgPath) ? file_get_contents($svgPath) : '<!-- missing SVG -
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <link rel="stylesheet" href="../css/site.css">
   <link rel="stylesheet" href="../css/nemi_timeline.css">
-  <title>Nemi • <?= htmlspecialchars($pageTitle) ?></title>
+  <title>Nemi • <?= htmlspecialchars($pageTitle, ENT_QUOTES, 'UTF-8') ?></title>
+  <style>
+    .case-top-actions{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      margin:10px 0 0;
+    }
+    .home-btn{
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      padding:10px 14px;
+      border-radius:10px;
+      background:#0f172a;
+      color:#fff;
+      text-decoration:none;
+      font-weight:700;
+      border:0;
+    }
+    .home-btn.secondary{
+      background:#4f46e5;
+    }
+  </style>
 </head>
 <body>
 <header class="site-header">
@@ -82,24 +118,41 @@ $svg = file_exists($svgPath) ? file_get_contents($svgPath) : '<!-- missing SVG -
 </header>
 
 <main>
-  <!-- ===== CASE TITLE + TEAM ACTIONS (baked in) ===== -->
+  <!-- ===== CASE TITLE + TEAM ACTIONS ===== -->
   <section style="max-width:980px;margin:16px auto 8px;padding:0 12px;">
-    <h1 style="margin:0 0 8px;font-size:20px;font-weight:700;"><?= htmlspecialchars($pageTitle) ?></h1>
+    <h1 style="margin:0 0 8px;font-size:20px;font-weight:700;"><?= htmlspecialchars($pageTitle, ENT_QUOTES, 'UTF-8') ?></h1>
+
+    <?php if ($hasCase): ?>
+      <div class="case-top-actions">
+        <?php if ($hasHomeDesign): ?>
+          <a class="home-btn secondary" href="/app/client/home_design.php?case=<?= urlencode($caseId) ?>">
+            View Your Home
+          </a>
+        <?php else: ?>
+          <?php if ($role === 'realtor' || $role === 'admin'): ?>
+            <a class="home-btn" href="/app/client/home_design.php?case=<?= urlencode($caseId) ?>">
+              Set Up Home Design
+            </a>
+          <?php endif; ?>
+        <?php endif; ?>
+      </div>
+    <?php endif; ?>
 
     <?php if ($hasCase): ?>
       <?php
-        if (empty($_SESSION['csrf_case'])) { $_SESSION['csrf_case'] = bin2hex(random_bytes(16)); }
+        if (empty($_SESSION['csrf_case'])) {
+            $_SESSION['csrf_case'] = bin2hex(random_bytes(16));
+        }
         $csrfCase = $_SESSION['csrf_case'];
       ?>
-      <div style="padding:12px;border:1px solid #e2e8f0;border-radius:10px;background:#fff">
+      <div style="padding:12px;border:1px solid #e2e8f0;border-radius:10px;background:#fff;margin-top:12px;">
         <h2 style="margin:0 0 8px; font-size:16px;">Team actions</h2>
 
         <?php if (!$hasRealtor): ?>
-          <!-- Users can request a Realtor (admin must approve/attach) -->
           <form method="post" action="/api/request_realtor.php"
                 style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:8px;">
-            <input type="hidden" name="case" value="<?= htmlspecialchars($caseId) ?>">
-            <input type="hidden" name="csrf" value="<?= htmlspecialchars($csrfCase) ?>">
+            <input type="hidden" name="case" value="<?= htmlspecialchars($caseId, ENT_QUOTES, 'UTF-8') ?>">
+            <input type="hidden" name="csrf" value="<?= htmlspecialchars($csrfCase, ENT_QUOTES, 'UTF-8') ?>">
             <input name="email" type="email" placeholder="Realtor email" required
                    style="padding:8px 10px;border:1px solid #cbd5e1;border-radius:8px;">
             <input name="note" placeholder="Note (optional)"
@@ -111,12 +164,11 @@ $svg = file_exists($svgPath) ? file_get_contents($svgPath) : '<!-- missing SVG -
           </form>
         <?php endif; ?>
 
-        <!-- Add teammate (admin can add Realtor; others can add Lender/Attorney once a Realtor exists) -->
         <form method="post" action="/api/add_to_case.php"
               style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
-          <input type="hidden" name="case" value="<?= htmlspecialchars($caseId) ?>">
+          <input type="hidden" name="case" value="<?= htmlspecialchars($caseId, ENT_QUOTES, 'UTF-8') ?>">
           <input type="hidden" name="send_invites" value="1">
-          <input type="hidden" name="csrf" value="<?= htmlspecialchars($csrfCase) ?>">
+          <input type="hidden" name="csrf" value="<?= htmlspecialchars($csrfCase, ENT_QUOTES, 'UTF-8') ?>">
 
           <select name="role" required
                   style="padding:8px 10px;border:1px solid #cbd5e1;border-radius:8px;">
@@ -144,10 +196,10 @@ $svg = file_exists($svgPath) ? file_get_contents($svgPath) : '<!-- missing SVG -
 
   <!-- ===== TIMELINE SVG ===== -->
   <section id="timeline-wrap" style="position:relative">
-    <?php echo $svg; ?>  <!-- inline SVG so we can add click handlers -->
+    <?= $svg ?>
   </section>
 
-  <!-- bottom sheet (for step details) -->
+  <!-- bottom sheet -->
   <div id="nt_sheet" aria-hidden="true">
     <div class="grab"></div>
     <h3 id="nt_title">Step</h3>
@@ -160,7 +212,6 @@ $svg = file_exists($svgPath) ? file_get_contents($svgPath) : '<!-- missing SVG -
   </div>
 
   <?php if ($showPin): ?>
-  <!-- PIN / OTP overlay (rendered only if $showPin === true) -->
   <div id="pinGate" class="pin-gate-backdrop" aria-hidden="true">
     <div class="pin-gate-card">
       <h3 class="title">Unlock with your PIN</h3>
@@ -177,13 +228,12 @@ $svg = file_exists($svgPath) ? file_get_contents($svgPath) : '<!-- missing SVG -
         <p class="sub"><a href="#" id="forgotPin">Forgot PIN?</a></p>
       </form>
 
-
       <form id="otpForm" class="otp-form hide" method="post" action="/auth/verify_otp.php">
         <p>We sent a 6-digit code to your email/phone.</p>
         <input class="field" name="code" pattern="\d{6}" maxlength="6" inputmode="numeric" placeholder="123456" required>
         <div class="row">
           <button class="btn" type="submit">Verify</button>
-           <button id="resendOtp" class="btn ghost" type="button">Resend</button>
+          <button id="resendOtp" class="btn ghost" type="button">Resend</button>
         </div>
         <p id="otpErr" class="err hide">Invalid or expired code.</p>
       </form>
@@ -192,21 +242,16 @@ $svg = file_exists($svgPath) ? file_get_contents($svgPath) : '<!-- missing SVG -
   <?php endif; ?>
 </main>
 
-
-<?php
-// Choose the correct map file for the JS boot
-$mapJson = (is_readable($mapPath) ? (json_decode(file_get_contents($mapPath), true) ?: new stdClass()) : new stdClass());
-?>
- <script>
+<script>
   window.NEMI = {
-    userId: "<?= htmlspecialchars($userId) ?>",
+    userId: "<?= htmlspecialchars($userId, ENT_QUOTES, 'UTF-8') ?>",
+    caseId: "<?= htmlspecialchars($caseId, ENT_QUOTES, 'UTF-8') ?>",
     states: <?= json_encode($states, JSON_UNESCAPED_SLASHES) ?>,
-    notes:  <?= json_encode($notes,  JSON_UNESCAPED_SLASHES) ?>,
+    notes:  <?= json_encode($notes, JSON_UNESCAPED_SLASHES) ?>,
     map:    <?= json_encode($mapJson, JSON_UNESCAPED_SLASHES) ?>
   };
 </script>
- <script src="../js/timeline.js" defer></script>
-
+<script src="../js/timeline.js" defer></script>
 
 <?php if ($showPin): ?>
 <script>
@@ -215,8 +260,6 @@ $mapJson = (is_readable($mapPath) ? (json_decode(file_get_contents($mapPath), tr
   const pinErr  = document.getElementById('pinErr');
   const pins    = Array.from(document.querySelectorAll('#pinForm .pin'));
   const otpForm = document.getElementById('otpForm');
-  const forgot  = document.getElementById('forgotPin');
-
 
   const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
   const hasDeviceCookie = document.cookie.includes('nemi_device=');
@@ -232,7 +275,6 @@ $mapJson = (is_readable($mapPath) ? (json_decode(file_get_contents($mapPath), tr
     });
   });
 
-  
   document.getElementById('pinForm').addEventListener('submit', async (e)=>{
     e.preventDefault();
     const pin = pins.map(i=>i.value).join('');
@@ -253,8 +295,11 @@ $mapJson = (is_readable($mapPath) ? (json_decode(file_get_contents($mapPath), tr
         return;
       }
       pinErr.classList.remove('hide');
-      pins.forEach(p=>p.value=''); pins[0].focus();
-    } catch(e){ pinErr.classList.remove('hide'); }
+      pins.forEach(p=>p.value='');
+      pins[0].focus();
+    } catch(e){
+      pinErr.classList.remove('hide');
+    }
   });
 
   document.getElementById('resendOtp')?.addEventListener('click', async ()=>{
@@ -265,8 +310,8 @@ $mapJson = (is_readable($mapPath) ? (json_decode(file_get_contents($mapPath), tr
     e.preventDefault();
     document.getElementById('pinForm').classList.add('hide');
     otpForm.classList.remove('hide');
-     try { await fetch('/auth/resend_otp.php', {method:'POST'}); } catch(e){}
-    });
+    try { await fetch('/auth/resend_otp.php', {method:'POST'}); } catch(e){}
+  });
 })();
 </script>
 <?php endif; ?>
