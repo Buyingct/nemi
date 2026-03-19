@@ -19,6 +19,16 @@ $cfg = include __DIR__ . '/../config/.env.php';
 
 // --- CASE LOADING -------------------------------------------------
 $caseId      = trim((string)($_GET['case'] ?? ''));
+
+$debugCaseFile = __DIR__ . '/../data/cases/' . basename($caseId) . '.json';
+
+echo '<pre>';
+echo "CASE ID: " . $caseId . "\n";
+echo "CASE FILE: " . $debugCaseFile . "\n";
+echo "FILE EXISTS: " . (file_exists($debugCaseFile) ? 'YES' : 'NO') . "\n";
+echo "FILE READABLE: " . (is_readable($debugCaseFile) ? 'YES' : 'NO') . "\n";
+exit;
+
 $case        = [];
 $hasCase     = false;
 $hasRealtor  = false;
