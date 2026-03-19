@@ -1,0 +1,22 @@
+{
+  "id": "case_buyer_0002",
+  "title": "Riveras - New Construction Home",
+  "type": "buyer",
+  "team": {
+    "realtor": {
+      "email": "v.rocharealtor@gmail.com"
+    }
+  },
+  "assets": {
+    "svg": "assets/svgs/timeline_buyer.svg",
+    "map": "data/timeline_map_buyer.json"
+  },
+  "timeline": {
+    "states": {},
+    "notes": {}
+  },
+  "home_design": {
+    "title": "Rivera Family Home",
+    "model": "/models/rivera_house.glb"
+  }
+}

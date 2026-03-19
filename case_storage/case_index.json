@@ -1,0 +1,16 @@
+{
+  "case_buyer_0001": {
+    "role": "client",
+    "client_user_id": "u_gerry",
+    "type": "buyer",
+    "svg": "assets/svgs/timeline_buyer.svg",
+    "timeline_data": "data/clients/default.json"
+  },
+  "case_buyer_0002": {
+    "role": "client",
+    "client_user_id": "u_rivera",
+    "type": "buyer",
+    "svg": "assets/svgs/timeline_buyer.svg",
+    "timeline_data": "data/clients/default.json"
+  }
+}
