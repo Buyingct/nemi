@@ -21,7 +21,7 @@ session_set_cookie_params([
 session_start();
 
 const MAX_FAILS = 5;
-const LOCK_SECONDS = 900; // 15 min
+const LOCK_SECONDS = 900;
 
 function fail_and_exit(string $message, string $redirect = '/'): void
 {
@@ -49,16 +49,17 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 }
 
 $identifier = trim((string)($_POST['identifier'] ?? ''));
-$pin        = trim((string)($_POST['pin'] ?? ''));
+$pinRaw     = (string)($_POST['pin'] ?? '');
 $deviceId   = trim((string)($_POST['device_id'] ?? ''));
 
-if ($identifier === '' || $pin === '') {
-    fail_and_exit('Please enter your email or phone and your PIN.');
+// Clean the PIN aggressively
+$pin = preg_replace('/\D+/', '', $pinRaw) ?? '';
+
+if ($identifier === '') {
+    fail_and_exit('Please enter your email or phone.');
 }
 
-$pin = preg_replace('/\D+/', '', $pin) ?? '';
-
-if (!preg_match('/^\d{4}$/', $pin)) {
+if (strlen($pin) !== 4) {
     fail_and_exit('PIN must be exactly 4 digits.');
 }
 
@@ -166,12 +167,7 @@ $_SESSION['uid']       = $uid;
 $_SESSION['email']     = $email;
 $_SESSION['role']      = $role;
 $_SESSION['device_id'] = $deviceId;
+$_SESSION['name']      = preg_replace('/@.*$/', '', $email);
 
-// optional debug name
-if (empty($_SESSION['name'])) {
-    $_SESSION['name'] = preg_replace('/@.*$/', '', $email);
-}
-
-// Always route through one place after login
 header('Location: /auth/start.php');
 exit;

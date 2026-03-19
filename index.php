@@ -74,18 +74,17 @@ unset($_SESSION['login_error']);
       </div>
 
       <div id="slot-passwordbox" class="slot absolute hidden">
-        <input
-          class="w-full h-full rounded-full border-2 border-slate-300 px-3 text-[16px]"
-          type="password"
-          name="pin"
-          placeholder="4-digit PIN"
-          autocomplete="current-password"
-          maxlength="4"
-          inputmode="numeric"
-          pattern="\d{4}"
-          required
-        >
-      </div>
+  <input
+    class="w-full h-full rounded-full border-2 border-slate-300 px-3 text-[16px]"
+    type="tel"
+    name="pin"
+    placeholder="4-digit PIN"
+    autocomplete="off"
+    inputmode="numeric"
+    maxlength="4"
+    required
+  >
+</div>
 
       <input type="hidden" name="device_id" value="d_abc123">
 
@@ -843,5 +842,24 @@ html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
   }
 })();
   </script>
+
+  <script>
+document.addEventListener('DOMContentLoaded', function () {
+  const form = document.getElementById('nemiLoginForm');
+  if (!form) return;
+
+  const pinInput = form.querySelector('input[name="pin"]');
+  if (!pinInput) return;
+
+  pinInput.addEventListener('input', function () {
+    this.value = this.value.replace(/\D/g, '').slice(0, 4);
+  });
+
+  form.addEventListener('submit', function (e) {
+    pinInput.value = pinInput.value.replace(/\D/g, '').slice(0, 4);
+  });
+});
+</script>
+
 </body>
 </html>
