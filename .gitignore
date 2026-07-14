@@ -1,0 +1,18 @@
+#################################################
+# Rocha Circle Concierge
+#################################################
+
+# SQLite database
+concierge/database/*.db
+concierge/database/*.db-shm
+concierge/database/*.db-wal
+
+# Uploaded client documents
+concierge/documents/*
+
+# Runtime storage
+concierge/storage/*
+
+# Keep folders in Git
+!concierge/documents/.gitkeep
+!concierge/storage/.gitkeep

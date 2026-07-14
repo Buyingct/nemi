@@ -1,0 +1,218 @@
+<?php
+
+declare(strict_types=1);
+
+require_once __DIR__ . '/connect.php';
+
+$success = false;
+$message = '';
+$databasePath = __DIR__ . '/concierge.db';
+
+try {
+    $database = conciergeDatabase();
+
+    $database->exec(
+        '
+        CREATE TABLE IF NOT EXISTS workspaces (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            public_id TEXT NOT NULL UNIQUE,
+            name TEXT NOT NULL,
+            address TEXT,
+            city TEXT,
+            state TEXT NOT NULL DEFAULT "CT",
+            postal_code TEXT,
+            status TEXT NOT NULL DEFAULT "active",
+            created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+            updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+        );
+        '
+    );
+
+    $database->exec(
+        '
+        CREATE INDEX IF NOT EXISTS idx_workspaces_public_id
+        ON workspaces(public_id);
+        '
+    );
+
+    $database->exec(
+        '
+        CREATE INDEX IF NOT EXISTS idx_workspaces_status
+        ON workspaces(status);
+        '
+    );
+
+    $success = true;
+    $message = 'Database and workspace table created successfully.';
+} catch (Throwable $exception) {
+    error_log(
+        'Concierge database initialization failed: '
+        . $exception->getMessage()
+    );
+
+    $message = 'The database could not be initialized. Check the server logs.';
+}
+
+$statusCode = $success ? 200 : 500;
+http_response_code($statusCode);
+?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1"
+    >
+
+    <meta name="robots" content="noindex, nofollow">
+
+    <title>Concierge Setup</title>
+
+    <style>
+        :root {
+            --ivory: #f2ede3;
+            --paper: rgba(255, 255, 255, 0.72);
+            --ink: #181816;
+            --muted: #6f6b62;
+            --gold: #9a7740;
+            --success: #426a4b;
+            --error: #8a3f3f;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            min-height: 100vh;
+            margin: 0;
+            padding: 24px;
+            display: grid;
+            place-items: center;
+            color: var(--ink);
+            background:
+                radial-gradient(
+                    circle at top left,
+                    rgba(205, 183, 140, 0.35),
+                    transparent 42%
+                ),
+                var(--ivory);
+            font-family:
+                -apple-system,
+                BlinkMacSystemFont,
+                "Segoe UI",
+                sans-serif;
+        }
+
+        .setup-card {
+            width: min(620px, 100%);
+            padding: 42px;
+            border: 1px solid rgba(255, 255, 255, 0.7);
+            border-radius: 28px;
+            background: var(--paper);
+            box-shadow: 0 30px 80px rgba(60, 49, 31, 0.12);
+            backdrop-filter: blur(24px);
+            -webkit-backdrop-filter: blur(24px);
+        }
+
+        .eyebrow {
+            margin: 0 0 18px;
+            color: var(--gold);
+            font-size: 0.72rem;
+            font-weight: 700;
+            letter-spacing: 0.17em;
+            text-transform: uppercase;
+        }
+
+        h1 {
+            margin: 0;
+            font-family: Georgia, "Times New Roman", serif;
+            font-size: clamp(2.3rem, 7vw, 4rem);
+            font-weight: 400;
+            line-height: 1;
+            letter-spacing: -0.04em;
+        }
+
+        .status {
+            margin-top: 30px;
+            padding: 18px 20px;
+            border-radius: 15px;
+            background: rgba(255, 255, 255, 0.55);
+        }
+
+        .status.success {
+            border-left: 4px solid var(--success);
+        }
+
+        .status.error {
+            border-left: 4px solid var(--error);
+        }
+
+        .status strong,
+        .status span {
+            display: block;
+        }
+
+        .status span {
+            margin-top: 6px;
+            color: var(--muted);
+            line-height: 1.6;
+        }
+
+        .details {
+            margin-top: 25px;
+            color: var(--muted);
+            font-size: 0.86rem;
+            line-height: 1.7;
+        }
+
+        a {
+            display: inline-block;
+            margin-top: 24px;
+            color: var(--ink);
+            text-underline-offset: 5px;
+        }
+    </style>
+</head>
+
+<body>
+
+<main class="setup-card">
+
+    <p class="eyebrow">Rocha Circle Concierge</p>
+
+    <h1>Database setup</h1>
+
+    <div class="status <?= $success ? 'success' : 'error' ?>">
+
+        <strong>
+            <?= $success ? 'Setup complete' : 'Setup failed' ?>
+        </strong>
+
+        <span>
+            <?= htmlspecialchars($message, ENT_QUOTES, 'UTF-8') ?>
+        </span>
+
+    </div>
+
+    <?php if ($success): ?>
+
+        <div class="details">
+            <strong>Created:</strong><br>
+            SQLite database<br>
+            Workspaces table<br>
+            Workspace indexes
+        </div>
+
+        <a href="../">
+            Return to Document Concierge
+        </a>
+
+    <?php endif; ?>
+
+</main>
+
+</body>
+</html>
