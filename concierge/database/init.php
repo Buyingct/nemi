@@ -44,7 +44,8 @@ try {
 
     $success = true;
     $message = 'Database and workspace table created successfully.';
-} catch (Throwable $exception) {
+
+    } catch (Throwable $exception) {
     error_log(
         'Concierge database initialization failed: '
         . $exception->getMessage()
