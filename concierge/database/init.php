@@ -6,7 +6,6 @@ require_once __DIR__ . '/connect.php';
 
 $success = false;
 $message = '';
-$databasePath = __DIR__ . '/concierge.db';
 
 try {
     $database = conciergeDatabase();
@@ -44,15 +43,13 @@ try {
 
     $success = true;
     $message = 'Database and workspace table created successfully.';
-
-
-    } catch (Throwable $exception) {
+} catch (Throwable $exception) {
     error_log(
         'Concierge database initialization failed: '
         . $exception->getMessage()
     );
 
-    $message = 'Database error: ' . $exception->getMessage();
+    $message = 'The database could not be initialized. Check the server logs.';
 }
 
 $statusCode = $success ? 200 : 500;

@@ -41,15 +41,14 @@ function conciergeDatabase(): PDO
         $database->exec('PRAGMA journal_mode = WAL;');
 
         return $database;
- 
-            } catch (PDOException $exception) {
+    } catch (PDOException $exception) {
         error_log(
             'Concierge database connection failed: '
             . $exception->getMessage()
         );
 
         throw new RuntimeException(
-            'Database error: ' . $exception->getMessage()
+            'The Concierge database is temporarily unavailable.'
         );
     }
 }
