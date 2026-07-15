@@ -58,15 +58,29 @@ try {
     $documentsStatement = $database->prepare(
         '
         SELECT
-            public_id,
-            original_name,
-            category,
-            uploaded_at,
-            file_size,
-            status
-        FROM documents
-        WHERE workspace_id = :workspace_id
-        ORDER BY uploaded_at DESC, id DESC
+            d.id,
+            d.public_id,
+            d.original_name,
+            d.category,
+            d.uploaded_at,
+            d.file_size,
+            d.status,
+            COUNT(k.id) AS chunk_count,
+            MIN(k.page_number) AS first_page,
+            MAX(k.page_number) AS last_page
+        FROM documents d
+        LEFT JOIN knowledge k
+            ON k.document_id = d.id
+        WHERE d.workspace_id = :workspace_id
+        GROUP BY
+            d.id,
+            d.public_id,
+            d.original_name,
+            d.category,
+            d.uploaded_at,
+            d.file_size,
+            d.status
+        ORDER BY d.uploaded_at DESC, d.id DESC
         '
     );
 
@@ -114,6 +128,24 @@ function formatCategory(string $category): string
 {
     return ucwords(str_replace('-', ' ', $category));
 }
+
+function formatPageCoverage(
+    mixed $firstPage,
+    mixed $lastPage
+): string {
+    if ($firstPage === null || $lastPage === null) {
+        return 'No page data';
+    }
+
+    $first = (int) $firstPage;
+    $last = (int) $lastPage;
+
+    if ($first === $last) {
+        return 'Page ' . $first;
+    }
+
+    return 'Pages ' . $first . '–' . $last;
+}
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -146,6 +178,7 @@ function formatCategory(string $category): string
             --gold: #9a7740;
             --line: rgba(45, 41, 34, 0.12);
             --success: #426a4b;
+            --warning: #8a6d2f;
             --error: #8a3f3f;
         }
 
@@ -360,13 +393,22 @@ function formatCategory(string $category): string
 
         .document-status {
             padding: 8px 11px;
-            border: 1px solid rgba(66, 106, 75, 0.18);
             border-radius: 999px;
-            color: var(--success);
-            background: rgba(66, 106, 75, 0.06);
             font-size: 0.68rem;
             letter-spacing: 0.08em;
             text-transform: uppercase;
+        }
+
+        .document-status.ready {
+            border: 1px solid rgba(66, 106, 75, 0.18);
+            color: var(--success);
+            background: rgba(66, 106, 75, 0.06);
+        }
+
+        .document-status.processing {
+            border: 1px solid rgba(138, 109, 47, 0.18);
+            color: var(--warning);
+            background: rgba(138, 109, 47, 0.07);
         }
 
         .summary-list {
@@ -460,7 +502,7 @@ function formatCategory(string $category): string
     <?php if ($uploaded): ?>
 
         <div class="notice">
-            Document uploaded successfully.
+            Document uploaded and processed successfully.
         </div>
 
     <?php endif; ?>
@@ -552,6 +594,18 @@ function formatCategory(string $category): string
 
                         <?php foreach ($documents as $document): ?>
 
+                            <?php
+                            $documentStatus = (string) $document['status'];
+
+                            $statusClass = in_array(
+                                $documentStatus,
+                                ['ready', 'processing'],
+                                true
+                            )
+                                ? $documentStatus
+                                : 'processing';
+                            ?>
+
                             <article class="document-card">
 
                                 <div>
@@ -587,6 +641,22 @@ function formatCategory(string $category): string
                                         </span>
 
                                         <span>
+                                            <?= (int) $document['chunk_count'] ?>
+                                            knowledge chunks
+                                        </span>
+
+                                        <span>
+                                            <?= htmlspecialchars(
+                                                formatPageCoverage(
+                                                    $document['first_page'],
+                                                    $document['last_page']
+                                                ),
+                                                ENT_QUOTES,
+                                                'UTF-8'
+                                            ) ?>
+                                        </span>
+
+                                        <span>
                                             Uploaded:
                                             <?= htmlspecialchars(
                                                 (string) $document['uploaded_at'],
@@ -599,9 +669,15 @@ function formatCategory(string $category): string
 
                                 </div>
 
-                                <span class="document-status">
+                                <span
+                                    class="document-status <?= htmlspecialchars(
+                                        $statusClass,
+                                        ENT_QUOTES,
+                                        'UTF-8'
+                                    ) ?>"
+                                >
                                     <?= htmlspecialchars(
-                                        (string) $document['status'],
+                                        $documentStatus,
                                         ENT_QUOTES,
                                         'UTF-8'
                                     ) ?>
@@ -626,6 +702,19 @@ function formatCategory(string $category): string
                     <div class="summary-item">
                         <span>Documents</span>
                         <strong><?= count($documents) ?></strong>
+                    </div>
+
+                    <div class="summary-item">
+                        <span>Knowledge chunks</span>
+                        <strong>
+                            <?= array_sum(
+                                array_map(
+                                    static fn (array $document): int =>
+                                        (int) $document['chunk_count'],
+                                    $documents
+                                )
+                            ) ?>
+                        </strong>
                     </div>
 
                     <div class="summary-item">

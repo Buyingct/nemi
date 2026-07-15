@@ -89,15 +89,62 @@ try {
         '
     );
 
+    /*
+     * Knowledge
+     */
+    $database->exec(
+        '
+        CREATE TABLE IF NOT EXISTS knowledge (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            workspace_id INTEGER NOT NULL,
+            document_id INTEGER NOT NULL,
+            section_title TEXT,
+            page_number INTEGER,
+            content TEXT NOT NULL,
+            embedding TEXT,
+            created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+            FOREIGN KEY (workspace_id)
+                REFERENCES workspaces(id)
+                ON DELETE CASCADE,
+
+            FOREIGN KEY (document_id)
+                REFERENCES documents(id)
+                ON DELETE CASCADE
+        );
+        '
+    );
+
+    $database->exec(
+        '
+        CREATE INDEX IF NOT EXISTS idx_knowledge_workspace
+        ON knowledge(workspace_id);
+        '
+    );
+
+    $database->exec(
+        '
+        CREATE INDEX IF NOT EXISTS idx_knowledge_document
+        ON knowledge(document_id);
+        '
+    );
+
     $success = true;
-    $message = 'Database, workspace table, and documents table created successfully.';
+
+    $message = (
+        'Database, workspace, documents, and knowledge tables '
+        . 'created successfully.'
+    );
 } catch (Throwable $exception) {
     error_log(
         'Concierge database initialization failed: '
         . $exception->getMessage()
     );
 
-    $message = 'The database could not be initialized. Check the server logs.';
+    $message = (
+        'The database could not be initialized. '
+        . 'Check the server logs.'
+    );
 }
 
 http_response_code($success ? 200 : 500);
@@ -250,6 +297,7 @@ http_response_code($success ? 200 : 500);
             SQLite database<br>
             Workspaces table<br>
             Documents table<br>
+            Knowledge table<br>
             Database indexes
         </div>
 

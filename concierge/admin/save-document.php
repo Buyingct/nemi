@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 require_once __DIR__ . '/../database/connect.php';
 require_once __DIR__ . '/../classes/WorkspaceStorage.php';
+require_once __DIR__ . '/../classes/DocumentProcessor.php';
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     header('Location: index.php');
@@ -84,10 +85,6 @@ if ($originalName === '') {
     );
 }
 
-/*
- * Keep the first version conservative.
- * We can raise this later after checking the VPS upload limits.
- */
 $maximumFileSize = 50 * 1024 * 1024;
 
 if ($fileSize <= 0 || $fileSize > $maximumFileSize) {
@@ -123,9 +120,6 @@ if (!in_array($mimeType, $allowedMimeTypes, true)) {
     );
 }
 
-/*
- * Confirm the file begins with the PDF signature.
- */
 $handle = fopen($temporaryPath, 'rb');
 
 if ($handle === false) {
@@ -148,6 +142,7 @@ if ($signature !== '%PDF-') {
 $storedName = bin2hex(random_bytes(16)) . '.pdf';
 $documentPublicId = bin2hex(random_bytes(8));
 $destinationPath = '';
+$database = null;
 
 try {
     $database = conciergeDatabase();
@@ -237,7 +232,64 @@ try {
         ':category' => $category,
         ':mime_type' => $mimeType,
         ':file_size' => $fileSize,
-        ':status' => 'uploaded',
+        ':status' => 'processing',
+    ]);
+
+    $documentId = (int) $database->lastInsertId();
+
+    $processor = new DocumentProcessor($storage);
+
+    $chunks = $processor->process(
+        $workspacePublicId,
+        $destinationPath,
+        $documentPublicId
+    );
+
+    if ($chunks === []) {
+        throw new RuntimeException(
+            'No searchable text chunks were created.'
+        );
+    }
+
+    $knowledgeInsert = $database->prepare(
+        '
+        INSERT INTO knowledge (
+            workspace_id,
+            document_id,
+            section_title,
+            page_number,
+            content
+        ) VALUES (
+            :workspace_id,
+            :document_id,
+            :section_title,
+            :page_number,
+            :content
+        )
+        '
+    );
+
+    foreach ($chunks as $chunk) {
+        $knowledgeInsert->execute([
+            ':workspace_id' => (int) $workspace['id'],
+            ':document_id' => $documentId,
+            ':section_title' => $chunk['section_title'],
+            ':page_number' => $chunk['page_number'],
+            ':content' => $chunk['content'],
+        ]);
+    }
+
+    $statusUpdate = $database->prepare(
+        '
+        UPDATE documents
+        SET status = :status
+        WHERE id = :document_id
+        '
+    );
+
+    $statusUpdate->execute([
+        ':status' => 'ready',
+        ':document_id' => $documentId,
     ]);
 
     $database->commit();
@@ -250,8 +302,7 @@ try {
     exit;
 } catch (Throwable $exception) {
     if (
-        isset($database)
-        && $database instanceof PDO
+        $database instanceof PDO
         && $database->inTransaction()
     ) {
         $database->rollBack();
@@ -265,13 +316,13 @@ try {
     }
 
     error_log(
-        'Document upload failed: '
+        'Document upload or processing failed: '
         . $exception->getMessage()
     );
 
     redirectWithError(
         $workspacePublicId,
-        'The document could not be uploaded. Please try again.'
+        'The document could not be processed. Please try again.'
     );
 }
 
