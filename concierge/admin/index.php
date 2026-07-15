@@ -251,6 +251,16 @@ try {
             font-size: 0.75rem;
         }
 
+.workspace-card {
+    color: inherit;
+    text-decoration: none;
+}
+
+.workspace-card:hover {
+    transform: translateY(-2px);
+    border-color: rgba(154, 119, 64, 0.24);
+}
+
         .status {
             padding: 8px 11px;
             border: 1px solid rgba(66, 106, 75, 0.18);
@@ -425,7 +435,12 @@ try {
                     $location = implode(', ', $locationParts);
                     ?>
 
-                    <article class="workspace-card">
+                    <a
+    class="workspace-card"
+    href="workspace.php?id=<?= urlencode(
+        (string) $workspace['public_id']
+    ) ?>"
+>
 
                         <div>
 
@@ -481,7 +496,7 @@ try {
                             ) ?>
                         </span>
 
-                    </article>
+                    </a>
 
                 <?php endforeach; ?>
 
