@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 require_once __DIR__ . '/../database/connect.php';
+require_once __DIR__ . '/../classes/WorkspaceStorage.php';
 
 $publicId = trim((string) ($_GET['id'] ?? ''));
 
@@ -12,6 +13,8 @@ if ($publicId === '') {
 }
 
 $workspace = null;
+$documents = [];
+$uploaded = isset($_GET['uploaded']) && $_GET['uploaded'] === '1';
 $error = '';
 
 try {
@@ -45,6 +48,33 @@ try {
         http_response_code(404);
         exit('Workspace not found.');
     }
+
+    $storage = new WorkspaceStorage();
+
+    $storage->createWorkspaceFolders(
+        (string) $workspace['public_id']
+    );
+
+    $documentsStatement = $database->prepare(
+        '
+        SELECT
+            public_id,
+            original_name,
+            category,
+            uploaded_at,
+            file_size,
+            status
+        FROM documents
+        WHERE workspace_id = :workspace_id
+        ORDER BY uploaded_at DESC, id DESC
+        '
+    );
+
+    $documentsStatement->execute([
+        ':workspace_id' => (int) $workspace['id'],
+    ]);
+
+    $documents = $documentsStatement->fetchAll();
 } catch (Throwable $exception) {
     error_log(
         'Workspace detail failed: '
@@ -66,6 +96,24 @@ if ($workspace) {
 }
 
 $location = implode(', ', $locationParts);
+
+function formatFileSize(int $bytes): string
+{
+    if ($bytes >= 1024 * 1024) {
+        return number_format($bytes / (1024 * 1024), 1) . ' MB';
+    }
+
+    if ($bytes >= 1024) {
+        return number_format($bytes / 1024, 1) . ' KB';
+    }
+
+    return $bytes . ' bytes';
+}
+
+function formatCategory(string $category): string
+{
+    return ucwords(str_replace('-', ' ', $category));
+}
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -162,7 +210,8 @@ $location = implode(', ', $locationParts);
         }
 
         .eyebrow,
-        .section-label {
+        .section-label,
+        .document-label {
             margin: 0;
             color: var(--gold);
             font-size: 0.72rem;
@@ -185,6 +234,23 @@ $location = implode(', ', $locationParts);
             color: var(--muted);
             font-size: 1.02rem;
             line-height: 1.7;
+        }
+
+        .notice,
+        .error {
+            margin-top: 28px;
+            padding: 16px 18px;
+            border-radius: 14px;
+            background: rgba(255, 255, 255, 0.5);
+        }
+
+        .notice {
+            border-left: 4px solid var(--success);
+        }
+
+        .error {
+            border-left: 4px solid var(--error);
+            color: var(--error);
         }
 
         .workspace-grid {
@@ -258,6 +324,51 @@ $location = implode(', ', $locationParts);
             margin-top: 22px;
         }
 
+        .document-list {
+            margin-top: 24px;
+            display: grid;
+            gap: 12px;
+        }
+
+        .document-card {
+            padding: 20px;
+            display: grid;
+            grid-template-columns: minmax(0, 1fr) auto;
+            gap: 20px;
+            align-items: center;
+            border: 1px solid var(--line);
+            border-radius: 18px;
+            background: var(--paper-strong);
+        }
+
+        .document-card h3 {
+            margin: 8px 0 0;
+            overflow-wrap: anywhere;
+            font-family: Georgia, "Times New Roman", serif;
+            font-size: 1.28rem;
+            font-weight: 400;
+        }
+
+        .document-meta {
+            margin: 9px 0 0;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            color: var(--muted);
+            font-size: 0.76rem;
+        }
+
+        .document-status {
+            padding: 8px 11px;
+            border: 1px solid rgba(66, 106, 75, 0.18);
+            border-radius: 999px;
+            color: var(--success);
+            background: rgba(66, 106, 75, 0.06);
+            font-size: 0.68rem;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+        }
+
         .summary-list {
             margin-top: 24px;
             display: grid;
@@ -283,15 +394,7 @@ $location = implode(', ', $locationParts);
 
         .summary-item strong {
             font-weight: 600;
-        }
-
-        .error {
-            margin-top: 28px;
-            padding: 16px 18px;
-            border-left: 4px solid var(--error);
-            border-radius: 14px;
-            background: rgba(255, 255, 255, 0.5);
-            color: var(--error);
+            text-align: right;
         }
 
         @media (max-width: 860px) {
@@ -317,6 +420,14 @@ $location = implode(', ', $locationParts);
 
             .panel {
                 padding: 22px;
+            }
+
+            .document-card {
+                grid-template-columns: 1fr;
+            }
+
+            .document-status {
+                justify-self: start;
             }
         }
     </style>
@@ -345,6 +456,14 @@ $location = implode(', ', $locationParts);
         <?php endif; ?>
 
     </header>
+
+    <?php if ($uploaded): ?>
+
+        <div class="notice">
+            Document uploaded successfully.
+        </div>
+
+    <?php endif; ?>
 
     <?php if ($error !== ''): ?>
 
@@ -404,26 +523,97 @@ $location = implode(', ', $locationParts);
 
                 </div>
 
-                <div class="empty-state">
+                <?php if ($documents === []): ?>
 
-                    <h3>No documents yet</h3>
+                    <div class="empty-state">
 
-                    <p>
-                        Upload the declaration, bylaws, rules, budget,
-                        reserve study, insurance documents, meeting
-                        minutes, or other property records.
-                    </p>
+                        <h3>No documents yet</h3>
 
-                    <a
-                        class="primary-button"
-                        href="upload-document.php?id=<?= urlencode(
-                            (string) $workspace['public_id']
-                        ) ?>"
-                    >
-                        Upload the first document
-                    </a>
+                        <p>
+                            Upload the declaration, bylaws, rules,
+                            budget, reserve study, insurance documents,
+                            meeting minutes, or other property records.
+                        </p>
 
-                </div>
+                        <a
+                            class="primary-button"
+                            href="upload-document.php?id=<?= urlencode(
+                                (string) $workspace['public_id']
+                            ) ?>"
+                        >
+                            Upload the first document
+                        </a>
+
+                    </div>
+
+                <?php else: ?>
+
+                    <div class="document-list">
+
+                        <?php foreach ($documents as $document): ?>
+
+                            <article class="document-card">
+
+                                <div>
+
+                                    <p class="document-label">
+                                        <?= htmlspecialchars(
+                                            formatCategory(
+                                                (string) $document['category']
+                                            ),
+                                            ENT_QUOTES,
+                                            'UTF-8'
+                                        ) ?>
+                                    </p>
+
+                                    <h3>
+                                        <?= htmlspecialchars(
+                                            (string) $document['original_name'],
+                                            ENT_QUOTES,
+                                            'UTF-8'
+                                        ) ?>
+                                    </h3>
+
+                                    <div class="document-meta">
+
+                                        <span>
+                                            <?= htmlspecialchars(
+                                                formatFileSize(
+                                                    (int) $document['file_size']
+                                                ),
+                                                ENT_QUOTES,
+                                                'UTF-8'
+                                            ) ?>
+                                        </span>
+
+                                        <span>
+                                            Uploaded:
+                                            <?= htmlspecialchars(
+                                                (string) $document['uploaded_at'],
+                                                ENT_QUOTES,
+                                                'UTF-8'
+                                            ) ?>
+                                        </span>
+
+                                    </div>
+
+                                </div>
+
+                                <span class="document-status">
+                                    <?= htmlspecialchars(
+                                        (string) $document['status'],
+                                        ENT_QUOTES,
+                                        'UTF-8'
+                                    ) ?>
+                                </span>
+
+                            </article>
+
+                        <?php endforeach; ?>
+
+                    </div>
+
+                <?php endif; ?>
 
             </div>
 
@@ -435,7 +625,7 @@ $location = implode(', ', $locationParts);
 
                     <div class="summary-item">
                         <span>Documents</span>
-                        <strong>0</strong>
+                        <strong><?= count($documents) ?></strong>
                     </div>
 
                     <div class="summary-item">

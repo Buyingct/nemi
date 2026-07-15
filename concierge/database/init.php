@@ -6,11 +6,13 @@ require_once __DIR__ . '/connect.php';
 
 $success = false;
 $message = '';
-$databasePath = __DIR__ . '/concierge.db';
 
 try {
     $database = conciergeDatabase();
 
+    /*
+     * Workspaces
+     */
     $database->exec(
         '
         CREATE TABLE IF NOT EXISTS workspaces (
@@ -42,10 +44,54 @@ try {
         '
     );
 
-    $success = true;
-    $message = 'Database and workspace table created successfully.';
+    /*
+     * Documents
+     */
+    $database->exec(
+        '
+        CREATE TABLE IF NOT EXISTS documents (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            workspace_id INTEGER NOT NULL,
+            public_id TEXT NOT NULL UNIQUE,
+            original_name TEXT NOT NULL,
+            stored_name TEXT NOT NULL,
+            category TEXT NOT NULL DEFAULT "other",
+            mime_type TEXT NOT NULL,
+            file_size INTEGER NOT NULL DEFAULT 0,
+            status TEXT NOT NULL DEFAULT "uploaded",
+            uploaded_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
-    } catch (Throwable $exception) {
+            FOREIGN KEY (workspace_id)
+                REFERENCES workspaces(id)
+                ON DELETE CASCADE
+        );
+        '
+    );
+
+    $database->exec(
+        '
+        CREATE INDEX IF NOT EXISTS idx_documents_workspace_id
+        ON documents(workspace_id);
+        '
+    );
+
+    $database->exec(
+        '
+        CREATE INDEX IF NOT EXISTS idx_documents_category
+        ON documents(category);
+        '
+    );
+
+    $database->exec(
+        '
+        CREATE INDEX IF NOT EXISTS idx_documents_status
+        ON documents(status);
+        '
+    );
+
+    $success = true;
+    $message = 'Database, workspace table, and documents table created successfully.';
+} catch (Throwable $exception) {
     error_log(
         'Concierge database initialization failed: '
         . $exception->getMessage()
@@ -54,8 +100,7 @@ try {
     $message = 'The database could not be initialized. Check the server logs.';
 }
 
-$statusCode = $success ? 200 : 500;
-http_response_code($statusCode);
+http_response_code($success ? 200 : 500);
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -201,10 +246,11 @@ http_response_code($statusCode);
     <?php if ($success): ?>
 
         <div class="details">
-            <strong>Created:</strong><br>
+            <strong>Created or verified:</strong><br>
             SQLite database<br>
             Workspaces table<br>
-            Workspace indexes
+            Documents table<br>
+            Database indexes
         </div>
 
         <a href="../">
