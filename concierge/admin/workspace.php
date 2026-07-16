@@ -15,6 +15,8 @@ if ($publicId === '') {
 $workspace = null;
 $documents = [];
 $uploaded = isset($_GET['uploaded']) && $_GET['uploaded'] === '1';
+$deleted = isset($_GET['deleted']) && $_GET['deleted'] === '1';
+$deleteError = isset($_GET['delete_error']);
 $error = '';
 
 try {
@@ -253,6 +255,32 @@ function formatPageCoverage(
             text-transform: uppercase;
         }
 
+     .document-actions {
+    display: grid;
+    justify-items: end;
+    gap: 10px;
+}
+
+.document-actions form {
+    margin: 0;
+}
+
+.delete-button {
+    padding: 0;
+    border: 0;
+    color: var(--error);
+    background: transparent;
+    font: inherit;
+    font-size: 0.76rem;
+    text-decoration: underline;
+    text-underline-offset: 4px;
+    cursor: pointer;
+}
+
+.delete-button:hover {
+    text-decoration-thickness: 2px;
+}
+
         h1 {
             margin: 16px 0 0;
             font-family: Georgia, "Times New Roman", serif;
@@ -471,6 +499,9 @@ function formatPageCoverage(
             .document-status {
                 justify-self: start;
             }
+            .document-actions {
+    justify-items: start;
+}
         }
     </style>
 </head>
@@ -506,6 +537,22 @@ function formatPageCoverage(
         </div>
 
     <?php endif; ?>
+
+    <?php if ($deleted): ?>
+
+    <div class="notice">
+        Document and its knowledge entries were deleted successfully.
+    </div>
+
+<?php endif; ?>
+
+<?php if ($deleteError): ?>
+
+    <div class="error">
+        The document could not be deleted. Please try again.
+    </div>
+
+<?php endif; ?>
 
     <?php if ($error !== ''): ?>
 
@@ -669,19 +716,58 @@ function formatPageCoverage(
 
                                 </div>
 
-                                <span
-                                    class="document-status <?= htmlspecialchars(
-                                        $statusClass,
-                                        ENT_QUOTES,
-                                        'UTF-8'
-                                    ) ?>"
-                                >
-                                    <?= htmlspecialchars(
-                                        $documentStatus,
-                                        ENT_QUOTES,
-                                        'UTF-8'
-                                    ) ?>
-                                </span>
+                                <div class="document-actions">
+
+    <span
+        class="document-status <?= htmlspecialchars(
+            $statusClass,
+            ENT_QUOTES,
+            'UTF-8'
+        ) ?>"
+    >
+        <?= htmlspecialchars(
+            $documentStatus,
+            ENT_QUOTES,
+            'UTF-8'
+        ) ?>
+    </span>
+
+    <form
+        method="post"
+        action="delete-document.php"
+        onsubmit="return confirm(
+            'Delete this document and all of its extracted knowledge?'
+        );"
+    >
+        <input
+            type="hidden"
+            name="workspace_id"
+            value="<?= htmlspecialchars(
+                (string) $workspace['public_id'],
+                ENT_QUOTES,
+                'UTF-8'
+            ) ?>"
+        >
+
+        <input
+            type="hidden"
+            name="document_id"
+            value="<?= htmlspecialchars(
+                (string) $document['public_id'],
+                ENT_QUOTES,
+                'UTF-8'
+            ) ?>"
+        >
+
+        <button
+            class="delete-button"
+            type="submit"
+        >
+            Delete
+        </button>
+    </form>
+
+</div>
 
                             </article>
 
