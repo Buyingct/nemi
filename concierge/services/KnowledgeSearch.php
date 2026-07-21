@@ -18,6 +18,7 @@ final class KnowledgeSearch
             '
             SELECT
                 k.id,
+                k.document_id,
                 k.section_title,
                 k.page_number,
                 k.content,

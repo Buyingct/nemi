@@ -44,21 +44,40 @@ final class QuestionLogger
         return (int) $this->database->lastInsertId();
     }
 
-    public function updateStatus(
+    public function updateOutcome(
         int $questionId,
-        string $status
+        string $status,
+        int $apiUsed = 0,
+        ?int $answerId = null
     ): void {
         $statement = $this->database->prepare(
             '
             UPDATE questions
-            SET result_status = :result_status
+            SET
+                result_status = :result_status,
+                api_used = :api_used,
+                answer_id = :answer_id
             WHERE id = :id
             '
         );
 
         $statement->execute([
             ':result_status' => $status,
+            ':api_used' => $apiUsed,
+            ':answer_id' => $answerId,
             ':id' => $questionId,
         ]);
+    }
+
+    public function updateStatus(
+        int $questionId,
+        string $status
+    ): void {
+        $this->updateOutcome(
+            $questionId,
+            $status,
+            0,
+            null
+        );
     }
 }

@@ -9,6 +9,7 @@ require_once __DIR__ . '/services/QuestionLogger.php';
 require_once __DIR__ . '/services/WorkspaceRepository.php';
 require_once __DIR__ . '/services/KnowledgeSearch.php';
 require_once __DIR__ . '/services/DocumentFormatter.php';
+require_once __DIR__ . '/services/AnswerLibrary.php';
 
 header('Content-Type: application/json; charset=UTF-8');
 header('Cache-Control: no-store');
@@ -79,6 +80,7 @@ try {
     $workspaceRepository = new WorkspaceRepository($database);
     $questionLogger = new QuestionLogger($database);
     $knowledgeSearch = new KnowledgeSearch($database);
+    $answerLibrary = new AnswerLibrary($database);
 
     $workspace = $workspaceRepository->findActiveByPublicId(
         $workspacePublicId
@@ -91,22 +93,55 @@ try {
         ]);
     }
 
+    $workspaceId = (int) $workspace['id'];
+
     $normalizedQuestion = QuestionNormalizer::normalize(
         $question
     );
 
     $questionRecordId = $questionLogger->create(
-        (int) $workspace['id'],
+        $workspaceId,
         $question,
         $normalizedQuestion
     );
 
+    /*
+     * First priority: use an approved answer stored in this workspace.
+     * This path never calls OpenAI.
+     */
+    $approvedAnswer = $answerLibrary->findApprovedExact(
+        $workspaceId,
+        $normalizedQuestion
+    );
+
+    if ($approvedAnswer) {
+        $answerId = (int) $approvedAnswer['id'];
+
+        $questionLogger->updateOutcome(
+            $questionRecordId,
+            'local_match',
+            0,
+            $answerId
+        );
+
+        JsonResponse::send(200, [
+            'success' => true,
+            'title' => 'Approved answer',
+            'answer' => (string) $approvedAnswer['answer_text'],
+            'source' => 'Rocha Circle approved answer library',
+            'strength' => (
+                (string) ($approvedAnswer['source_strength'] ?? '')
+                ?: 'Approved'
+            ),
+        ]);
+    }
+
     $chunks = $knowledgeSearch->getReadyChunks(
-        (int) $workspace['id']
+        $workspaceId
     );
 
     if ($chunks === []) {
-        $questionLogger->updateStatus(
+        $questionLogger->updateOutcome(
             $questionRecordId,
             'not_found'
         );
@@ -124,7 +159,7 @@ try {
     );
 
     if ($keywords === []) {
-        $questionLogger->updateStatus(
+        $questionLogger->updateOutcome(
             $questionRecordId,
             'not_found'
         );
@@ -146,7 +181,7 @@ try {
     );
 
     if ($rankedChunks === []) {
-        $questionLogger->updateStatus(
+        $questionLogger->updateOutcome(
             $questionRecordId,
             'not_found'
         );
@@ -168,7 +203,7 @@ try {
     $bestScore = (int) $best['score'];
 
     if ($bestScore < 5) {
-        $questionLogger->updateStatus(
+        $questionLogger->updateOutcome(
             $questionRecordId,
             'not_found'
         );
@@ -191,9 +226,33 @@ try {
         (string) ($bestChunk['section_title'] ?? '')
     );
 
-    $questionLogger->updateStatus(
+    $answerText = DocumentFormatter::cleanAnswerText(
+        (string) $bestChunk['content']
+    );
+
+    $sourceStrength = DocumentFormatter::relevanceLabel(
+        $bestScore
+    );
+
+    /*
+     * For now, create a draft from the best document section.
+     * In the next step, OpenAI will replace this raw draft text with
+     * a concise plain-English answer before it enters Knowledge Review.
+     */
+    $draftAnswer = $answerLibrary->createDraftFromDocument(
+        $workspaceId,
+        $question,
+        $normalizedQuestion,
+        $answerText,
+        $sourceStrength,
+        $bestChunk
+    );
+
+    $questionLogger->updateOutcome(
         $questionRecordId,
-        'document_match'
+        'draft_created',
+        0,
+        (int) $draftAnswer['id']
     );
 
     JsonResponse::send(200, [
@@ -203,15 +262,11 @@ try {
                 ? $sectionTitle
                 : 'Relevant document section'
         ),
-        'answer' => DocumentFormatter::cleanAnswerText(
-            (string) $bestChunk['content']
-        ),
+        'answer' => $answerText,
         'source' => DocumentFormatter::sourceLabel(
             $bestChunk
         ),
-        'strength' => DocumentFormatter::relevanceLabel(
-            $bestScore
-        ),
+        'strength' => $sourceStrength,
     ]);
 } catch (Throwable $exception) {
     if (
@@ -219,7 +274,7 @@ try {
         && is_int($questionRecordId)
     ) {
         try {
-            $questionLogger->updateStatus(
+            $questionLogger->updateOutcome(
                 $questionRecordId,
                 'failed'
             );
@@ -244,4 +299,3 @@ try {
         ),
     ]);
 }
-
