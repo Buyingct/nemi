@@ -51,6 +51,37 @@ final class AnswerRepository
     }
 
     /**
+     * @return array<string, mixed>|false
+     */
+    public function findByPublicId(string $publicId): array|false
+    {
+        $statement = $this->database->prepare(
+            '
+            SELECT
+                id,
+                public_id,
+                workspace_id,
+                canonical_question,
+                normalized_question,
+                answer_text,
+                status,
+                source_strength,
+                created_at,
+                updated_at
+            FROM answers
+            WHERE public_id = :public_id
+            LIMIT 1
+            '
+        );
+
+        $statement->execute([
+            ':public_id' => $publicId,
+        ]);
+
+        return $statement->fetch();
+    }
+
+    /**
      * @return array<int, array<string, mixed>>
      */
     public function findSourcesForAnswer(int $answerId): array
@@ -73,5 +104,72 @@ final class AnswerRepository
         ]);
 
         return $statement->fetchAll();
+    }
+
+    public function approve(
+        string $publicId,
+        string $answerText
+    ): bool {
+        $statement = $this->database->prepare(
+            '
+            UPDATE answers
+            SET
+                answer_text = :answer_text,
+                status = "approved",
+                updated_at = CURRENT_TIMESTAMP
+            WHERE public_id = :public_id
+              AND status = "draft"
+            '
+        );
+
+        $statement->execute([
+            ':answer_text' => $answerText,
+            ':public_id' => $publicId,
+        ]);
+
+        return $statement->rowCount() === 1;
+    }
+
+    public function saveDraftEdit(
+        string $publicId,
+        string $answerText
+    ): bool {
+        $statement = $this->database->prepare(
+            '
+            UPDATE answers
+            SET
+                answer_text = :answer_text,
+                updated_at = CURRENT_TIMESTAMP
+            WHERE public_id = :public_id
+              AND status = "draft"
+            '
+        );
+
+        $statement->execute([
+            ':answer_text' => $answerText,
+            ':public_id' => $publicId,
+        ]);
+
+        return $statement->rowCount() === 1;
+    }
+
+    public function reject(string $publicId): bool
+    {
+        $statement = $this->database->prepare(
+            '
+            UPDATE answers
+            SET
+                status = "rejected",
+                updated_at = CURRENT_TIMESTAMP
+            WHERE public_id = :public_id
+              AND status = "draft"
+            '
+        );
+
+        $statement->execute([
+            ':public_id' => $publicId,
+        ]);
+
+        return $statement->rowCount() === 1;
     }
 }
