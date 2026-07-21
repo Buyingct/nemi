@@ -320,19 +320,31 @@ $title = 'Document Concierge';
     const question = document.getElementById('question');
     const reviewState = document.getElementById('review-state');
     const answerCard = document.getElementById('answer-card');
-    const suggestionButtons = document.querySelectorAll('[data-question]');
+
+    const answerTitle = document.getElementById('answer-title');
+    const answerText = document.getElementById('answer-text');
+    const answerSource = document.getElementById('answer-source');
+    const sourceStrength = document.getElementById('source-strength');
+
+    const suggestionButtons = document.querySelectorAll(
+        '[data-question]'
+    );
+
+    const workspaceId = '6974c13161bf1375';
 
     suggestionButtons.forEach((button) => {
         button.addEventListener('click', () => {
-            question.value = button.dataset.question;
+            question.value = button.dataset.question ?? '';
             question.focus();
         });
     });
 
-    form.addEventListener('submit', (event) => {
+    form.addEventListener('submit', async (event) => {
         event.preventDefault();
 
-        if (!question.value.trim()) {
+        const submittedQuestion = question.value.trim();
+
+        if (!submittedQuestion) {
             question.focus();
             return;
         }
@@ -340,14 +352,73 @@ $title = 'Document Concierge';
         answerCard.hidden = true;
         reviewState.hidden = false;
 
-        window.setTimeout(() => {
+        try {
+            const response = await fetch('ask.php', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json'
+                },
+                body: JSON.stringify({
+                    workspace_id: workspaceId,
+                    question: submittedQuestion
+                })
+            });
+
+            const result = await response.json();
+
+            if (!response.ok || result.success !== true) {
+                throw new Error(
+                    result.error
+                    || 'The documents could not answer that question.'
+                );
+            }
+
+            answerTitle.textContent =
+                result.title
+                || 'Answer from the documents';
+
+            answerText.textContent =
+                result.answer
+                || 'No answer was returned.';
+
+            answerSource.textContent =
+                result.source
+                || 'No specific source was identified.';
+
+            sourceStrength.textContent =
+                result.strength
+                || 'Document supported';
+
             reviewState.hidden = true;
             answerCard.hidden = false;
+
             answerCard.scrollIntoView({
                 behavior: 'smooth',
                 block: 'nearest'
             });
-        }, 1400);
+        } catch (error) {
+            reviewState.hidden = true;
+            answerCard.hidden = false;
+
+            answerTitle.textContent =
+                'The Concierge could not complete the review.';
+
+            answerText.textContent =
+                error instanceof Error
+                    ? error.message
+                    : 'An unexpected error occurred.';
+
+            answerSource.textContent =
+                'Please try again or check the server log.';
+
+            sourceStrength.textContent = 'Unavailable';
+
+            answerCard.scrollIntoView({
+                behavior: 'smooth',
+                block: 'nearest'
+            });
+        }
     });
 </script>
 
