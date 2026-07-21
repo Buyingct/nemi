@@ -170,12 +170,15 @@ $title = 'Document Concierge';
                         <div>
                             <p class="answer-label">The documents indicate</p>
 
-                            <h3>Short-term rentals are not permitted.</h3>
+                            <h3 id="answer-title">Document answer</h3>
                         </div>
 
-                        <span class="source-strength">
-                            Directly stated
-                        </span>
+                        <span
+    class="source-strength"
+    id="source-strength"
+>
+    Document supported
+</span>
 
                     </div>
 
@@ -185,11 +188,7 @@ $title = 'Document Concierge';
 
                             <p class="answer-section-title">Plain English</p>
 
-                            <p>
-                                The declaration prohibits transient, hotel,
-                                motel, and short-term rental use. This would
-                                generally include Airbnb, VRBO, and similar stays.
-                            </p>
+                            <p id="answer-text"></p>
 
                         </div>
 
@@ -197,10 +196,7 @@ $title = 'Document Concierge';
 
                             <p class="answer-section-title">Source</p>
 
-                            <p>
-                                Condominium Declaration<br>
-                                Section 9.1(a) — Residential Use
-                            </p>
+                            <p id="answer-source"></p>
 
                             <button type="button" class="source-button">
                                 View original section
