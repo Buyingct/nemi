@@ -455,9 +455,10 @@ try {
     );
 
     redirectWithError(
-        $workspacePublicId,
-        safeProcessingErrorMessage($exception)
-    );
+    $workspacePublicId,
+    $exception->getMessage()
+);
+
 }
 
 function redirectWithError(
