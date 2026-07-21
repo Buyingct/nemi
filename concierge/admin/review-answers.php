@@ -2,8 +2,24 @@
 
 declare(strict_types=1);
 
+session_start();
+
 require_once __DIR__ . '/../database/connect.php';
 require_once __DIR__ . '/../services/AnswerRepository.php';
+
+if (
+    !isset($_SESSION['knowledge_review_csrf'])
+    || !is_string($_SESSION['knowledge_review_csrf'])
+) {
+    $_SESSION['knowledge_review_csrf'] = bin2hex(
+        random_bytes(32)
+    );
+}
+
+$csrfToken = $_SESSION['knowledge_review_csrf'];
+
+$flash = $_SESSION['knowledge_review_flash'] ?? null;
+unset($_SESSION['knowledge_review_flash']);
 
 $draftAnswers = [];
 $errorMessage = '';
@@ -14,7 +30,7 @@ try {
     $draftAnswers = $answerRepository->findDrafts();
 } catch (Throwable $exception) {
     error_log(
-        'Answer review queue failed: '
+        'Knowledge review queue failed: '
         . $exception->getMessage()
     );
 
@@ -56,7 +72,7 @@ function formatReviewDate(string $value): string
 
     <meta name="robots" content="noindex, nofollow">
 
-    <title>Answer Review Queue | Rocha Circle Concierge</title>
+    <title>Knowledge Review | Rocha Circle Concierge</title>
 
     <style>
         :root {
@@ -161,7 +177,6 @@ function formatReviewDate(string $value): string
             border-radius: 20px;
             background: var(--paper);
             box-shadow: var(--shadow);
-            backdrop-filter: blur(20px);
         }
 
         .count-card strong,
@@ -181,16 +196,22 @@ function formatReviewDate(string $value): string
             font-size: 0.84rem;
         }
 
+        .flash,
         .notice,
         .empty-state {
-            padding: 32px;
+            margin-bottom: 22px;
+            padding: 22px 26px;
             border: 1px solid rgba(255, 255, 255, 0.75);
-            border-radius: 24px;
+            border-radius: 20px;
             background: var(--paper);
             box-shadow: var(--shadow);
-            backdrop-filter: blur(20px);
         }
 
+        .flash.success {
+            border-left: 4px solid var(--green);
+        }
+
+        .flash.error,
         .notice {
             border-left: 4px solid var(--red);
         }
@@ -243,8 +264,6 @@ function formatReviewDate(string $value): string
 
         .status-pill {
             display: inline-flex;
-            align-items: center;
-            gap: 8px;
             padding: 8px 12px;
             border: 1px solid rgba(154, 119, 64, 0.22);
             border-radius: 999px;
@@ -302,13 +321,16 @@ function formatReviewDate(string $value): string
             text-transform: uppercase;
         }
 
-        .answer-text {
-            margin: 0;
+        textarea {
+            width: 100%;
+            min-height: 190px;
+            resize: vertical;
+            padding: 18px;
+            border: 1px solid var(--line);
+            border-radius: 16px;
             color: #403d37;
-            font-family: Georgia, "Times New Roman", serif;
-            font-size: 1.12rem;
-            line-height: 1.75;
-            white-space: pre-wrap;
+            background: rgba(255, 255, 255, 0.7);
+            font: 1.05rem/1.7 Georgia, "Times New Roman", serif;
         }
 
         .detail-row + .detail-row {
@@ -335,8 +357,7 @@ function formatReviewDate(string $value): string
             border-radius: 999px;
             font: inherit;
             font-weight: 650;
-            cursor: not-allowed;
-            opacity: 0.55;
+            cursor: pointer;
         }
 
         .approve {
@@ -345,7 +366,7 @@ function formatReviewDate(string $value): string
             background: var(--green);
         }
 
-        .edit {
+        .save {
             border: 1px solid var(--ink);
             color: var(--ink);
             background: transparent;
@@ -355,13 +376,6 @@ function formatReviewDate(string $value): string
             border: 1px solid rgba(135, 70, 70, 0.42);
             color: var(--red);
             background: transparent;
-        }
-
-        .action-note {
-            align-self: center;
-            margin-left: auto;
-            color: var(--muted);
-            font-size: 0.78rem;
         }
 
         @media (max-width: 760px) {
@@ -396,11 +410,6 @@ function formatReviewDate(string $value): string
                 border-top: 1px solid var(--line);
                 border-left: 0;
             }
-
-            .action-note {
-                width: 100%;
-                margin: 6px 0 0;
-            }
         }
     </style>
 </head>
@@ -425,8 +434,7 @@ function formatReviewDate(string $value): string
 
         <div>
             <p class="eyebrow">Private administration</p>
-
-            <h1>Answer Review Queue</h1>
+            <h1>Knowledge Review</h1>
         </div>
 
         <aside class="count-card">
@@ -435,6 +443,14 @@ function formatReviewDate(string $value): string
         </aside>
 
     </section>
+
+    <?php if (is_array($flash)): ?>
+
+        <section class="flash <?= escapeHtml((string) $flash['type']) ?>">
+            <?= escapeHtml((string) $flash['message']) ?>
+        </section>
+
+    <?php endif; ?>
 
     <?php if ($errorMessage !== ''): ?>
 
@@ -449,7 +465,6 @@ function formatReviewDate(string $value): string
             <div class="empty-state-inner">
 
                 <p class="eyebrow">Everything reviewed</p>
-
                 <h2>No draft answers are waiting.</h2>
 
                 <p>
@@ -467,15 +482,31 @@ function formatReviewDate(string $value): string
 
             <?php foreach ($draftAnswers as $answer): ?>
 
-                <article class="review-card">
+                <form
+                    class="review-card"
+                    method="post"
+                    action="answer-action.php"
+                >
+
+                    <input
+                        type="hidden"
+                        name="csrf_token"
+                        value="<?= escapeHtml($csrfToken) ?>"
+                    >
+
+                    <input
+                        type="hidden"
+                        name="answer_public_id"
+                        value="<?= escapeHtml(
+                            (string) $answer['public_id']
+                        ) ?>"
+                    >
 
                     <header class="review-header">
 
                         <div>
 
-                            <span class="status-pill">
-                                Draft
-                            </span>
+                            <span class="status-pill">Draft</span>
 
                             <h2 class="question">
                                 <?= escapeHtml(
@@ -508,18 +539,19 @@ function formatReviewDate(string $value): string
 
                             <p class="label">Draft answer</p>
 
-                            <p class="answer-text"><?= escapeHtml(
+                            <textarea
+                                name="answer_text"
+                                required
+                            ><?= escapeHtml(
                                 (string) $answer['answer_text']
-                            ) ?></p>
+                            ) ?></textarea>
 
                         </section>
 
                         <aside class="details-panel">
 
                             <div class="detail-row">
-
                                 <p class="label">Asked</p>
-
                                 <p class="detail-value">
                                     <?= (int) $answer['question_count'] ?>
                                     time<?= (int) $answer['question_count'] === 1
@@ -527,24 +559,18 @@ function formatReviewDate(string $value): string
                                         : 's'
                                     ?>
                                 </p>
-
                             </div>
 
                             <div class="detail-row">
-
                                 <p class="label">Sources</p>
-
                                 <p class="detail-value">
                                     <?= (int) $answer['source_count'] ?>
                                     attached
                                 </p>
-
                             </div>
 
                             <div class="detail-row">
-
                                 <p class="label">Strength</p>
-
                                 <p class="detail-value">
                                     <?= escapeHtml(
                                         (string) (
@@ -553,7 +579,6 @@ function formatReviewDate(string $value): string
                                         )
                                     ) ?>
                                 </p>
-
                             </div>
 
                         </aside>
@@ -562,25 +587,38 @@ function formatReviewDate(string $value): string
 
                     <footer class="actions">
 
-                        <button class="approve" type="button" disabled>
+                        <button
+                            class="approve"
+                            type="submit"
+                            name="action"
+                            value="approve"
+                        >
                             Approve
                         </button>
 
-                        <button class="edit" type="button" disabled>
-                            Edit
+                        <button
+                            class="save"
+                            type="submit"
+                            name="action"
+                            value="save"
+                        >
+                            Save changes
                         </button>
 
-                        <button class="reject" type="button" disabled>
+                        <button
+                            class="reject"
+                            type="submit"
+                            name="action"
+                            value="reject"
+                            formnovalidate
+                            onclick="return confirm('Reject this draft answer?');"
+                        >
                             Reject
                         </button>
 
-                        <span class="action-note">
-                            Actions are added in the next step.
-                        </span>
-
                     </footer>
 
-                </article>
+                </form>
 
             <?php endforeach; ?>
 
