@@ -110,27 +110,27 @@ final class KnowledgeSearch
         );
 
         $score = 0;
+        $distinctContentMatches = 0;
 
         foreach ($keywords as $keyword) {
-            $score += min(
-                substr_count($content, $keyword),
-                6
-            ) * 2;
+            $contentCount = substr_count($content, $keyword);
 
-            $score += min(
-                substr_count($sectionTitle, $keyword),
-                3
-            ) * 7;
+            if ($contentCount > 0) {
+                $distinctContentMatches++;
+            }
 
-            $score += min(
-                substr_count($documentName, $keyword),
-                2
-            ) * 3;
+            $score += min($contentCount, 6) * 2;
+            $score += min(substr_count($sectionTitle, $keyword), 3) * 8;
+            $score += min(substr_count($documentName, $keyword), 2) * 3;
+            $score += min(substr_count($category, $keyword), 2) * 3;
+        }
 
-            $score += min(
-                substr_count($category, $keyword),
-                2
-            ) * 3;
+        if ($distinctContentMatches >= 2) {
+            $score += 8;
+        }
+
+        if ($distinctContentMatches >= 4) {
+            $score += 10;
         }
 
         $normalizedQuestion = mb_strtolower(
@@ -145,7 +145,7 @@ final class KnowledgeSearch
             mb_strlen($normalizedQuestion) >= 8
             && str_contains($content, $normalizedQuestion)
         ) {
-            $score += 20;
+            $score += 25;
         }
 
         return $score;

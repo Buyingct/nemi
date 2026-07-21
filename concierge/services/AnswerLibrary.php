@@ -76,19 +76,17 @@ final class AnswerLibrary
     }
 
     /**
-     * Creates one draft answer and preserves its supporting source.
-     *
-     * @param array<string, mixed> $chunk
+     * @param array<int, array<string, mixed>> $sourceChunks
      *
      * @return array<string, mixed>
      */
-    public function createDraftFromDocument(
+    public function createDraft(
         int $workspaceId,
         string $question,
         string $normalizedQuestion,
         string $answerText,
         string $sourceStrength,
-        array $chunk
+        array $sourceChunks
     ): array {
         $existingDraft = $this->findDraftExact(
             $workspaceId,
@@ -159,34 +157,36 @@ final class AnswerLibrary
                 '
             );
 
-            $sourceStatement->execute([
-                ':answer_id' => $answerId,
-                ':knowledge_id' => (
-                    isset($chunk['id'])
-                        ? (int) $chunk['id']
-                        : null
-                ),
-                ':document_id' => (
-                    isset($chunk['document_id'])
-                        ? (int) $chunk['document_id']
-                        : null
-                ),
-                ':document_name' => (string) (
-                    $chunk['original_name'] ?? 'Unknown document'
-                ),
-                ':section_title' => (
-                    trim((string) ($chunk['section_title'] ?? '')) !== ''
-                        ? (string) $chunk['section_title']
-                        : null
-                ),
-                ':page_number' => (
-                    isset($chunk['page_number'])
-                    && (int) $chunk['page_number'] > 0
-                        ? (int) $chunk['page_number']
-                        : null
-                ),
-                ':excerpt' => (string) ($chunk['content'] ?? ''),
-            ]);
+            foreach ($sourceChunks as $chunk) {
+                $sourceStatement->execute([
+                    ':answer_id' => $answerId,
+                    ':knowledge_id' => (
+                        isset($chunk['id'])
+                            ? (int) $chunk['id']
+                            : null
+                    ),
+                    ':document_id' => (
+                        isset($chunk['document_id'])
+                            ? (int) $chunk['document_id']
+                            : null
+                    ),
+                    ':document_name' => (string) (
+                        $chunk['original_name'] ?? 'Unknown document'
+                    ),
+                    ':section_title' => (
+                        trim((string) ($chunk['section_title'] ?? '')) !== ''
+                            ? (string) $chunk['section_title']
+                            : null
+                    ),
+                    ':page_number' => (
+                        isset($chunk['page_number'])
+                        && (int) $chunk['page_number'] > 0
+                            ? (int) $chunk['page_number']
+                            : null
+                    ),
+                    ':excerpt' => (string) ($chunk['content'] ?? ''),
+                ]);
+            }
 
             $this->database->commit();
 

@@ -28,16 +28,10 @@ final class QuestionNormalizer
      */
     public static function extractKeywords(string $question): array
     {
-        $normalized = mb_strtolower($question);
-
-        $normalized = preg_replace(
-            '/[^\p{L}\p{N}\s-]+/u',
-            ' ',
-            $normalized
-        ) ?? $normalized;
+        $normalized = self::normalize($question);
 
         $parts = preg_split(
-            '/[\s-]+/u',
+            '/\s+/u',
             $normalized,
             -1,
             PREG_SPLIT_NO_EMPTY
@@ -83,6 +77,27 @@ final class QuestionNormalizer
             }
         }
 
-        return array_values(array_unique($keywords));
+        $conceptGroups = [
+            ['pet', 'pets', 'animal', 'animals', 'dog', 'dogs', 'cat', 'cats'],
+            ['rental', 'rentals', 'rent', 'lease', 'leases', 'leasing', 'tenant', 'tenants'],
+            ['short', 'transient', 'hotel', 'motel', 'airbnb', 'vacation'],
+            ['parking', 'park', 'vehicle', 'vehicles', 'car', 'cars', 'garage'],
+            ['business', 'occupation', 'office', 'commercial', 'professional'],
+            ['fee', 'fees', 'assessment', 'assessments', 'dues', 'charge', 'charges'],
+            ['repair', 'repairs', 'maintain', 'maintenance', 'replacement', 'replace'],
+            ['insurance', 'insured', 'policy', 'coverage', 'premium', 'premiums'],
+            ['alteration', 'alterations', 'modify', 'modification', 'renovation', 'improvement'],
+            ['vote', 'voting', 'ballot', 'election', 'quorum'],
+        ];
+
+        $expanded = $keywords;
+
+        foreach ($conceptGroups as $group) {
+            if (array_intersect($keywords, $group) !== []) {
+                $expanded = array_merge($expanded, $group);
+            }
+        }
+
+        return array_values(array_unique($expanded));
     }
 }
