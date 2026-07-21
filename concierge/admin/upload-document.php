@@ -104,6 +104,7 @@ $categories = [
             --gold: #9a7740;
             --line: rgba(45, 41, 34, 0.12);
             --error: #8a3f3f;
+            --success: #426a4b;
         }
 
         * {
@@ -225,11 +226,21 @@ $categories = [
             box-shadow: 0 0 0 4px rgba(154, 119, 64, 0.08);
         }
 
-        .upload-note {
+        .upload-note,
+        .detected-note {
             margin: 0;
             color: var(--muted);
             font-size: 0.84rem;
             line-height: 1.65;
+        }
+
+        .detected-note {
+            display: none;
+            color: var(--success);
+        }
+
+        .detected-note.visible {
+            display: block;
         }
 
         .actions {
@@ -352,27 +363,34 @@ $categories = [
 
                     <?php endforeach; ?>
                 </select>
+
+                <p
+                    class="detected-note"
+                    id="detected-category"
+                    aria-live="polite"
+                ></p>
             </div>
 
-           <div class="PDFfield">
-    <label for="document">Knowledge Source</label>
+            <div class="field">
+                <label for="document">Knowledge source</label>
 
-    <input
-        id="document"
-        name="document"
-        type="file"
-        accept=".pdf,.md,.txt,application/pdf,text/markdown,text/plain"
-        required
-    >
+                <input
+                    id="document"
+                    name="document"
+                    type="file"
+                    accept=".pdf,.md,.markdown,.txt,application/pdf,text/markdown,text/plain"
+                    required
+                >
 
-    <p class="upload-note">
-        Supported formats:
-        <strong>PDF</strong>, <strong>Markdown (.md)</strong>, and
-        <strong>Text (.txt)</strong>.
-        Original PDFs are preserved. Markdown and text files are treated as
-        verified knowledge sources.
-    </p>
-</div>
+                <p class="upload-note">
+                    Supported formats:
+                    <strong>PDF</strong>,
+                    <strong>Markdown (.md)</strong>, and
+                    <strong>Text (.txt)</strong>.
+                    Searchable PDFs may be indexed directly. Markdown and text
+                    files are treated as verified knowledge sources.
+                </p>
+            </div>
 
             <div class="actions">
 
@@ -396,6 +414,133 @@ $categories = [
     </section>
 
 </main>
+
+<script>
+    (() => {
+        const documentInput = document.getElementById('document');
+        const categorySelect = document.getElementById('category');
+        const detectedNote = document.getElementById('detected-category');
+
+        if (
+            !(documentInput instanceof HTMLInputElement)
+            || !(categorySelect instanceof HTMLSelectElement)
+            || !(detectedNote instanceof HTMLElement)
+        ) {
+            return;
+        }
+
+        const categoryRules = [
+            {
+                category: 'declaration',
+                label: 'Declaration',
+                patterns: [
+                    /\bdeclaration\b/i,
+                    /\bmaster deed\b/i
+                ]
+            },
+            {
+                category: 'bylaws',
+                label: 'Bylaws',
+                patterns: [
+                    /\bbylaws?\b/i,
+                    /\bby-laws?\b/i
+                ]
+            },
+            {
+                category: 'rules',
+                label: 'Rules & Regulations',
+                patterns: [
+                    /\brules?\b/i,
+                    /\bregulations?\b/i,
+                    /\brules? and regulations?\b/i
+                ]
+            },
+            {
+                category: 'budget',
+                label: 'Budget',
+                patterns: [
+                    /\bbudget\b/i,
+                    /\bfinancial statement\b/i,
+                    /\bincome and expense\b/i
+                ]
+            },
+            {
+                category: 'insurance',
+                label: 'Insurance',
+                patterns: [
+                    /\binsurance\b/i,
+                    /\bcertificate of insurance\b/i,
+                    /\bpolicy\b/i
+                ]
+            },
+            {
+                category: 'reserve-study',
+                label: 'Reserve Study',
+                patterns: [
+                    /\breserve study\b/i,
+                    /\breserve analysis\b/i
+                ]
+            },
+            {
+                category: 'meeting-minutes',
+                label: 'Meeting Minutes',
+                patterns: [
+                    /\bminutes\b/i,
+                    /\bmeeting minutes\b/i
+                ]
+            },
+            {
+                category: 'seller-disclosure',
+                label: 'Seller Disclosure',
+                patterns: [
+                    /\bseller disclosure\b/i,
+                    /\bproperty disclosure\b/i
+                ]
+            },
+            {
+                category: 'inspection',
+                label: 'Inspection Report',
+                patterns: [
+                    /\binspection\b/i,
+                    /\binspection report\b/i
+                ]
+            }
+        ];
+
+        documentInput.addEventListener('change', () => {
+            const selectedFile = documentInput.files?.[0];
+
+            detectedNote.classList.remove('visible');
+            detectedNote.textContent = '';
+
+            if (!selectedFile) {
+                return;
+            }
+
+            const normalizedName = selectedFile.name
+                .replace(/\.[^.]+$/, '')
+                .replace(/[_-]+/g, ' ')
+                .replace(/\s+/g, ' ')
+                .trim();
+
+            const match = categoryRules.find((rule) =>
+                rule.patterns.some((pattern) =>
+                    pattern.test(normalizedName)
+                )
+            );
+
+            if (!match) {
+                return;
+            }
+
+            categorySelect.value = match.category;
+            detectedNote.textContent =
+                `Category detected from filename: ${match.label}. `
+                + 'You can change it before uploading.';
+            detectedNote.classList.add('visible');
+        });
+    })();
+</script>
 
 </body>
 </html>
