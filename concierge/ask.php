@@ -10,6 +10,7 @@ require_once __DIR__ . '/services/WorkspaceRepository.php';
 require_once __DIR__ . '/services/KnowledgeSearch.php';
 require_once __DIR__ . '/services/DocumentFormatter.php';
 require_once __DIR__ . '/services/AnswerLibrary.php';
+require_once __DIR__ . '/services/OpenAIService.php';
 
 header('Content-Type: application/json; charset=UTF-8');
 header('Cache-Control: no-store');
@@ -106,8 +107,7 @@ try {
     );
 
     /*
-     * First priority: use an approved answer stored in this workspace.
-     * This path never calls OpenAI.
+     * 1. Approved exact answer: local, instant, no API charge.
      */
     $approvedAnswer = $answerLibrary->findApprovedExact(
         $workspaceId,
@@ -115,13 +115,11 @@ try {
     );
 
     if ($approvedAnswer) {
-        $answerId = (int) $approvedAnswer['id'];
-
         $questionLogger->updateOutcome(
             $questionRecordId,
             'local_match',
             0,
-            $answerId
+            (int) $approvedAnswer['id']
         );
 
         JsonResponse::send(200, [
@@ -136,6 +134,9 @@ try {
         ]);
     }
 
+    /*
+     * 2. Search local document knowledge before considering OpenAI.
+     */
     $chunks = $knowledgeSearch->getReadyChunks(
         $workspaceId
     );
@@ -167,9 +168,7 @@ try {
         JsonResponse::send(400, [
             'success' => false,
             'error' => (
-                'Please ask a more specific question using a subject such as '
-                . 'pets, rentals, maintenance, insurance, fees, parking, '
-                . 'alterations, or voting.'
+                'Please ask a more specific document question.'
             ),
         ]);
     }
@@ -180,7 +179,13 @@ try {
         $question
     );
 
-    if ($rankedChunks === []) {
+    /*
+     * No meaningful local candidate means no OpenAI call and no charge.
+     */
+    if (
+        $rankedChunks === []
+        || (int) $rankedChunks[0]['score'] < 10
+    ) {
         $questionLogger->updateOutcome(
             $questionRecordId,
             'not_found'
@@ -193,78 +198,99 @@ try {
                 'I could not find information answering that question in the '
                 . 'documents currently available in this workspace.'
             ),
-            'source' => 'No matching document section was found.',
+            'source' => 'No sufficiently relevant document section was found.',
             'strength' => 'Not found',
         ]);
     }
 
-    $best = $rankedChunks[0];
-    $bestChunk = $best['chunk'];
-    $bestScore = (int) $best['score'];
+    /*
+     * 3. Send only the five best local excerpts to OpenAI.
+     */
+    $topRankedChunks = array_slice(
+        $rankedChunks,
+        0,
+        5
+    );
 
-    if ($bestScore < 5) {
+    $openAI = OpenAIService::fromEnvFile(
+        dirname(__DIR__) . '/.env'
+    );
+
+    $generated = $openAI->createGroundedDraft(
+        $question,
+        $topRankedChunks
+    );
+
+    /*
+     * OpenAI may determine that the supplied excerpts do not support an
+     * answer. This API call is still billable because the model reviewed
+     * the excerpts, but no unreliable draft is saved.
+     */
+    if (!$generated['supported']) {
         $questionLogger->updateOutcome(
             $questionRecordId,
-            'not_found'
+            'not_found',
+            1
         );
 
         JsonResponse::send(200, [
             'success' => true,
             'title' => 'The answer was not found.',
             'answer' => (
-                'I found documents in this workspace, but none matched your '
-                . 'question closely enough to provide a reliable answer.'
+                'The available document excerpts did not clearly answer that '
+                . 'question. It has been saved for review.'
             ),
-            'source' => (
-                'No sufficiently relevant section was identified.'
-            ),
+            'source' => 'No clearly supporting section was confirmed.',
             'strength' => 'Not found',
         ]);
     }
 
-    $sectionTitle = trim(
-        (string) ($bestChunk['section_title'] ?? '')
-    );
+    $usedSourceChunks = [];
 
-    $answerText = DocumentFormatter::cleanAnswerText(
-        (string) $bestChunk['content']
-    );
+    foreach ($generated['source_numbers'] as $sourceNumber) {
+        $index = $sourceNumber - 1;
 
+        if (isset($topRankedChunks[$index]['chunk'])) {
+            $usedSourceChunks[] = $topRankedChunks[$index]['chunk'];
+        }
+    }
+
+    if ($usedSourceChunks === []) {
+        $usedSourceChunks[] = $topRankedChunks[0]['chunk'];
+    }
+
+    $bestScore = (int) $topRankedChunks[0]['score'];
     $sourceStrength = DocumentFormatter::relevanceLabel(
         $bestScore
     );
 
-    /*
-     * For now, create a draft from the best document section.
-     * In the next step, OpenAI will replace this raw draft text with
-     * a concise plain-English answer before it enters Knowledge Review.
-     */
-    $draftAnswer = $answerLibrary->createDraftFromDocument(
+    $draftAnswer = $answerLibrary->createDraft(
         $workspaceId,
         $question,
         $normalizedQuestion,
-        $answerText,
+        $generated['answer'],
         $sourceStrength,
-        $bestChunk
+        $usedSourceChunks
     );
 
     $questionLogger->updateOutcome(
         $questionRecordId,
-        'draft_created',
-        0,
+        'ai_answered',
+        1,
         (int) $draftAnswer['id']
     );
 
     JsonResponse::send(200, [
         'success' => true,
-        'title' => (
-            $sectionTitle !== ''
-                ? $sectionTitle
-                : 'Relevant document section'
-        ),
-        'answer' => $answerText,
-        'source' => DocumentFormatter::sourceLabel(
-            $bestChunk
+        'title' => $generated['title'],
+        'answer' => $generated['answer'],
+        'source' => (
+            count($usedSourceChunks) === 1
+                ? DocumentFormatter::sourceLabel(
+                    $usedSourceChunks[0]
+                )
+                : count($usedSourceChunks)
+                    . ' supporting document sections'
         ),
         'strength' => $sourceStrength,
     ]);
