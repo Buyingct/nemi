@@ -354,22 +354,25 @@ $categories = [
                 </select>
             </div>
 
-            <div class="field">
-                <label for="document">PDF document</label>
+           <div class="PDFfield">
+    <label for="document">Knowledge Source</label>
 
-                <input
-                    id="document"
-                    name="document"
-                    type="file"
-                    accept="application/pdf,.pdf"
-                    required
-                >
+    <input
+        id="document"
+        name="document"
+        type="file"
+        accept=".pdf,.md,.txt,application/pdf,text/markdown,text/plain"
+        required
+    >
 
-                <p class="upload-note">
-                    PDF files only. The document will be stored privately
-                    inside this workspace and will not be committed to GitHub.
-                </p>
-            </div>
+    <p class="upload-note">
+        Supported formats:
+        <strong>PDF</strong>, <strong>Markdown (.md)</strong>, and
+        <strong>Text (.txt)</strong>.
+        Original PDFs are preserved. Markdown and text files are treated as
+        verified knowledge sources.
+    </p>
+</div>
 
             <div class="actions">
 
