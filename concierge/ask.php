@@ -59,6 +59,8 @@ if (mb_strlen($question) > 1000) {
     ]);
 }
 
+$questionRecordId = null;
+
 try {
     $database = conciergeDatabase();
 
@@ -84,6 +86,20 @@ try {
             'error' => 'The requested workspace was not found.',
         ]);
     }
+
+    /*
+     * STEP 2:
+     * Save every valid submitted question before searching documents
+     * or making any future API call.
+     */
+    $normalizedQuestion = normalizeQuestion($question);
+
+    $questionRecordId = saveQuestion(
+        $database,
+        (int) $workspace['id'],
+        $question,
+        $normalizedQuestion
+    );
 
     $knowledgeStatement = $database->prepare(
         '
@@ -114,6 +130,12 @@ try {
     $chunks = $knowledgeStatement->fetchAll();
 
     if ($chunks === []) {
+        updateQuestionStatus(
+            $database,
+            $questionRecordId,
+            'not_found'
+        );
+
         respond(404, [
             'success' => false,
             'error' => 'No ready knowledge is available in this workspace yet.',
@@ -123,6 +145,12 @@ try {
     $keywords = extractKeywords($question);
 
     if ($keywords === []) {
+        updateQuestionStatus(
+            $database,
+            $questionRecordId,
+            'not_found'
+        );
+
         respond(400, [
             'success' => false,
             'error' => (
@@ -153,6 +181,12 @@ try {
     );
 
     if ($rankedChunks === []) {
+        updateQuestionStatus(
+            $database,
+            $questionRecordId,
+            'not_found'
+        );
+
         respond(200, [
             'success' => true,
             'title' => 'The answer was not found.',
@@ -170,6 +204,12 @@ try {
     $bestScore = (int) $best['score'];
 
     if ($bestScore < 5) {
+        updateQuestionStatus(
+            $database,
+            $questionRecordId,
+            'not_found'
+        );
+
         respond(200, [
             'success' => true,
             'title' => 'The answer was not found.',
@@ -200,6 +240,12 @@ try {
         $sourceParts[] = 'Page ' . (int) $pageNumber;
     }
 
+    updateQuestionStatus(
+        $database,
+        $questionRecordId,
+        'document_match'
+    );
+
     respond(200, [
         'success' => true,
         'title' => (
@@ -212,6 +258,25 @@ try {
         'strength' => relevanceLabel($bestScore),
     ]);
 } catch (Throwable $exception) {
+    if (
+        isset($database)
+        && $database instanceof PDO
+        && is_int($questionRecordId)
+    ) {
+        try {
+            updateQuestionStatus(
+                $database,
+                $questionRecordId,
+                'failed'
+            );
+        } catch (Throwable $statusException) {
+            error_log(
+                'Question status update failed: '
+                . $statusException->getMessage()
+            );
+        }
+    }
+
     error_log(
         'Concierge question failed: '
         . $exception->getMessage()
@@ -241,6 +306,85 @@ function respond(int $statusCode, array $payload): never
     );
 
     exit;
+}
+
+function normalizeQuestion(string $question): string
+{
+    $normalized = mb_strtolower(trim($question));
+
+    $normalized = preg_replace(
+        '/[^\p{L}\p{N}\s]+/u',
+        ' ',
+        $normalized
+    ) ?? $normalized;
+
+    $normalized = preg_replace(
+        '/\s+/u',
+        ' ',
+        $normalized
+    ) ?? $normalized;
+
+    return trim($normalized);
+}
+
+function generatePublicId(): string
+{
+    return bin2hex(random_bytes(8));
+}
+
+function saveQuestion(
+    PDO $database,
+    int $workspaceId,
+    string $question,
+    string $normalizedQuestion
+): int {
+    $statement = $database->prepare(
+        '
+        INSERT INTO questions (
+            workspace_id,
+            public_id,
+            question_text,
+            normalized_question,
+            result_status,
+            api_used
+        ) VALUES (
+            :workspace_id,
+            :public_id,
+            :question_text,
+            :normalized_question,
+            "received",
+            0
+        )
+        '
+    );
+
+    $statement->execute([
+        ':workspace_id' => $workspaceId,
+        ':public_id' => generatePublicId(),
+        ':question_text' => $question,
+        ':normalized_question' => $normalizedQuestion,
+    ]);
+
+    return (int) $database->lastInsertId();
+}
+
+function updateQuestionStatus(
+    PDO $database,
+    int $questionId,
+    string $status
+): void {
+    $statement = $database->prepare(
+        '
+        UPDATE questions
+        SET result_status = :result_status
+        WHERE id = :id
+        '
+    );
+
+    $statement->execute([
+        ':result_status' => $status,
+        ':id' => $questionId,
+    ]);
 }
 
 /**
