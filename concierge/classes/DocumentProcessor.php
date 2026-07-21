@@ -21,10 +21,10 @@ final class DocumentProcessor
     }
 
     /**
-     * Extracts searchable text from a PDF.
+     * Processes a searchable PDF, verified Markdown file, or plain-text file.
      *
-     * If the original PDF contains too little readable text,
-     * OCRmyPDF is used automatically before chunk creation.
+     * Scanned and mixed PDFs are intentionally NOT indexed. They must be
+     * digitized first or reviewed through the separate OCR preview workflow.
      *
      * @return array<int, array{
      *     section_title: string|null,
@@ -34,143 +34,168 @@ final class DocumentProcessor
      */
     public function process(
         string $workspacePublicId,
-        string $storedPdfPath,
+        string $storedDocumentPath,
         string $documentPublicId
     ): array {
+        if (!is_file($storedDocumentPath)) {
+            throw new RuntimeException('The source document could not be found.');
+        }
+
+        $extension = strtolower(pathinfo($storedDocumentPath, PATHINFO_EXTENSION));
+
+        return match ($extension) {
+            'pdf' => $this->processPdf(
+                $workspacePublicId,
+                $storedDocumentPath,
+                $documentPublicId
+            ),
+            'md', 'markdown' => $this->processTextDocument(
+                $workspacePublicId,
+                $storedDocumentPath,
+                $documentPublicId,
+                true
+            ),
+            'txt' => $this->processTextDocument(
+                $workspacePublicId,
+                $storedDocumentPath,
+                $documentPublicId,
+                false
+            ),
+            default => throw new RuntimeException(
+                'Unsupported document type. Please upload a PDF, MD, or TXT file.'
+            ),
+        };
+    }
+
+    /**
+     * Creates an OCR text preview without indexing the document.
+     */
+    public function runOcrPreview(
+        string $workspacePublicId,
+        string $storedPdfPath,
+        string $documentPublicId
+    ): string {
         if (!is_file($storedPdfPath)) {
-            throw new RuntimeException(
-                'The source PDF could not be found.'
-            );
+            throw new RuntimeException('The source PDF could not be found.');
         }
 
-        if (!is_executable($this->pdfToTextBinary)) {
-            throw new RuntimeException(
-                'The PDF text extractor is unavailable.'
-            );
+        if (strtolower(pathinfo($storedPdfPath, PATHINFO_EXTENSION)) !== 'pdf') {
+            throw new RuntimeException('OCR preview is available only for PDF documents.');
         }
 
-        $workspaceFolders = $this->storage->createWorkspaceFolders(
-            $workspacePublicId
-        );
+        $workspaceFolders = $this->storage->createWorkspaceFolders($workspacePublicId);
 
-        $originalTextPath = $workspaceFolders['extracted']
-            . '/'
-            . $documentPublicId
-            . '.txt';
+        $ocrPdfPath = $workspaceFolders['temporary'] . '/' . $documentPublicId . '-ocr-preview.pdf';
+        $ocrTextPath = $workspaceFolders['temporary'] . '/' . $documentPublicId . '-ocr-preview.txt';
 
-        $ocrPdfPath = $workspaceFolders['temporary']
-            . '/'
-            . $documentPublicId
-            . '-ocr.pdf';
-
-        $ocrTextPath = $workspaceFolders['temporary']
-            . '/'
-            . $documentPublicId
-            . '-ocr.txt';
-
-        $this->removeFileIfPresent($originalTextPath);
         $this->removeFileIfPresent($ocrPdfPath);
         $this->removeFileIfPresent($ocrTextPath);
 
-        /*
-         * First attempt: extract any existing text layer.
-         */
-        $originalText = $this->extractText(
-            $storedPdfPath,
-            $originalTextPath
-        );
+        try {
+            $text = $this->runOcrAndExtract(
+                $storedPdfPath,
+                $ocrPdfPath,
+                $ocrTextPath
+            );
 
-        $selectedText = $originalText;
+            $text = $this->normalizeText($text);
 
-        /*
-         * Mixed or scanned PDFs may contain only a partial text layer.
-         * OCR is triggered when the existing text coverage is poor.
-         */
-        if ($this->needsOcr($originalText)) {
-            try {
-                $ocrText = $this->runOcrAndExtract(
-                    $storedPdfPath,
-                    $ocrPdfPath,
-                    $ocrTextPath
-                );
-
-                /*
-                 * Keep whichever result contains more useful text.
-                 */
-                if (
-                    $this->readableCharacterCount($ocrText)
-                    > $this->readableCharacterCount($originalText)
-                ) {
-                    $selectedText = $ocrText;
-
-                    /*
-                     * Preserve the best extracted text in the normal
-                     * extracted-document location.
-                     */
-                    if (
-                        file_put_contents(
-                            $originalTextPath,
-                            $ocrText
-                        ) === false
-                    ) {
-                        throw new RuntimeException(
-                            'The OCR text could not be saved.'
-                        );
-                    }
-
-                    @chmod($originalTextPath, 0664);
-                }
-            } catch (Throwable $ocrException) {
-                error_log(
-                    'Document OCR fallback failed: '
-                    . $ocrException->getMessage()
-                );
-
-                /*
-                 * If some usable original text exists, continue with it.
-                 * Otherwise the document cannot be processed safely.
-                 */
-                if (
-                    $this->readableCharacterCount($originalText)
-                    < 100
-                ) {
-                    throw new RuntimeException(
-                        'The scanned PDF could not be converted '
-                        . 'into searchable text.'
-                    );
-                }
-            } finally {
-                $this->removeFileIfPresent($ocrPdfPath);
-                $this->removeFileIfPresent($ocrTextPath);
+            if ($text === '') {
+                throw new RuntimeException('OCR preview did not produce readable text.');
             }
+
+            return $text;
+        } finally {
+            $this->removeFileIfPresent($ocrPdfPath);
+            $this->removeFileIfPresent($ocrTextPath);
+        }
+    }
+
+    private function processPdf(
+        string $workspacePublicId,
+        string $storedPdfPath,
+        string $documentPublicId
+    ): array {
+        if (!is_executable($this->pdfToTextBinary)) {
+            throw new RuntimeException('The PDF text extractor is unavailable.');
         }
 
-        $selectedText = $this->normalizeText($selectedText);
+        $workspaceFolders = $this->storage->createWorkspaceFolders($workspacePublicId);
+        $extractedTextPath = $workspaceFolders['extracted'] . '/' . $documentPublicId . '.txt';
 
-        if ($selectedText === '') {
+        $this->removeFileIfPresent($extractedTextPath);
+
+        $text = $this->extractText($storedPdfPath, $extractedTextPath);
+
+        if ($this->needsDigitization($text)) {
+            $this->removeFileIfPresent($extractedTextPath);
+
             throw new RuntimeException(
-                'No readable text was found in the PDF.'
+                'NEEDS_DIGITIZATION: This PDF is scanned or partially scanned. '
+                . 'For precision, upload a verified digital PDF, Markdown (.md), '
+                . 'or text (.txt) version. You may also run an OCR preview.'
             );
         }
 
-        $chunks = $this->createChunks($selectedText);
+        $text = $this->normalizeText($text);
+
+        if ($text === '') {
+            throw new RuntimeException('No readable text was found in the PDF.');
+        }
+
+        $chunks = $this->createChunks($text, true);
 
         if ($chunks === []) {
-            throw new RuntimeException(
-                'No searchable text chunks were created.'
-            );
+            throw new RuntimeException('No searchable text chunks were created.');
         }
 
         return $chunks;
     }
 
-    /**
-     * Extracts text from a PDF with pdftotext.
-     */
-    private function extractText(
-        string $pdfPath,
-        string $outputPath
-    ): string {
+    private function processTextDocument(
+        string $workspacePublicId,
+        string $storedDocumentPath,
+        string $documentPublicId,
+        bool $isMarkdown
+    ): array {
+        $text = file_get_contents($storedDocumentPath);
+
+        if ($text === false) {
+            throw new RuntimeException('The uploaded text document could not be read.');
+        }
+
+        $text = $this->normalizeText($text);
+
+        if ($text === '') {
+            throw new RuntimeException('The uploaded text document is empty.');
+        }
+
+        if ($this->readableCharacterCount($text) < 40) {
+            throw new RuntimeException(
+                'The uploaded text document does not contain enough readable text.'
+            );
+        }
+
+        $workspaceFolders = $this->storage->createWorkspaceFolders($workspacePublicId);
+        $extractedTextPath = $workspaceFolders['extracted'] . '/' . $documentPublicId . '.txt';
+
+        if (file_put_contents($extractedTextPath, $text) === false) {
+            throw new RuntimeException('The verified text could not be stored.');
+        }
+
+        @chmod($extractedTextPath, 0664);
+
+        $chunks = $this->createChunks($text, false, $isMarkdown);
+
+        if ($chunks === []) {
+            throw new RuntimeException('No searchable text chunks were created.');
+        }
+
+        return $chunks;
+    }
+
+    private function extractText(string $pdfPath, string $outputPath): string
+    {
         $this->removeFileIfPresent($outputPath);
 
         $command = sprintf(
@@ -182,77 +207,37 @@ final class DocumentProcessor
 
         $output = [];
         $exitCode = 0;
-
         exec($command, $output, $exitCode);
 
         if ($exitCode !== 0 || !is_file($outputPath)) {
-            error_log(
-                'PDF extraction failed: '
-                . implode(PHP_EOL, $output)
-            );
-
+            error_log('PDF extraction failed: ' . implode(PHP_EOL, $output));
             return '';
         }
 
         $text = file_get_contents($outputPath);
 
         if ($text === false) {
-            throw new RuntimeException(
-                'The extracted text could not be read.'
-            );
+            throw new RuntimeException('The extracted text could not be read.');
         }
 
         @chmod($outputPath, 0664);
-
         return $text;
     }
 
-    /**
-     * Creates a searchable OCR copy, then extracts its text.
-     */
     private function runOcrAndExtract(
         string $sourcePdfPath,
         string $ocrPdfPath,
         string $ocrTextPath
     ): string {
         if (!is_executable($this->ocrMyPdfBinary)) {
-            throw new RuntimeException(
-                'The OCR processor is unavailable.'
-            );
+            throw new RuntimeException('The OCR processor is unavailable.');
         }
 
         $this->removeFileIfPresent($ocrPdfPath);
         $this->removeFileIfPresent($ocrTextPath);
 
-        /*
-         * --skip-text:
-         * Keeps pages that already contain text and OCRs image-only pages.
-         *
-         * --rotate-pages:
-         * Corrects pages scanned in the wrong orientation.
-         *
-         * --deskew:
-         * Straightens slightly crooked scanned pages.
-         *
-         * --output-type pdf:
-         * Produces a regular searchable PDF instead of requiring PDF/A.
-         *
-         * --optimize 0:
-         * Avoids unnecessary optimization work during ingestion.
-         *
-         * --jobs 2:
-         * Limits server CPU use while processing large documents.
-         */
         $command = sprintf(
-            '%s'
-            . ' --skip-text'
-            . ' --rotate-pages'
-            . ' --deskew'
-            . ' --output-type pdf'
-            . ' --optimize 0'
-            . ' --jobs 2'
-            . ' --language eng'
-            . ' %s %s 2>&1',
+            '%s --skip-text --rotate-pages --deskew --output-type pdf --optimize 0 --jobs 2 --language eng %s %s 2>&1',
             escapeshellarg($this->ocrMyPdfBinary),
             escapeshellarg($sourcePdfPath),
             escapeshellarg($ocrPdfPath)
@@ -260,28 +245,19 @@ final class DocumentProcessor
 
         $output = [];
         $exitCode = 0;
-
         exec($command, $output, $exitCode);
 
         if ($exitCode !== 0 || !is_file($ocrPdfPath)) {
             error_log(
-                'OCRmyPDF failed with exit code '
-                . $exitCode
-                . ': '
-                . implode(PHP_EOL, $output)
+                'OCRmyPDF failed with exit code ' . $exitCode . ': ' . implode(PHP_EOL, $output)
             );
 
-            throw new RuntimeException(
-                'OCR could not process this PDF.'
-            );
+            throw new RuntimeException('OCR could not process this PDF.');
         }
 
         @chmod($ocrPdfPath, 0664);
 
-        $text = $this->extractText(
-            $ocrPdfPath,
-            $ocrTextPath
-        );
+        $text = $this->extractText($ocrPdfPath, $ocrTextPath);
 
         if ($this->readableCharacterCount($text) < 100) {
             throw new RuntimeException(
@@ -292,10 +268,7 @@ final class DocumentProcessor
         return $text;
     }
 
-    /**
-     * Determines whether the PDF has poor searchable-text coverage.
-     */
-    private function needsOcr(string $text): bool
+    private function needsDigitization(string $text): bool
     {
         if ($this->readableCharacterCount($text) < 1000) {
             return true;
@@ -320,22 +293,12 @@ final class DocumentProcessor
             return false;
         }
 
-        $coverage = $readablePages / $totalPages;
-
-        /*
-         * OCR mixed documents when fewer than 70% of their pages
-         * contain a meaningful searchable-text layer.
-         */
-        return $coverage < 0.70;
+        return ($readablePages / $totalPages) < 0.90;
     }
 
     private function readableCharacterCount(string $text): int
     {
-        $withoutWhitespace = preg_replace(
-            '/\s+/u',
-            '',
-            $text
-        );
+        $withoutWhitespace = preg_replace('/\s+/u', '', $text);
 
         if (!is_string($withoutWhitespace)) {
             return 0;
@@ -346,40 +309,19 @@ final class DocumentProcessor
 
     private function normalizeText(string $text): string
     {
-        $text = str_replace(
-            ["\r\n", "\r"],
-            "\n",
-            $text
-        );
-
-        $text = preg_replace(
-            '/[ \t]+/',
-            ' ',
-            $text
-        ) ?? $text;
-
-        $text = preg_replace(
-            "/\n{3,}/",
-            "\n\n",
-            $text
-        ) ?? $text;
+        $text = str_replace(["\r\n", "\r"], "\n", $text);
+        $text = preg_replace('/[ \t]+/', ' ', $text) ?? $text;
+        $text = preg_replace("/\n{3,}/", "\n\n", $text) ?? $text;
 
         return trim($text);
     }
 
-    /**
-     * @return array<int, array{
-     *     section_title: string|null,
-     *     page_number: int|null,
-     *     content: string
-     * }>
-     */
-    private function createChunks(string $text): array
-    {
-        /*
-         * pdftotext separates PDF pages using form-feed characters.
-         */
-        $pages = preg_split('/\f/', $text);
+    private function createChunks(
+        string $text,
+        bool $preservePdfPages,
+        bool $isMarkdown = false
+    ): array {
+        $pages = $preservePdfPages ? preg_split('/\f/', $text) : [$text];
 
         if (!is_array($pages)) {
             $pages = [$text];
@@ -395,12 +337,8 @@ final class DocumentProcessor
                 continue;
             }
 
-            $pageNumber = $pageIndex + 1;
-
-            $paragraphs = preg_split(
-                "/\n\s*\n/",
-                $pageText
-            );
+            $pageNumber = $preservePdfPages ? $pageIndex + 1 : null;
+            $paragraphs = preg_split("/\n\s*\n/", $pageText);
 
             if (!is_array($paragraphs)) {
                 $paragraphs = [$pageText];
@@ -416,6 +354,23 @@ final class DocumentProcessor
                     continue;
                 }
 
+                if (
+                    $isMarkdown
+                    && preg_match('/^#{1,6}\s+(.+)$/u', $paragraph, $matches)
+                ) {
+                    if ($buffer !== '') {
+                        $chunks[] = [
+                            'section_title' => $sectionTitle,
+                            'page_number' => $pageNumber,
+                            'content' => trim($buffer),
+                        ];
+                        $buffer = '';
+                    }
+
+                    $sectionTitle = mb_substr(trim($matches[1]), 0, 250);
+                    continue;
+                }
+
                 if ($this->looksLikeHeading($paragraph)) {
                     if ($buffer !== '') {
                         $chunks[] = [
@@ -423,16 +378,10 @@ final class DocumentProcessor
                             'page_number' => $pageNumber,
                             'content' => trim($buffer),
                         ];
-
                         $buffer = '';
                     }
 
-                    $sectionTitle = mb_substr(
-                        $paragraph,
-                        0,
-                        250
-                    );
-
+                    $sectionTitle = mb_substr($paragraph, 0, 250);
                     continue;
                 }
 
@@ -440,11 +389,7 @@ final class DocumentProcessor
                     ? $paragraph
                     : $buffer . "\n\n" . $paragraph;
 
-                if (
-                    mb_strlen($candidate)
-                    > $maximumChunkLength
-                    && $buffer !== ''
-                ) {
+                if (mb_strlen($candidate) > $maximumChunkLength && $buffer !== '') {
                     $chunks[] = [
                         'section_title' => $sectionTitle,
                         'page_number' => $pageNumber,
@@ -452,7 +397,6 @@ final class DocumentProcessor
                     ];
 
                     $buffer = $paragraph;
-
                     continue;
                 }
 
@@ -471,19 +415,14 @@ final class DocumentProcessor
         return array_values(
             array_filter(
                 $chunks,
-                static fn (array $chunk): bool =>
-                    mb_strlen($chunk['content']) >= 40
+                static fn (array $chunk): bool => mb_strlen($chunk['content']) >= 40
             )
         );
     }
 
     private function looksLikeHeading(string $text): bool
     {
-        if (mb_strlen($text) > 180) {
-            return false;
-        }
-
-        if (str_contains($text, "\n")) {
+        if (mb_strlen($text) > 180 || str_contains($text, "\n")) {
             return false;
         }
 

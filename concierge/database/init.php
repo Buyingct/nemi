@@ -7,8 +7,69 @@ require_once __DIR__ . '/connect.php';
 $success = false;
 $message = '';
 
+/**
+ * Returns true when a column already exists on a SQLite table.
+ */
+function conciergeColumnExists(
+    PDO $database,
+    string $tableName,
+    string $columnName
+): bool {
+    $statement = $database->query(
+        'PRAGMA table_info(' . $tableName . ')'
+    );
+
+    if ($statement === false) {
+        return false;
+    }
+
+    $columns = $statement->fetchAll(PDO::FETCH_ASSOC);
+
+    foreach ($columns as $column) {
+        if (
+            isset($column['name'])
+            && $column['name'] === $columnName
+        ) {
+            return true;
+        }
+    }
+
+    return false;
+}
+
+/**
+ * Adds a column only when it does not already exist.
+ */
+function conciergeAddColumnIfMissing(
+    PDO $database,
+    string $tableName,
+    string $columnName,
+    string $columnDefinition
+): void {
+    if (
+        conciergeColumnExists(
+            $database,
+            $tableName,
+            $columnName
+        )
+    ) {
+        return;
+    }
+
+    $database->exec(
+        sprintf(
+            'ALTER TABLE %s ADD COLUMN %s %s;',
+            $tableName,
+            $columnName,
+            $columnDefinition
+        )
+    );
+}
+
 try {
     $database = conciergeDatabase();
+
+    $database->exec('PRAGMA foreign_keys = ON;');
 
     /*
      * Workspaces
@@ -46,6 +107,17 @@ try {
 
     /*
      * Documents
+     *
+     * document_type:
+     *     The uploaded file format: pdf, md, or txt.
+     *
+     * knowledge_source:
+     *     Describes what the Concierge is allowed to answer from:
+     *     native_pdf, verified_markdown, verified_text, or none.
+     *
+     * original_document_id:
+     *     Links a verified Markdown/text document back to the original PDF.
+     *     It remains NULL when the document is itself the original source.
      */
     $database->exec(
         '
@@ -58,13 +130,70 @@ try {
             category TEXT NOT NULL DEFAULT "other",
             mime_type TEXT NOT NULL,
             file_size INTEGER NOT NULL DEFAULT 0,
+            document_type TEXT NOT NULL DEFAULT "pdf",
+            knowledge_source TEXT NOT NULL DEFAULT "native_pdf",
+            original_document_id INTEGER DEFAULT NULL,
             status TEXT NOT NULL DEFAULT "uploaded",
             uploaded_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
             FOREIGN KEY (workspace_id)
                 REFERENCES workspaces(id)
-                ON DELETE CASCADE
+                ON DELETE CASCADE,
+
+            FOREIGN KEY (original_document_id)
+                REFERENCES documents(id)
+                ON DELETE SET NULL
         );
+        '
+    );
+
+    /*
+     * Safe migration for existing databases.
+     * SQLite CREATE TABLE IF NOT EXISTS does not add newly introduced columns,
+     * so each missing column is added separately.
+     */
+    conciergeAddColumnIfMissing(
+        $database,
+        'documents',
+        'document_type',
+        'TEXT NOT NULL DEFAULT "pdf"'
+    );
+
+    conciergeAddColumnIfMissing(
+        $database,
+        'documents',
+        'knowledge_source',
+        'TEXT NOT NULL DEFAULT "native_pdf"'
+    );
+
+    conciergeAddColumnIfMissing(
+        $database,
+        'documents',
+        'original_document_id',
+        'INTEGER DEFAULT NULL REFERENCES documents(id) ON DELETE SET NULL'
+    );
+
+    /*
+     * Preserve sensible values for previously uploaded records.
+     */
+    $database->exec(
+        '
+        UPDATE documents
+        SET document_type = "pdf"
+        WHERE document_type IS NULL
+           OR TRIM(document_type) = "";
+        '
+    );
+
+    $database->exec(
+        '
+        UPDATE documents
+        SET knowledge_source = CASE
+            WHEN status = "needs_digitization" THEN "none"
+            ELSE "native_pdf"
+        END
+        WHERE knowledge_source IS NULL
+           OR TRIM(knowledge_source) = "";
         '
     );
 
@@ -86,6 +215,27 @@ try {
         '
         CREATE INDEX IF NOT EXISTS idx_documents_status
         ON documents(status);
+        '
+    );
+
+    $database->exec(
+        '
+        CREATE INDEX IF NOT EXISTS idx_documents_type
+        ON documents(document_type);
+        '
+    );
+
+    $database->exec(
+        '
+        CREATE INDEX IF NOT EXISTS idx_documents_knowledge_source
+        ON documents(knowledge_source);
+        '
+    );
+
+    $database->exec(
+        '
+        CREATE INDEX IF NOT EXISTS idx_documents_original_document
+        ON documents(original_document_id);
         '
     );
 
@@ -132,8 +282,8 @@ try {
     $success = true;
 
     $message = (
-        'Database, workspace, documents, and knowledge tables '
-        . 'created successfully.'
+        'Database updated successfully. Document type, knowledge source, '
+        . 'and original-document linking are ready.'
     );
 } catch (Throwable $exception) {
     error_log(
@@ -142,7 +292,7 @@ try {
     );
 
     $message = (
-        'The database could not be initialized. '
+        'The database could not be initialized or migrated. '
         . 'Check the server logs.'
     );
 }
@@ -293,10 +443,13 @@ http_response_code($success ? 200 : 500);
     <?php if ($success): ?>
 
         <div class="details">
-            <strong>Created or verified:</strong><br>
+            <strong>Created, verified, or migrated:</strong><br>
             SQLite database<br>
             Workspaces table<br>
             Documents table<br>
+            Document type field<br>
+            Knowledge source field<br>
+            Original-document relationship<br>
             Knowledge table<br>
             Database indexes
         </div>
