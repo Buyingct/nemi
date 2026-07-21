@@ -92,56 +92,37 @@ final class OpenAIService
             $chunk = $rankedChunk['chunk'] ?? [];
             $sourceNumber = $index + 1;
 
-            $documentName = trim(
-                (string) ($chunk['original_name'] ?? 'Unknown document')
-            );
-
-            $sectionTitle = trim(
-                (string) ($chunk['section_title'] ?? '')
-            );
-
-            $pageNumber = (
-                isset($chunk['page_number'])
-                && (int) $chunk['page_number'] > 0
-                    ? (int) $chunk['page_number']
-                    : null
-            );
-
-            $content = trim(
-                (string) ($chunk['content'] ?? '')
-            );
-
             $sourceBlocks[] = implode("\n", [
                 'SOURCE ' . $sourceNumber,
-                'Document: ' . $documentName,
+                'Document: ' . trim(
+                    (string) ($chunk['original_name'] ?? 'Unknown document')
+                ),
                 'Section: ' . (
-                    $sectionTitle !== ''
-                        ? $sectionTitle
+                    trim((string) ($chunk['section_title'] ?? '')) !== ''
+                        ? trim((string) $chunk['section_title'])
                         : 'Not specified'
                 ),
                 'Page: ' . (
-                    $pageNumber !== null
-                        ? (string) $pageNumber
+                    isset($chunk['page_number'])
+                    && (int) $chunk['page_number'] > 0
+                        ? (string) (int) $chunk['page_number']
                         : 'Not specified'
                 ),
                 'Text:',
-                $content,
+                trim((string) ($chunk['content'] ?? '')),
             ]);
         }
 
         $instructions = implode("\n", [
             'You are the Rocha Circle condominium document concierge.',
             'Answer only from the supplied source excerpts.',
-            'Do not use outside knowledge, assumptions, or general HOA rules.',
-            'If the excerpts do not clearly answer the question, set supported',
-            'to false and leave answer concise.',
-            'If supported is true, explain the answer in plain English.',
-            'Do not overstate. Preserve qualifications, exceptions, approvals,',
-            'time limits, and board discretion found in the source.',
+            'Never use outside knowledge, assumptions, or general HOA rules.',
+            'If the excerpts do not clearly answer the question, set',
+            'supported to false.',
+            'If supported is true, explain the answer in concise plain English.',
+            'Preserve all qualifications, exceptions, approval requirements,',
+            'time limits, and board discretion stated in the source.',
             'Do not provide legal advice.',
-            'Return valid JSON only, with exactly these keys:',
-            'supported (boolean), title (string), answer (string),',
-            'source_numbers (array of source numbers used).',
         ]);
 
         $input = implode("\n\n", [
@@ -154,9 +135,47 @@ final class OpenAIService
         $payload = [
             'model' => self::MODEL,
             'store' => false,
+            'reasoning' => [
+                'effort' => 'low',
+            ],
+            'text' => [
+                'verbosity' => 'low',
+                'format' => [
+                    'type' => 'json_schema',
+                    'name' => 'concierge_grounded_answer',
+                    'strict' => true,
+                    'schema' => [
+                        'type' => 'object',
+                        'properties' => [
+                            'supported' => [
+                                'type' => 'boolean',
+                            ],
+                            'title' => [
+                                'type' => 'string',
+                            ],
+                            'answer' => [
+                                'type' => 'string',
+                            ],
+                            'source_numbers' => [
+                                'type' => 'array',
+                                'items' => [
+                                    'type' => 'integer',
+                                ],
+                            ],
+                        ],
+                        'required' => [
+                            'supported',
+                            'title',
+                            'answer',
+                            'source_numbers',
+                        ],
+                        'additionalProperties' => false,
+                    ],
+                ],
+            ],
             'instructions' => $instructions,
             'input' => $input,
-            'max_output_tokens' => 700,
+            'max_output_tokens' => 1600,
         ];
 
         $response = $this->postJson($payload);
@@ -166,7 +185,7 @@ final class OpenAIService
 
         if (!is_array($decoded)) {
             throw new RuntimeException(
-                'OpenAI returned an unreadable draft response.'
+                'OpenAI returned an unreadable structured response.'
             );
         }
 
@@ -198,7 +217,7 @@ final class OpenAIService
 
         if ($supported && $answer === '') {
             throw new RuntimeException(
-                'OpenAI did not provide an answer.'
+                'OpenAI marked the answer supported but returned no answer.'
             );
         }
 
@@ -252,7 +271,7 @@ final class OpenAIService
             CURLOPT_POST => true,
             CURLOPT_RETURNTRANSFER => true,
             CURLOPT_CONNECTTIMEOUT => 10,
-            CURLOPT_TIMEOUT => 45,
+            CURLOPT_TIMEOUT => 60,
             CURLOPT_HTTPHEADER => [
                 'Authorization: Bearer ' . $this->apiKey,
                 'Content-Type: application/json',
@@ -305,13 +324,6 @@ final class OpenAIService
      */
     private function extractOutputText(array $response): string
     {
-        if (
-            isset($response['output_text'])
-            && is_string($response['output_text'])
-        ) {
-            return trim($response['output_text']);
-        }
-
         $parts = [];
 
         foreach (($response['output'] ?? []) as $outputItem) {
@@ -320,25 +332,55 @@ final class OpenAIService
             }
 
             foreach (($outputItem['content'] ?? []) as $contentItem) {
+                if (!is_array($contentItem)) {
+                    continue;
+                }
+
                 if (
-                    is_array($contentItem)
-                    && ($contentItem['type'] ?? '') === 'output_text'
+                    ($contentItem['type'] ?? '') === 'output_text'
                     && isset($contentItem['text'])
                     && is_string($contentItem['text'])
                 ) {
                     $parts[] = $contentItem['text'];
+                }
+
+                if (
+                    ($contentItem['type'] ?? '') === 'refusal'
+                    && isset($contentItem['refusal'])
+                ) {
+                    throw new RuntimeException(
+                        'OpenAI declined the request: '
+                        . (string) $contentItem['refusal']
+                    );
                 }
             }
         }
 
         $text = trim(implode("\n", $parts));
 
-        if ($text === '') {
-            throw new RuntimeException(
-                'OpenAI returned no text.'
-            );
+        if ($text !== '') {
+            return $text;
         }
 
-        return $text;
+        $status = (string) ($response['status'] ?? 'unknown');
+        $reason = (string) (
+            $response['incomplete_details']['reason']
+            ?? 'no output text was returned'
+        );
+
+        $reasoningTokens = (int) (
+            $response['usage']['output_tokens_details']['reasoning_tokens']
+            ?? 0
+        );
+
+        throw new RuntimeException(
+            'OpenAI returned no text. Response status: '
+            . $status
+            . '; reason: '
+            . $reason
+            . '; reasoning tokens: '
+            . $reasoningTokens
+            . '.'
+        );
     }
 }
