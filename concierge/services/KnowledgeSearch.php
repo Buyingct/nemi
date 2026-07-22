@@ -1,9 +1,12 @@
 <?php
+
 declare(strict_types=1);
 
 final class KnowledgeSearch
 {
-    public function __construct(private PDO $database) {}
+    public function __construct(private PDO $database)
+    {
+    }
 
     /** @return array<int, array<string, mixed>> */
     public function getReadyChunks(int $workspaceId): array
@@ -21,7 +24,10 @@ final class KnowledgeSearch
              ORDER BY k.id ASC'
         );
 
-        $statement->execute([':workspace_id' => $workspaceId]);
+        $statement->execute([
+            ':workspace_id' => $workspaceId,
+        ]);
+
         return $statement->fetchAll();
     }
 
@@ -30,15 +36,25 @@ final class KnowledgeSearch
      * @param array<int, string> $keywords
      * @return array<int, array{score:int,chunk:array<string,mixed>}>
      */
-    public function rankChunks(array $chunks, array $keywords, string $question): array
-    {
+    public function rankChunks(
+        array $chunks,
+        array $keywords,
+        string $question
+    ): array {
         $ranked = [];
 
         foreach ($chunks as $chunk) {
-            $score = $this->scoreChunk($chunk, $keywords, $question);
+            $score = $this->scoreChunk(
+                $chunk,
+                $keywords,
+                $question
+            );
 
             if ($score > 0) {
-                $ranked[] = ['score' => $score, 'chunk' => $chunk];
+                $ranked[] = [
+                    'score' => $score,
+                    'chunk' => $chunk,
+                ];
             }
         }
 
@@ -52,43 +68,71 @@ final class KnowledgeSearch
     }
 
     /**
-     * @param array<string,mixed> $chunk
-     * @param array<int,string> $keywords
+     * @param array<string, mixed> $chunk
+     * @param array<int, string> $keywords
      */
-    private function scoreChunk(array $chunk, array $keywords, string $question): int
-    {
+    private function scoreChunk(
+        array $chunk,
+        array $keywords,
+        string $question
+    ): int {
         $content = $this->normalizeSearchText(
-    (string)($chunk['content'] ?? '')
-);
+            (string) ($chunk['content'] ?? '')
+        );
 
-$sectionTitle = $this->normalizeSearchText(
-    (string)($chunk['section_title'] ?? '')
-);
+        $sectionTitle = $this->normalizeSearchText(
+            (string) ($chunk['section_title'] ?? '')
+        );
 
-$documentName = $this->normalizeSearchText(
-    (string)($chunk['original_name'] ?? '')
-);
+        $documentName = $this->normalizeSearchText(
+            (string) ($chunk['original_name'] ?? '')
+        );
 
-$category = $this->normalizeSearchText(
-    (string)($chunk['category'] ?? '')
-);
+        $category = $this->normalizeSearchText(
+            (string) ($chunk['category'] ?? '')
+        );
 
-$normalizedQuestion = $this->normalizeSearchText($question);
+        $normalizedQuestion = $this->normalizeSearchText(
+            $question
+        );
 
         $score = 0;
         $distinctMatches = 0;
 
         foreach ($keywords as $keyword) {
-            $contentCount = substr_count($content, $keyword);
+            $normalizedKeyword = $this->normalizeSearchText(
+                $keyword
+            );
+
+            if ($normalizedKeyword === '') {
+                continue;
+            }
+
+            $contentCount = substr_count(
+                $content,
+                $normalizedKeyword
+            );
 
             if ($contentCount > 0) {
                 $distinctMatches++;
             }
 
             $score += min($contentCount, 6) * 2;
-            $score += min(substr_count($sectionTitle, $keyword), 3) * 8;
-            $score += min(substr_count($documentName, $keyword), 2) * 3;
-            $score += min(substr_count($category, $keyword), 2) * 3;
+
+            $score += min(
+                substr_count($sectionTitle, $normalizedKeyword),
+                3
+            ) * 8;
+
+            $score += min(
+                substr_count($documentName, $normalizedKeyword),
+                2
+            ) * 3;
+
+            $score += min(
+                substr_count($category, $normalizedKeyword),
+                2
+            ) * 3;
         }
 
         if ($distinctMatches >= 2) {
@@ -105,22 +149,34 @@ $normalizedQuestion = $this->normalizeSearchText($question);
             || str_contains($normalizedQuestion, 'size of');
 
         if ($isQuantityQuestion) {
-            if (preg_match('/\b(one|two|three|four|five|six|seven|eight|nine|ten)\b/u', $content) === 1) {
+            if (
+                preg_match(
+                    '/\b(one|two|three|four|five|six|seven|eight|nine|ten)\b/u',
+                    $content
+                ) === 1
+            ) {
                 $score += 10;
             }
 
-            if (preg_match('/\b\d+\s*\(\d+\)|\(\d+\)|\b\d+\b/u', $content) === 1) {
+            if (
+                preg_match(
+                    '/\b\d+\s*\(\d+\)|\(\d+\)|\b\d+\b/u',
+                    $content
+                ) === 1
+            ) {
                 $score += 10;
             }
 
-            foreach ([
-                'shall consist of',
-                'consists of',
-                'consist of',
-                'composed of',
-                'number of directors',
-                'number of members',
-            ] as $phrase) {
+            foreach (
+                [
+                    'shall consist of',
+                    'consists of',
+                    'consist of',
+                    'composed of',
+                    'number of directors',
+                    'number of members',
+                ] as $phrase
+            ) {
                 if (str_contains($content, $phrase)) {
                     $score += 28;
                 }
@@ -142,15 +198,53 @@ $normalizedQuestion = $this->normalizeSearchText($question);
                 $score += 35;
             }
 
-            if (str_contains($content, 'vacancy') || str_contains($content, 'vacancies')) {
+            if (
+                str_contains($content, 'vacancy')
+                || str_contains($content, 'vacancies')
+            ) {
                 $score -= 8;
             }
 
-            if (str_contains($content, 'records of') || str_contains($content, 'minutes of')) {
+            if (
+                str_contains($content, 'records of')
+                || str_contains($content, 'minutes of')
+            ) {
                 $score -= 8;
             }
         }
 
         return max($score, 0);
+    }
+
+    private function normalizeSearchText(
+        string $text
+    ): string {
+        $text = mb_strtolower(trim($text));
+
+        $text = str_replace(
+            ['-', '–', '—'],
+            ' ',
+            $text
+        );
+
+        $text = preg_replace(
+            '/[^\p{L}\p{N}\s]+/u',
+            ' ',
+            $text
+        ) ?? $text;
+
+        $text = preg_replace(
+            '/\s+/u',
+            ' ',
+            $text
+        ) ?? $text;
+
+        $text = preg_replace(
+            '/\btime\s+shares?\b/u',
+            'timeshare',
+            $text
+        ) ?? $text;
+
+        return trim($text);
     }
 }
