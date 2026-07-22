@@ -57,13 +57,23 @@ final class KnowledgeSearch
      */
     private function scoreChunk(array $chunk, array $keywords, string $question): int
     {
-        $content = mb_strtolower((string)($chunk['content'] ?? ''));
-        $sectionTitle = mb_strtolower((string)($chunk['section_title'] ?? ''));
-        $documentName = mb_strtolower((string)($chunk['original_name'] ?? ''));
-        $category = mb_strtolower((string)($chunk['category'] ?? ''));
-        $normalizedQuestion = mb_strtolower(
-            preg_replace('/\s+/u', ' ', trim($question)) ?? trim($question)
-        );
+        $content = $this->normalizeSearchText(
+    (string)($chunk['content'] ?? '')
+);
+
+$sectionTitle = $this->normalizeSearchText(
+    (string)($chunk['section_title'] ?? '')
+);
+
+$documentName = $this->normalizeSearchText(
+    (string)($chunk['original_name'] ?? '')
+);
+
+$category = $this->normalizeSearchText(
+    (string)($chunk['category'] ?? '')
+);
+
+$normalizedQuestion = $this->normalizeSearchText($question);
 
         $score = 0;
         $distinctMatches = 0;
