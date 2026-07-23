@@ -45,14 +45,38 @@ final class QuestionNormalizer
         }
 
         $groups = [
-            ['board','executive','director','directors','member','members'],
-            ['people','person','persons','serve','serves','serving','director',
-             'directors','member','members','consist','consists','composed',
-             'composition'],
-            ['pet','pets','animal','animals','dog','dogs','cat','cats'],
-            ['rental','rentals','rent','lease','leases','leasing','tenant','tenants'],
-            ['short','transient','hotel','motel','airbnb','vacation'],
-        ];
+    [
+        'board','executive','director','directors','member','members',
+    ],
+    [
+        'people','person','persons','serve','serves','serving','director',
+        'directors','member','members','consist','consists','composed',
+        'composition',
+    ],
+    [
+        'pet','pets','animal','animals','dog','dogs','cat','cats',
+    ],
+    [
+        'rental','rentals','rent','lease','leases','leasing',
+        'tenant','tenants',
+    ],
+    [
+        'short','transient','hotel','motel','airbnb','vacation',
+        'short term','short-term',
+    ],
+
+    // Landscaping and exterior changes
+    [
+        'flower','flowers','plant','plants','planting','garden','gardens',
+        'gardening','landscape','landscaping','shrub','shrubs','tree','trees',
+        'lawn','yard','mulch','bed','beds',
+        'alter','alters','alteration','alterations','modify','modification',
+        'change','changes','exterior','outside',
+        'common element','common elements',
+        'limited common element','limited common elements',
+        'approval','permission','board approval',
+    ],
+];
 
         $expanded = $keywords;
 

@@ -213,6 +213,68 @@ final class KnowledgeSearch
             }
         }
 
+$isLandscapingQuestion =
+    str_contains($normalizedQuestion, 'flower')
+    || str_contains($normalizedQuestion, 'plant')
+    || str_contains($normalizedQuestion, 'garden')
+    || str_contains($normalizedQuestion, 'landscap')
+    || str_contains($normalizedQuestion, 'yard')
+    || str_contains($normalizedQuestion, 'tree')
+    || str_contains($normalizedQuestion, 'shrub');
+
+if ($isLandscapingQuestion) {
+    foreach (
+        [
+            'landscape',
+            'landscaping',
+            'planting',
+            'plantings',
+            'garden',
+            'gardens',
+            'shrub',
+            'shrubs',
+            'tree',
+            'trees',
+            'lawn',
+            'exterior',
+            'alter',
+            'alteration',
+            'alterations',
+            'modify',
+            'modification',
+            'common element',
+            'common elements',
+            'limited common element',
+            'limited common elements',
+        ] as $phrase
+    ) {
+        if (
+            str_contains($content, $phrase)
+            || str_contains($sectionTitle, $phrase)
+        ) {
+            $score += 18;
+        }
+    }
+
+    foreach (
+        [
+            'board approval',
+            'prior approval',
+            'written approval',
+            'without approval',
+            'without the consent',
+            'shall not alter',
+            'may not alter',
+            'shall not modify',
+            'may not modify',
+        ] as $approvalPhrase
+    ) {
+        if (str_contains($content, $approvalPhrase)) {
+            $score += 28;
+        }
+    }
+}
+
         return max($score, 0);
     }
 
