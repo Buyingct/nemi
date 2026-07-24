@@ -182,25 +182,47 @@ $title = 'Document Concierge';
 
                     </div>
 
-                    <div class="answer-body">
+                    
+                    
+                   <div class="answer-body">
 
-                        <div class="answer-section">
+    <div class="answer-section">
 
-                      
+        <p class="answer-section-title">
+            Plain English
+        </p>
 
-    <p class="answer-section-title">
-        Supporting Documents
-    </p>
+        <p
+            class="answer-copy"
+            id="answer-text"
+        >
+            Your answer will appear here.
+        </p>
 
-    <div
-        class="supporting-sources"
-        id="supporting-sources"
-    ></div>
+    </div>
 
-</div>     <p class="answer-section-title">Plain English</p>
+    <div class="answer-section">
 
-                
-                    </div>
+        <p class="answer-section-title">
+            Supporting Documents
+        </p>
+
+        <div
+            class="supporting-sources"
+            id="supporting-sources"
+        ></div>
+
+    </div>
+
+</div> 
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
 
                 </article>
 
