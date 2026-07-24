@@ -337,9 +337,66 @@ $title = 'Document Concierge';
         });
     });
 
-     function renderSources(sources) {
-    supportingSources.innerHTML = '';
+     function escapeHtml(value) {
+    return String(value ?? '')
+        .replaceAll('&', '&amp;')
+        .replaceAll('<', '&lt;')
+        .replaceAll('>', '&gt;')
+        .replaceAll('"', '&quot;')
+        .replaceAll("'", '&#039;');
+}
 
+function cleanDocumentName(name) {
+    return String(name || 'Property Document')
+        .replace(/\.(md|txt|pdf)$/i, '');
+}
+
+function findSectionTitle(source) {
+    if (source.section_title) {
+        return source.section_title;
+    }
+
+    const excerpt = String(source.excerpt || '');
+
+    const match = excerpt.match(
+        /(?:\\?#{1,4})\s*(Section\s+[0-9.]+\s*[–—-]\s*[^\n]+)/i
+    );
+
+    return match
+        ? match[1].replaceAll('\\', '').trim()
+        : 'Supporting section';
+}
+
+function findPageLabel(source) {
+    if (source.page_number) {
+        return `Page ${source.page_number}`;
+    }
+
+    const excerpt = String(source.excerpt || '');
+
+    const match = excerpt.match(
+        /(?:\\?\*{0,2}Source:\\?\*{0,2})\s*Page\s+([0-9]+)/i
+    );
+
+    return match
+        ? `Page ${match[1]}`
+        : '';
+}
+
+function cleanExcerpt(value) {
+    return String(value || '')
+        .replaceAll('\\*', '*')
+        .replaceAll('\\#', '#')
+        .replaceAll('\\---', '---')
+        .replace(/^#{1,4}\s+/gm, '')
+        .replace(/\*\*/g, '')
+        .replace(/`/g, '')
+        .replace(/^---$/gm, '')
+        .replace(/\n{3,}/g, '\n\n')
+        .trim();
+}
+
+function renderSources(sources) {
     if (!Array.isArray(sources) || sources.length === 0) {
         supportingSources.innerHTML = `
             <div class="source-empty">
@@ -350,88 +407,78 @@ $title = 'Document Concierge';
         return;
     }
 
-    sources.forEach((source, index) => {
-        const card = document.createElement('article');
-
-        card.className = 'supporting-source-card';
-
-        const documentName =
-            source.document_name
-            || 'Property Document';
-
-        const sectionTitle =
-            source.section_title
-            || 'Supporting section';
-
-        const pageNumber =
-            source.page_number
-                ? `Page ${source.page_number}`
-                : 'Page not specified';
-
-        const excerpt =
-            source.excerpt
-            || 'No excerpt is available.';
-
-        card.innerHTML = `
-            <div class="source-card-heading">
-                <div>
-                    <p class="source-document-label">
-                        Supporting document ${index + 1}
-                    </p>
-
-                    <h4></h4>
-                </div>
-
-                <span class="source-page"></span>
-            </div>
-
-            <p class="source-section-name"></p>
-
-            <div class="source-excerpt"></div>
-
-            <button
-                type="button"
-                class="source-button"
-                aria-expanded="false"
-            >
-                Read full section
-            </button>
-        `;
-
-        card.querySelector('h4').textContent =
-            documentName;
-
-        card.querySelector('.source-page').textContent =
-            pageNumber;
-
-        card.querySelector('.source-section-name').textContent =
-            sectionTitle;
-
-        const excerptElement =
-            card.querySelector('.source-excerpt');
-
-        excerptElement.textContent = excerpt;
-
-        const button =
-            card.querySelector('.source-button');
-
-        button.addEventListener('click', () => {
-            const expanded =
-                card.classList.toggle('is-expanded');
-
-            button.setAttribute(
-                'aria-expanded',
-                expanded ? 'true' : 'false'
+    supportingSources.innerHTML = sources
+        .map((source, index) => {
+            const documentName = cleanDocumentName(
+                source.document_name
             );
 
-            button.textContent =
-                expanded
-                    ? 'Show less'
-                    : 'Read full section';
-        });
+            const sectionTitle = findSectionTitle(source);
+            const pageLabel = findPageLabel(source);
+            const excerpt = cleanExcerpt(source.excerpt);
 
-        supportingSources.appendChild(card);
-    });
+            return `
+                <article class="supporting-source-card">
+                    <div class="source-card-heading">
+                        <div>
+                            <p class="source-document-label">
+                                Supporting document ${index + 1}
+                            </p>
+
+                            <h4>${escapeHtml(documentName)}</h4>
+                        </div>
+
+                        ${
+                            pageLabel
+                                ? `
+                                    <span class="source-page">
+                                        ${escapeHtml(pageLabel)}
+                                    </span>
+                                `
+                                : ''
+                        }
+                    </div>
+
+                    <p class="source-section-name">
+                        ${escapeHtml(sectionTitle)}
+                    </p>
+
+                    <div class="source-excerpt">
+                        ${escapeHtml(excerpt)}
+                    </div>
+
+                    <button
+                        type="button"
+                        class="source-button"
+                        aria-expanded="false"
+                    >
+                        Read full section
+                    </button>
+                </article>
+            `;
+        })
+        .join('');
+
+    supportingSources
+        .querySelectorAll('.supporting-source-card')
+        .forEach((card) => {
+            const button = card.querySelector('.source-button');
+
+            button.addEventListener('click', () => {
+                const expanded =
+                    card.classList.toggle('is-expanded');
+
+                button.setAttribute(
+                    'aria-expanded',
+                    expanded ? 'true' : 'false'
+                );
+
+                button.textContent =
+                    expanded
+                        ? 'Show less'
+                        : 'Read full section';
+            });
+        });
 }
 
     form.addEventListener('submit', async (event) => {
