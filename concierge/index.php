@@ -186,24 +186,20 @@ $title = 'Document Concierge';
 
                         <div class="answer-section">
 
-                            <p class="answer-section-title">Plain English</p>
+                      
 
-                            <p id="answer-text"></p>
+    <p class="answer-section-title">
+        Supporting Documents
+    </p>
 
-                        </div>
+    <div
+        class="supporting-sources"
+        id="supporting-sources"
+    ></div>
 
-                        <div class="answer-section source-section">
+</div>     <p class="answer-section-title">Plain English</p>
 
-                            <p class="answer-section-title">Source</p>
-
-                            <p id="answer-source"></p>
-
-                            <button type="button" class="source-button">
-                                View original section
-                            </button>
-
-                        </div>
-
+                
                     </div>
 
                 </article>
@@ -323,7 +319,9 @@ $title = 'Document Concierge';
 
     const answerTitle = document.getElementById('answer-title');
     const answerText = document.getElementById('answer-text');
-    const answerSource = document.getElementById('answer-source');
+    const supportingSources = document.getElementById(
+    'supporting-sources'
+);
     const sourceStrength = document.getElementById('source-strength');
 
     const suggestionButtons = document.querySelectorAll(
@@ -338,6 +336,103 @@ $title = 'Document Concierge';
             question.focus();
         });
     });
+
+     function renderSources(sources) {
+    supportingSources.innerHTML = '';
+
+    if (!Array.isArray(sources) || sources.length === 0) {
+        supportingSources.innerHTML = `
+            <div class="source-empty">
+                No supporting document section was linked to this answer.
+            </div>
+        `;
+
+        return;
+    }
+
+    sources.forEach((source, index) => {
+        const card = document.createElement('article');
+
+        card.className = 'supporting-source-card';
+
+        const documentName =
+            source.document_name
+            || 'Property Document';
+
+        const sectionTitle =
+            source.section_title
+            || 'Supporting section';
+
+        const pageNumber =
+            source.page_number
+                ? `Page ${source.page_number}`
+                : 'Page not specified';
+
+        const excerpt =
+            source.excerpt
+            || 'No excerpt is available.';
+
+        card.innerHTML = `
+            <div class="source-card-heading">
+                <div>
+                    <p class="source-document-label">
+                        Supporting document ${index + 1}
+                    </p>
+
+                    <h4></h4>
+                </div>
+
+                <span class="source-page"></span>
+            </div>
+
+            <p class="source-section-name"></p>
+
+            <div class="source-excerpt"></div>
+
+            <button
+                type="button"
+                class="source-button"
+                aria-expanded="false"
+            >
+                Read full section
+            </button>
+        `;
+
+        card.querySelector('h4').textContent =
+            documentName;
+
+        card.querySelector('.source-page').textContent =
+            pageNumber;
+
+        card.querySelector('.source-section-name').textContent =
+            sectionTitle;
+
+        const excerptElement =
+            card.querySelector('.source-excerpt');
+
+        excerptElement.textContent = excerpt;
+
+        const button =
+            card.querySelector('.source-button');
+
+        button.addEventListener('click', () => {
+            const expanded =
+                card.classList.toggle('is-expanded');
+
+            button.setAttribute(
+                'aria-expanded',
+                expanded ? 'true' : 'false'
+            );
+
+            button.textContent =
+                expanded
+                    ? 'Show less'
+                    : 'Read full section';
+        });
+
+        supportingSources.appendChild(card);
+    });
+}
 
     form.addEventListener('submit', async (event) => {
         event.preventDefault();
@@ -382,9 +477,7 @@ $title = 'Document Concierge';
                 result.answer
                 || 'No answer was returned.';
 
-            answerSource.textContent =
-                result.source
-                || 'No specific source was identified.';
+            renderSources(result.sources);
 
             sourceStrength.textContent =
                 result.strength
@@ -409,8 +502,11 @@ $title = 'Document Concierge';
                     ? error.message
                     : 'An unexpected error occurred.';
 
-            answerSource.textContent =
-                'Please try again or check the server log.';
+            supportingSources.innerHTML = `
+    <div class="source-empty">
+        Please try again or check the server log.
+    </div>
+`;
 
             sourceStrength.textContent = 'Unavailable';
 

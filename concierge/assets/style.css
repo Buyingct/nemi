@@ -893,4 +893,100 @@ textarea {
         animation-iteration-count: 1 !important;
         transition-duration: 0.01ms !important;
     }
+
+
+}
+
+.supporting-sources {
+    display: grid;
+    gap: 16px;
+}
+
+.supporting-source-card {
+    padding: 20px;
+    border: 1px solid rgba(132, 107, 66, 0.18);
+    border-radius: 18px;
+    background: rgba(255, 255, 255, 0.48);
+}
+
+.source-card-heading {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 20px;
+    margin-bottom: 12px;
+}
+
+.source-document-label {
+    margin: 0 0 6px;
+    color: #9b7740;
+    font-size: 0.68rem;
+    font-weight: 700;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+}
+
+.supporting-source-card h4 {
+    margin: 0;
+    color: #25231f;
+    font-family: Georgia, "Times New Roman", serif;
+    font-size: 1.15rem;
+    font-weight: 500;
+}
+
+.source-page {
+    flex-shrink: 0;
+    padding: 7px 10px;
+    border: 1px solid rgba(132, 107, 66, 0.18);
+    border-radius: 999px;
+    color: #8b6b3c;
+    font-size: 0.72rem;
+}
+
+.source-section-name {
+    margin: 0 0 14px;
+    color: #514c44;
+    font-size: 0.9rem;
+    font-weight: 600;
+}
+
+.source-excerpt {
+    position: relative;
+    max-height: 110px;
+    overflow: hidden;
+    color: #666057;
+    font-size: 0.92rem;
+    line-height: 1.7;
+    white-space: pre-line;
+}
+
+.supporting-source-card:not(.is-expanded) .source-excerpt::after {
+    content: "";
+    position: absolute;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    height: 42px;
+    background: linear-gradient(
+        to bottom,
+        rgba(255, 255, 255, 0),
+        rgba(250, 248, 243, 0.96)
+    );
+}
+
+.supporting-source-card.is-expanded .source-excerpt {
+    max-height: none;
+}
+
+.source-button {
+    margin-top: 16px;
+}
+
+.source-empty {
+    padding: 18px;
+    border: 1px dashed rgba(132, 107, 66, 0.25);
+    border-radius: 14px;
+    color: #777067;
+    font-size: 0.9rem;
+    line-height: 1.6;
 }
