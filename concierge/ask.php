@@ -123,15 +123,16 @@ try {
         );
 
         JsonResponse::send(200, [
-            'success' => true,
-            'title' => 'Approved answer',
-            'answer' => (string) $approvedAnswer['answer_text'],
-            'source' => 'Rocha Circle approved answer library',
-            'strength' => (
-                (string) ($approvedAnswer['source_strength'] ?? '')
-                ?: 'Approved'
-            ),
-        ]);
+    'success' => true,
+    'title' => 'Approved answer',
+    'answer' => (string) $approvedAnswer['answer_text'],
+    'strength' => (
+        (string) ($approvedAnswer['source_strength'] ?? '')
+        ?: 'Approved'
+    ),
+    'sources' => $approvedAnswer['sources'] ?? [],
+]);
+
     }
 
     /*
@@ -281,19 +282,13 @@ try {
     );
 
     JsonResponse::send(200, [
-        'success' => true,
-        'title' => $generated['title'],
-        'answer' => $generated['answer'],
-        'source' => (
-            count($usedSourceChunks) === 1
-                ? DocumentFormatter::sourceLabel(
-                    $usedSourceChunks[0]
-                )
-                : count($usedSourceChunks)
-                    . ' supporting document sections'
-        ),
-        'strength' => $sourceStrength,
-    ]);
+    'success' => true,
+    'title' => $generated['title'],
+    'answer' => $generated['answer'],
+    'strength' => $sourceStrength,
+    'sources' => $draftAnswer['sources'] ?? [],
+]);
+
 } catch (Throwable $exception) {
     if (
         $questionLogger instanceof QuestionLogger

@@ -39,7 +39,17 @@ final class AnswerLibrary
             ':normalized_question' => $normalizedQuestion,
         ]);
 
-        return $statement->fetch();
+        $answer = $statement->fetch();
+
+        if (!$answer) {
+            return false;
+        }
+
+        $answer['sources'] = $this->findSourcesByAnswerId(
+            (int) $answer['id']
+        );
+
+        return $answer;
     }
 
     /**
@@ -72,7 +82,52 @@ final class AnswerLibrary
             ':normalized_question' => $normalizedQuestion,
         ]);
 
-        return $statement->fetch();
+        $answer = $statement->fetch();
+
+        if (!$answer) {
+            return false;
+        }
+
+        $answer['sources'] = $this->findSourcesByAnswerId(
+            (int) $answer['id']
+        );
+
+        return $answer;
+    }
+
+    /**
+     * Returns the document sources supporting one saved answer.
+     *
+     * @return array<int, array<string, mixed>>
+     */
+    public function findSourcesByAnswerId(
+        int $answerId
+    ): array {
+        $statement = $this->database->prepare(
+            '
+            SELECT
+                id,
+                knowledge_id,
+                document_id,
+                document_name,
+                section_title,
+                page_number,
+                excerpt
+            FROM answer_sources
+            WHERE answer_id = :answer_id
+            ORDER BY id ASC
+            '
+        );
+
+        $statement->execute([
+            ':answer_id' => $answerId,
+        ]);
+
+        $sources = $statement->fetchAll();
+
+        return is_array($sources)
+            ? $sources
+            : [];
     }
 
     /**
@@ -171,10 +226,16 @@ final class AnswerLibrary
                             : null
                     ),
                     ':document_name' => (string) (
-                        $chunk['original_name'] ?? 'Unknown document'
+                        $chunk['original_name']
+                        ?? 'Unknown document'
                     ),
                     ':section_title' => (
-                        trim((string) ($chunk['section_title'] ?? '')) !== ''
+                        trim(
+                            (string) (
+                                $chunk['section_title']
+                                ?? ''
+                            )
+                        ) !== ''
                             ? (string) $chunk['section_title']
                             : null
                     ),
@@ -184,7 +245,10 @@ final class AnswerLibrary
                             ? (int) $chunk['page_number']
                             : null
                     ),
-                    ':excerpt' => (string) ($chunk['content'] ?? ''),
+                    ':excerpt' => (string) (
+                        $chunk['content']
+                        ?? ''
+                    ),
                 ]);
             }
 
@@ -197,6 +261,9 @@ final class AnswerLibrary
                 'normalized_question' => $normalizedQuestion,
                 'answer_text' => $answerText,
                 'source_strength' => $sourceStrength,
+                'sources' => $this->findSourcesByAnswerId(
+                    $answerId
+                ),
             ];
         } catch (Throwable $exception) {
             if ($this->database->inTransaction()) {
