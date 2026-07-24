@@ -214,7 +214,7 @@ try {
     );
 
     $openAI = OpenAIService::fromEnvFile(
-    __DIR__ . '/config/.env.php'
+    dirname(__DIR__) . '/config/.env.php'
 );
 
     $generated = $openAI->createGroundedDraft(
