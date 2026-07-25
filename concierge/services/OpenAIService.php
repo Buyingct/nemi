@@ -38,16 +38,21 @@ final class OpenAIService
     );
 }
 
-    /**
-     * @param array<int, array<string, mixed>> $rankedChunks
-     *
-     * @return array{
-     *     supported: bool,
-     *     title: string,
-     *     answer: string,
-     *     source_numbers: array<int, int>
-     * }
-     */
+      
+     /**
+ * @param array<int, array<string, mixed>> $rankedChunks
+ *
+ * @return array{
+ *     supported: bool,
+ *     title: string,
+ *     answer: string,
+ *     sources: array<int, array{
+ *         source_number: int,
+ *         excerpt: string
+ *     }>
+ * }
+ */
+
     public function createGroundedDraft(
         string $question,
         array $rankedChunks
@@ -88,7 +93,12 @@ final class OpenAIService
             'If supported is true, explain the answer in concise plain English.',
             'Preserve all qualifications, exceptions, approval requirements,',
             'time limits, and board discretion stated in the source.',
+            'For every source used, return the exact supporting sentence or paragraph.',
+            'Do not return surrounding sections that are unrelated to the answer.',
+            'The excerpt must be copied from the supplied source text.',
+            'Each source should represent one specific supporting authority.',
             'Do not provide legal advice.',
+
         ]);
 
         $input = implode("\n\n", [
@@ -122,18 +132,32 @@ final class OpenAIService
                             'answer' => [
                                 'type' => 'string',
                             ],
-                            'source_numbers' => [
-                                'type' => 'array',
-                                'items' => [
-                                    'type' => 'integer',
-                                ],
-                            ],
+                            'sources' => [
+    'type' => 'array',
+    'items' => [
+        'type' => 'object',
+        'properties' => [
+            'source_number' => [
+                'type' => 'integer',
+            ],
+            'excerpt' => [
+                'type' => 'string',
+            ],
+        ],
+        'required' => [
+            'source_number',
+            'excerpt',
+        ],
+        'additionalProperties' => false,
+    ],
+],
+
                         ],
                         'required' => [
                             'supported',
                             'title',
                             'answer',
-                            'source_numbers',
+                            'sources',
                         ],
                         'additionalProperties' => false,
                     ],
@@ -158,28 +182,58 @@ final class OpenAIService
         $supported = (bool) ($decoded['supported'] ?? false);
         $title = trim((string) ($decoded['title'] ?? ''));
         $answer = trim((string) ($decoded['answer'] ?? ''));
-        $sourceNumbers = $decoded['source_numbers'] ?? [];
+        $returnedSources = $decoded['sources'] ?? [];
 
-        if (!is_array($sourceNumbers)) {
-            $sourceNumbers = [];
-        }
+if (!is_array($returnedSources)) {
+    $returnedSources = [];
+}
 
-        $cleanSourceNumbers = [];
+$cleanSources = [];
+$seenSources = [];
 
-        foreach ($sourceNumbers as $number) {
-            $number = (int) $number;
+foreach ($returnedSources as $returnedSource) {
+    if (!is_array($returnedSource)) {
+        continue;
+    }
 
-            if (
-                $number >= 1
-                && $number <= count($rankedChunks)
-            ) {
-                $cleanSourceNumbers[] = $number;
-            }
-        }
+    $sourceNumber = (int) (
+        $returnedSource['source_number']
+        ?? 0
+    );
 
-        $cleanSourceNumbers = array_values(
-            array_unique($cleanSourceNumbers)
-        );
+    $excerpt = trim(
+        (string) (
+            $returnedSource['excerpt']
+            ?? ''
+        )
+    );
+
+    if (
+        $sourceNumber < 1
+        || $sourceNumber > count($rankedChunks)
+        || $excerpt === ''
+    ) {
+        continue;
+    }
+
+    $deduplicationKey = $sourceNumber
+        . ':'
+        . mb_strtolower($excerpt);
+
+    if (isset($seenSources[$deduplicationKey])) {
+        continue;
+    }
+
+    $seenSources[$deduplicationKey] = true;
+
+    $cleanSources[] = [
+        'source_number' => $sourceNumber,
+        'excerpt' => $excerpt,
+    ];
+}
+
+
+
 
         if ($supported && $answer === '') {
             throw new RuntimeException(
@@ -195,7 +249,7 @@ final class OpenAIService
                     : 'Document answer'
             ),
             'answer' => $answer,
-            'source_numbers' => $cleanSourceNumbers,
+            'sources' => $cleanSources,
         ];
     }
 

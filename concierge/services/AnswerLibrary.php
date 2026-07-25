@@ -212,45 +212,68 @@ final class AnswerLibrary
                 '
             );
 
-            foreach ($sourceChunks as $chunk) {
-                $sourceStatement->execute([
-                    ':answer_id' => $answerId,
-                    ':knowledge_id' => (
-                        isset($chunk['id'])
-                            ? (int) $chunk['id']
-                            : null
-                    ),
-                    ':document_id' => (
-                        isset($chunk['document_id'])
-                            ? (int) $chunk['document_id']
-                            : null
-                    ),
-                    ':document_name' => (string) (
-                        $chunk['original_name']
-                        ?? 'Unknown document'
-                    ),
-                    ':section_title' => (
-                        trim(
-                            (string) (
-                                $chunk['section_title']
-                                ?? ''
-                            )
-                        ) !== ''
-                            ? (string) $chunk['section_title']
-                            : null
-                    ),
-                    ':page_number' => (
-                        isset($chunk['page_number'])
-                        && (int) $chunk['page_number'] > 0
-                            ? (int) $chunk['page_number']
-                            : null
-                    ),
-                    ':excerpt' => (string) (
-                        $chunk['content']
-                        ?? ''
-                    ),
-                ]);
-            }
+            $seenSources = [];
+
+foreach ($sourceChunks as $chunk) {
+    $knowledgeId = isset($chunk['id'])
+        ? (int) $chunk['id']
+        : null;
+
+    $excerpt = trim(
+        (string) (
+            $chunk['precise_excerpt']
+            ?? $chunk['content']
+            ?? ''
+        )
+    );
+
+    if ($excerpt === '') {
+        continue;
+    }
+
+    $sourceKey = (
+        (string) ($knowledgeId ?? 'none')
+        . ':'
+        . mb_strtolower($excerpt)
+    );
+
+    if (isset($seenSources[$sourceKey])) {
+        continue;
+    }
+
+    $seenSources[$sourceKey] = true;
+
+    $sourceStatement->execute([
+        ':answer_id' => $answerId,
+        ':knowledge_id' => $knowledgeId,
+        ':document_id' => (
+            isset($chunk['document_id'])
+                ? (int) $chunk['document_id']
+                : null
+        ),
+        ':document_name' => (string) (
+            $chunk['original_name']
+            ?? 'Unknown document'
+        ),
+        ':section_title' => (
+            trim(
+                (string) (
+                    $chunk['section_title']
+                    ?? ''
+                )
+            ) !== ''
+                ? (string) $chunk['section_title']
+                : null
+        ),
+        ':page_number' => (
+            isset($chunk['page_number'])
+            && (int) $chunk['page_number'] > 0
+                ? (int) $chunk['page_number']
+                : null
+        ),
+        ':excerpt' => $excerpt,
+    ]);
+}
 
             $this->database->commit();
 

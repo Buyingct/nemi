@@ -248,17 +248,46 @@ try {
 
     $usedSourceChunks = [];
 
-    foreach ($generated['source_numbers'] as $sourceNumber) {
-        $index = $sourceNumber - 1;
+foreach ($generated['sources'] as $generatedSource) {
+    $sourceNumber = (int) (
+        $generatedSource['source_number']
+        ?? 0
+    );
 
-        if (isset($topRankedChunks[$index]['chunk'])) {
-            $usedSourceChunks[] = $topRankedChunks[$index]['chunk'];
-        }
+    $index = $sourceNumber - 1;
+
+    if (!isset($topRankedChunks[$index]['chunk'])) {
+        continue;
     }
 
-    if ($usedSourceChunks === []) {
-        $usedSourceChunks[] = $topRankedChunks[0]['chunk'];
+    $chunk = $topRankedChunks[$index]['chunk'];
+
+    $chunk['precise_excerpt'] = trim(
+        (string) (
+            $generatedSource['excerpt']
+            ?? ''
+        )
+    );
+
+    if ($chunk['precise_excerpt'] === '') {
+        continue;
     }
+
+    $usedSourceChunks[] = $chunk;
+}
+
+if ($usedSourceChunks === []) {
+    $fallbackChunk = $topRankedChunks[0]['chunk'];
+
+    $fallbackChunk['precise_excerpt'] = trim(
+        (string) (
+            $fallbackChunk['content']
+            ?? ''
+        )
+    );
+
+    $usedSourceChunks[] = $fallbackChunk;
+}
 
     $bestScore = (int) $topRankedChunks[0]['score'];
     $sourceStrength = DocumentFormatter::relevanceLabel(
