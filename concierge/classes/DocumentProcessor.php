@@ -317,79 +317,105 @@ final class DocumentProcessor
     }
 
     private function createChunks(
-        string $text,
-        bool $preservePdfPages,
-        bool $isMarkdown = false
-    ): array {
-        $pages = $preservePdfPages ? preg_split('/\f/', $text) : [$text];
+    string $text,
+    bool $preservePdfPages,
+    bool $isMarkdown = false
+): array {
+    $pages = $preservePdfPages
+        ? preg_split('/\f/', $text)
+        : [$text];
 
-        if (!is_array($pages)) {
-            $pages = [$text];
+    if (!is_array($pages)) {
+        $pages = [$text];
+    }
+
+    $chunks = [];
+    $maximumChunkLength = 3500;
+
+    foreach ($pages as $pageIndex => $pageText) {
+        $pageText = trim($pageText);
+
+        if ($pageText === '') {
+            continue;
         }
 
-        $chunks = [];
-        $maximumChunkLength = 3500;
+        $pageNumber = $preservePdfPages
+            ? $pageIndex + 1
+            : null;
 
-        foreach ($pages as $pageIndex => $pageText) {
-            $pageText = trim($pageText);
+        $paragraphs = preg_split(
+            "/\n\s*\n/",
+            $pageText
+        );
 
-            if ($pageText === '') {
+        if (!is_array($paragraphs)) {
+            $paragraphs = [$pageText];
+        }
+
+        $buffer = '';
+        $sectionTitle = null;
+
+        foreach ($paragraphs as $paragraph) {
+            $paragraph = trim($paragraph);
+
+            if ($paragraph === '') {
                 continue;
             }
 
-            $pageNumber = $preservePdfPages ? $pageIndex + 1 : null;
-            $paragraphs = preg_split("/\n\s*\n/", $pageText);
+            /*
+             * Markdown headings:
+             *
+             * # and ## begin primary sections.
+             *
+             * ### through ###### are supporting labels such as
+             * Official Text, Plain English, Common Questions,
+             * Related Sections, Keywords, and AI Topics.
+             *
+             * Supporting labels remain inside the content and do not
+             * replace the governing section title.
+             */
+            if (
+                $isMarkdown
+                && preg_match(
+                    '/^(#{1,6})\s+(.+)$/u',
+                    $paragraph,
+                    $matches
+                )
+            ) {
+                $headingLevel = mb_strlen($matches[1]);
+                $headingText = trim($matches[2]);
 
-            if (!is_array($paragraphs)) {
-                $paragraphs = [$pageText];
-            }
-
-            $buffer = '';
-            $sectionTitle = null;
-
-            foreach ($paragraphs as $paragraph) {
-                $paragraph = trim($paragraph);
-
-                if ($paragraph === '') {
-                    continue;
-                }
-
-                if (
-                    $isMarkdown
-                    && preg_match('/^#{1,6}\s+(.+)$/u', $paragraph, $matches)
-                ) {
+                if ($headingLevel <= 2) {
                     if ($buffer !== '') {
                         $chunks[] = [
                             'section_title' => $sectionTitle,
                             'page_number' => $pageNumber,
                             'content' => trim($buffer),
                         ];
+
                         $buffer = '';
                     }
 
-                    $sectionTitle = mb_substr(trim($matches[1]), 0, 250);
+                    $sectionTitle = mb_substr(
+                        $headingText,
+                        0,
+                        250
+                    );
+
                     continue;
                 }
 
-                if ($this->looksLikeHeading($paragraph)) {
-                    if ($buffer !== '') {
-                        $chunks[] = [
-                            'section_title' => $sectionTitle,
-                            'page_number' => $pageNumber,
-                            'content' => trim($buffer),
-                        ];
-                        $buffer = '';
-                    }
-
-                    $sectionTitle = mb_substr($paragraph, 0, 250);
-                    continue;
-                }
-
+                /*
+                 * Keep lower-level Markdown headings in the content.
+                 */
                 $candidate = $buffer === ''
                     ? $paragraph
                     : $buffer . "\n\n" . $paragraph;
 
-                if (mb_strlen($candidate) > $maximumChunkLength && $buffer !== '') {
+                if (
+                    mb_strlen($candidate) > $maximumChunkLength
+                    && $buffer !== ''
+                ) {
                     $chunks[] = [
                         'section_title' => $sectionTitle,
                         'page_number' => $pageNumber,
@@ -401,24 +427,76 @@ final class DocumentProcessor
                 }
 
                 $buffer = $candidate;
+                continue;
             }
 
-            if ($buffer !== '') {
+            /*
+             * Heading detection is used mainly for PDFs and TXT files.
+             * Markdown headings have already been handled above.
+             */
+            if (
+                !$isMarkdown
+                && $this->looksLikeHeading($paragraph)
+            ) {
+                if ($buffer !== '') {
+                    $chunks[] = [
+                        'section_title' => $sectionTitle,
+                        'page_number' => $pageNumber,
+                        'content' => trim($buffer),
+                    ];
+
+                    $buffer = '';
+                }
+
+                $sectionTitle = mb_substr(
+                    $paragraph,
+                    0,
+                    250
+                );
+
+                continue;
+            }
+
+            $candidate = $buffer === ''
+                ? $paragraph
+                : $buffer . "\n\n" . $paragraph;
+
+            if (
+                mb_strlen($candidate) > $maximumChunkLength
+                && $buffer !== ''
+            ) {
                 $chunks[] = [
                     'section_title' => $sectionTitle,
                     'page_number' => $pageNumber,
                     'content' => trim($buffer),
                 ];
+
+                $buffer = $paragraph;
+                continue;
             }
+
+            $buffer = $candidate;
         }
 
-        return array_values(
-            array_filter(
-                $chunks,
-                static fn (array $chunk): bool => mb_strlen($chunk['content']) >= 40
-            )
-        );
+        if ($buffer !== '') {
+            $chunks[] = [
+                'section_title' => $sectionTitle,
+                'page_number' => $pageNumber,
+                'content' => trim($buffer),
+            ];
+        }
     }
+
+    return array_values(
+        array_filter(
+            $chunks,
+            static fn(array $chunk): bool =>
+                mb_strlen($chunk['content']) >= 40
+        )
+    );
+}
+
+
 
     private function looksLikeHeading(string $text): bool
     {

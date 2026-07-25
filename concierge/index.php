@@ -406,7 +406,9 @@ function findPageLabel(source) {
 }
 
 function cleanExcerpt(value) {
-    return String(value || '')
+    let text = String(value || '');
+
+    text = text
         .replaceAll('\\*', '*')
         .replaceAll('\\#', '#')
         .replaceAll('\\---', '---')
@@ -414,8 +416,21 @@ function cleanExcerpt(value) {
         .replace(/\*\*/g, '')
         .replace(/`/g, '')
         .replace(/^---$/gm, '')
+
+        // Remove markdown table separator rows
+        .replace(/^\|?[\s:-]+\|[\s|:-]*$/gm, '')
+
+        // Remove leading/trailing pipes
+        .replace(/^\|\s?/gm, '')
+        .replace(/\s?\|$/gm, '')
+
+        // Convert remaining pipes into bullets
+        .replace(/\s+\|\s+/g, ' • ')
+
         .replace(/\n{3,}/g, '\n\n')
         .trim();
+
+    return text;
 }
 
 function renderSources(sources) {
