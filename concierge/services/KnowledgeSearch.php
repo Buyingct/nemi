@@ -37,11 +37,16 @@ final class KnowledgeSearch
      * @return array<int, array{score:int,chunk:array<string,mixed>}>
      */
     public function rankChunks(
-        array $chunks,
-        array $keywords,
-        string $question
-    ): array {
-        $ranked = [];
+    array $chunks,
+    array $keywords,
+    string $question
+): array {
+    $keywords = $this->expandKeywords(
+        $keywords,
+        $question
+    );
+
+    $ranked = [];
 
         foreach ($chunks as $chunk) {
             $score = $this->scoreChunk(
@@ -274,9 +279,238 @@ if ($isLandscapingQuestion) {
         }
     }
 }
+$isShortTermRentalQuestion =
+    str_contains($normalizedQuestion, 'short term')
+    || str_contains($normalizedQuestion, 'airbnb')
+    || str_contains($normalizedQuestion, 'vacation rental')
+    || str_contains($normalizedQuestion, 'transient rental');
 
-        return max($score, 0);
+if ($isShortTermRentalQuestion) {
+    foreach (
+        [
+            'short term rental',
+            'short term purposes',
+            'transient',
+            'hotel',
+            'motel',
+        ] as $phrase
+    ) {
+        if (
+            str_contains($content, $phrase)
+            || str_contains($sectionTitle, $phrase)
+        ) {
+            $score += 35;
+        }
     }
+}
+
+$isFeeQuestion =
+    str_contains($normalizedQuestion, 'hoa fee')
+    || str_contains($normalizedQuestion, 'hoa fees')
+    || str_contains($normalizedQuestion, 'monthly fee')
+    || str_contains($normalizedQuestion, 'monthly fees')
+    || str_contains($normalizedQuestion, 'condo fee')
+    || str_contains($normalizedQuestion, 'condo fees')
+    || str_contains($normalizedQuestion, 'common expense')
+    || str_contains($normalizedQuestion, 'assessment');
+
+if ($isFeeQuestion) {
+    foreach (
+        [
+            'common expense assessment',
+            'estimated monthly common expense',
+            'monthly common expense',
+            'assessment per unit',
+        ] as $phrase
+    ) {
+        if (
+            str_contains($content, $phrase)
+            || str_contains($sectionTitle, $phrase)
+        ) {
+            $score += 40;
+        }
+    }
+
+    if (
+        preg_match(
+            '/\$\s*\d+(?:,\d{3})*(?:\.\d{2})?/u',
+            $content
+        ) === 1
+    ) {
+        $score += 20;
+    }
+}
+
+$isWindowDoorQuestion =
+    str_contains($normalizedQuestion, 'window')
+    || str_contains($normalizedQuestion, 'windows')
+    || str_contains($normalizedQuestion, 'door')
+    || str_contains($normalizedQuestion, 'doors');
+
+if ($isWindowDoorQuestion) {
+    foreach (
+        [
+            'window',
+            'windows',
+            'door',
+            'doors',
+        ] as $phrase
+    ) {
+        if (
+            str_contains($content, $phrase)
+            || str_contains($sectionTitle, $phrase)
+        ) {
+            $score += 28;
+        }
+    }
+
+    foreach (
+        [
+            'maintain',
+            'maintenance',
+            'repair',
+            'replacement',
+            'responsible',
+            'responsibility',
+        ] as $phrase
+    ) {
+        if (
+            str_contains($content, $phrase)
+            || str_contains($sectionTitle, $phrase)
+        ) {
+            $score += 24;
+        }
+    }
+}
+        
+return max($score, 0);
+    }
+
+     /**
+ * Adds common owner-language synonyms to the search terms.
+ *
+ * @param array<int, string> $keywords
+ * @return array<int, string>
+ */
+private function expandKeywords(
+    array $keywords,
+    string $question
+): array {
+    $normalizedQuestion = $this->normalizeSearchText(
+        $question
+    );
+
+    $expandedKeywords = $keywords;
+
+    $addKeywords = static function (
+        array &$target,
+        array $newKeywords
+    ): void {
+        foreach ($newKeywords as $keyword) {
+            if (!in_array($keyword, $target, true)) {
+                $target[] = $keyword;
+            }
+        }
+    };
+
+    $isRentalQuestion =
+        str_contains($normalizedQuestion, 'short term')
+        || str_contains($normalizedQuestion, 'airbnb')
+        || str_contains($normalizedQuestion, 'vacation rental')
+        || str_contains($normalizedQuestion, 'temporary rental')
+        || str_contains($normalizedQuestion, 'transient rental');
+
+    if ($isRentalQuestion) {
+        $addKeywords(
+            $expandedKeywords,
+            [
+                'short term rental',
+                'short term',
+                'transient',
+                'hotel',
+                'motel',
+                'rental',
+                'lease',
+            ]
+        );
+    }
+
+    $isFeeQuestion =
+        str_contains($normalizedQuestion, 'hoa fee')
+        || str_contains($normalizedQuestion, 'hoa fees')
+        || str_contains($normalizedQuestion, 'monthly fee')
+        || str_contains($normalizedQuestion, 'monthly fees')
+        || str_contains($normalizedQuestion, 'condo fee')
+        || str_contains($normalizedQuestion, 'condo fees')
+        || str_contains($normalizedQuestion, 'common charge')
+        || str_contains($normalizedQuestion, 'common charges')
+        || str_contains($normalizedQuestion, 'assessment');
+
+    if ($isFeeQuestion) {
+        $addKeywords(
+            $expandedKeywords,
+            [
+                'common expense assessment',
+                'common expense',
+                'assessment',
+                'monthly',
+                'budget',
+                'per unit',
+            ]
+        );
+    }
+
+    $isHomeBusinessQuestion =
+        str_contains($normalizedQuestion, 'business from home')
+        || str_contains($normalizedQuestion, 'home business')
+        || str_contains($normalizedQuestion, 'work from home')
+        || str_contains($normalizedQuestion, 'operate a business')
+        || str_contains($normalizedQuestion, 'home occupation');
+
+    if ($isHomeBusinessQuestion) {
+        $addKeywords(
+            $expandedKeywords,
+            [
+                'home occupation',
+                'home occupations',
+                'commercial',
+                'professional use',
+                'residential use',
+                'employees',
+                'visits from the public',
+            ]
+        );
+    }
+
+    $isWindowDoorQuestion =
+        str_contains($normalizedQuestion, 'window')
+        || str_contains($normalizedQuestion, 'windows')
+        || str_contains($normalizedQuestion, 'door')
+        || str_contains($normalizedQuestion, 'doors');
+
+    if ($isWindowDoorQuestion) {
+        $addKeywords(
+            $expandedKeywords,
+            [
+                'window',
+                'windows',
+                'door',
+                'doors',
+                'maintenance',
+                'maintain',
+                'repair',
+                'replacement',
+                'unit owner',
+                'association',
+                'limited common element',
+            ]
+        );
+    }
+
+    return array_values(
+        array_unique($expandedKeywords)
+    );
+}
 
     private function normalizeSearchText(
         string $text
