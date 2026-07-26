@@ -321,6 +321,159 @@ final class DocumentProcessor
     bool $preservePdfPages,
     bool $isMarkdown = false
 ): array {
+    /*
+     * Structured legal Markdown:
+     *
+     * One numbered legal section becomes one knowledge chunk.
+     *
+     * Recognized examples:
+     *
+     * ## Section 8.2 – Formulas for the Allocation of Interests
+     *
+     * Section 8.2 – Formulas for the Allocation of Interests
+     *
+     * Supporting headings such as:
+     *
+     * ### Official Text
+     * ### Plain English
+     * ### Common Questions
+     *
+     * remain inside the section content.
+     */
+    if (
+        $isMarkdown
+        && preg_match(
+            '/^(?:##\s+)?Section\s+\d+(?:\.\d+)+\s*[–—-]\s*.+$/imu',
+            $text
+        )
+    ) {
+        $normalizedText = str_replace(
+            ["\r\n", "\r"],
+            "\n",
+            $text
+        );
+
+        $lines = explode("\n", $normalizedText);
+
+        $chunks = [];
+        $sectionTitle = null;
+        $sectionLines = [];
+
+        foreach ($lines as $line) {
+            $trimmedLine = trim($line);
+
+            /*
+             * A numbered section heading begins a new legal section.
+             *
+             * The Markdown marks are optional so the parser also catches
+             * a section heading if "##" was accidentally omitted.
+             */
+            if (
+                preg_match(
+                    '/^(?:##\s+)?(Section\s+\d+(?:\.\d+)+\s*[–—-]\s*.+)$/iu',
+                    $trimmedLine,
+                    $matches
+                )
+            ) {
+                /*
+                 * Save the previous complete section before beginning
+                 * the new one.
+                 */
+                if (
+                    $sectionTitle !== null
+                    && trim(implode("\n", $sectionLines)) !== ''
+                ) {
+                    $chunks[] = [
+                        'section_title' => $sectionTitle,
+                        'page_number' => null,
+                        'content' => trim(
+                            implode("\n", $sectionLines)
+                        ),
+                    ];
+                }
+
+                $sectionTitle = mb_substr(
+                    trim($matches[1]),
+                    0,
+                    250
+                );
+
+                $sectionLines = [];
+
+                /*
+                 * Do not put the section heading inside content.
+                 *
+                 * It is already stored in section_title, so this prevents
+                 * the title from appearing twice in the source card.
+                 */
+                continue;
+            }
+
+            /*
+             * Ignore material before the first numbered section.
+             *
+             * This prevents the document title, table of contents,
+             * document-wide authority note, and similar front matter
+             * from being attached to the first legal section.
+             */
+            if ($sectionTitle === null) {
+                continue;
+            }
+
+            /*
+             * Article headings mark document organization, but they do not
+             * begin a separate knowledge chunk.
+             *
+             * If an ARTICLE heading appears after a section has already
+             * begun, it normally belongs between sections. We omit it from
+             * the prior section so it cannot create section bleeding.
+             */
+            if (
+                preg_match(
+                    '/^(?:#{1,2}\s+)?ARTICLE\s+\d+\b.*$/iu',
+                    $trimmedLine
+                )
+            ) {
+                continue;
+            }
+
+            $sectionLines[] = $line;
+        }
+
+        /*
+         * Save the final legal section.
+         */
+        if (
+            $sectionTitle !== null
+            && trim(implode("\n", $sectionLines)) !== ''
+        ) {
+            $chunks[] = [
+                'section_title' => $sectionTitle,
+                'page_number' => null,
+                'content' => trim(
+                    implode("\n", $sectionLines)
+                ),
+            ];
+        }
+
+        return array_values(
+            array_filter(
+                $chunks,
+                static fn(array $chunk): bool =>
+                    mb_strlen(
+                        trim((string) $chunk['content'])
+                    ) >= 40
+            )
+        );
+    }
+
+    /*
+     * Generic processing for:
+     *
+     * - PDF files
+     * - TXT files
+     * - Markdown files without numbered legal sections
+     */
     $pages = $preservePdfPages
         ? preg_split('/\f/', $text)
         : [$text];
@@ -363,16 +516,10 @@ final class DocumentProcessor
             }
 
             /*
-             * Markdown headings:
+             * Generic Markdown headings:
              *
              * # and ## begin primary sections.
-             *
-             * ### through ###### are supporting labels such as
-             * Official Text, Plain English, Common Questions,
-             * Related Sections, Keywords, and AI Topics.
-             *
-             * Supporting labels remain inside the content and do not
-             * replace the governing section title.
+             * Lower-level headings remain inside the content.
              */
             if (
                 $isMarkdown
@@ -405,9 +552,6 @@ final class DocumentProcessor
                     continue;
                 }
 
-                /*
-                 * Keep lower-level Markdown headings in the content.
-                 */
                 $candidate = $buffer === ''
                     ? $paragraph
                     : $buffer . "\n\n" . $paragraph;
@@ -431,8 +575,7 @@ final class DocumentProcessor
             }
 
             /*
-             * Heading detection is used mainly for PDFs and TXT files.
-             * Markdown headings have already been handled above.
+             * Heading detection for PDFs and TXT files.
              */
             if (
                 !$isMarkdown
@@ -491,7 +634,9 @@ final class DocumentProcessor
         array_filter(
             $chunks,
             static fn(array $chunk): bool =>
-                mb_strlen($chunk['content']) >= 40
+                mb_strlen(
+                    trim((string) $chunk['content'])
+                ) >= 40
         )
     );
 }
