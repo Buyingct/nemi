@@ -343,7 +343,7 @@ final class DocumentProcessor
     if (
         $isMarkdown
         && preg_match(
-            '/^(?:##\s+)?Section\s+\d+(?:\.\d+)+\s*[–—-]\s*.+$/imu',
+        '/^(?:#{1,6}\s+)?Section\s+\d+(?:\.\d+)*(?:\s*[–—:-]\s*.*)?$/imu',
             $text
         )
     ) {
@@ -368,13 +368,15 @@ final class DocumentProcessor
              * The Markdown marks are optional so the parser also catches
              * a section heading if "##" was accidentally omitted.
              */
+            
+            
             if (
-                preg_match(
-                    '/^(?:##\s+)?(Section\s+\d+(?:\.\d+)+\s*[–—-]\s*.+)$/iu',
-                    $trimmedLine,
-                    $matches
-                )
-            ) {
+    preg_match(
+        '/^(?:#{1,6}\s+)?(Section\s+\d+(?:\.\d+)*(?:\s*[–—:-]\s*.*)?)$/iu',
+        $trimmedLine,
+        $matches
+    )
+){
                 /*
                  * Save the previous complete section before beginning
                  * the new one.
