@@ -343,7 +343,7 @@ final class DocumentProcessor
     if (
         $isMarkdown
         && preg_match(
-        '/^(?:#{1,6}\s+)?Section\s+\d+(?:\.\d+)*(?:\s*[–—:-]\s*.*)?$/imu',
+        '/^(?:[\\\\]?#{1,6}\s+)?Section\s+\d+(?:\.\d+)*(?:\s*[–—:-]\s*.*)?$/imu',
             $text
         )
     ) {
@@ -372,7 +372,7 @@ final class DocumentProcessor
             
             if (
     preg_match(
-        '/^(?:#{1,6}\s+)?(Section\s+\d+(?:\.\d+)*(?:\s*[–—:-]\s*.*)?)$/iu',
+        '/^(?:[\\\\]?#{1,6}\s+)?(Section\s+\d+(?:\.\d+)*(?:\s*[–—:-]\s*.*)?)$/iu',
         $trimmedLine,
         $matches
     )
