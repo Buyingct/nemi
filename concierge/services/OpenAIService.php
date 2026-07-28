@@ -165,8 +165,13 @@ final class OpenAIService
             ],
             'instructions' => $instructions,
             'input' => $input,
-            'max_output_tokens' => 1600,
+            'max_output_tokens' => 400,
         ];
+
+        file_put_contents(
+    '/tmp/openai_payload.txt',
+    json_encode($payload, JSON_PRETTY_PRINT)
+);
 
         $response = $this->postJson($payload);
         $text = $this->extractOutputText($response);
