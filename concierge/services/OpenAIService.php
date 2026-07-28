@@ -169,8 +169,19 @@ final class OpenAIService
         ];
 
         file_put_contents(
-    '/tmp/openai_payload.txt',
-    json_encode($payload, JSON_PRETTY_PRINT)
+    '/tmp/openai_stats.txt',
+    "Question:\n"
+    . $question
+    . "\n\n"
+    . "Chunks: "
+    . count($rankedChunks)
+    . "\n"
+    . "Input characters: "
+    . strlen($input)
+    . "\n"
+    . "Instructions characters: "
+    . strlen($instructions)
+    . "\n"
 );
 
         $response = $this->postJson($payload);
