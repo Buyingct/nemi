@@ -488,8 +488,8 @@ function renderSources(sources) {
                     <div class="source-card-heading">
                         <div>
                             <p class="source-document-label">
-                                Supporting document ${index + 1}
-                            </p>
+    Official Source
+</p>
 
                             <h4>${escapeHtml(documentName)}</h4>
                         </div>
