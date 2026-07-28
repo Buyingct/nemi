@@ -444,7 +444,34 @@ function renderSources(sources) {
         return;
     }
 
-    supportingSources.innerHTML = sources
+     const groupedSources = Object.values(
+    sources.reduce((groups, source) => {
+        const key = [
+            source.document_name ?? '',
+            findSectionTitle(source)
+        ].join('||');
+
+        if (!groups[key]) {
+            groups[key] = {
+                ...source,
+                excerpts: []
+            };
+        }
+
+        const excerpt = cleanExcerpt(source.excerpt);
+
+        if (
+            excerpt &&
+            !groups[key].excerpts.includes(excerpt)
+        ) {
+            groups[key].excerpts.push(excerpt);
+        }
+
+        return groups;
+    }, {})
+);
+
+    supportingSources.innerHTML = groupedSources
         .map((source, index) => {
             const documentName = cleanDocumentName(
                 source.document_name
@@ -452,7 +479,9 @@ function renderSources(sources) {
 
             const sectionTitle = findSectionTitle(source);
             const pageLabel = findPageLabel(source);
-            const excerpt = cleanExcerpt(source.excerpt);
+            const excerpts = source.excerpts ?? [
+    cleanExcerpt(source.excerpt)
+];
 
             return `
                 <article class="supporting-source-card">
@@ -480,9 +509,15 @@ function renderSources(sources) {
                         ${escapeHtml(sectionTitle)}
                     </p>
 
-                    <div class="source-excerpt">
-                        ${escapeHtml(excerpt)}
-                    </div>
+                    <div class="source-excerpt-list">
+    ${excerpts
+        .map((excerpt) => `
+            <div class="source-excerpt">
+                ${escapeHtml(excerpt)}
+            </div>
+        `)
+        .join('')}
+</div>
 
                     <button
                         type="button"
