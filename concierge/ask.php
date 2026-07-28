@@ -246,47 +246,189 @@ try {
         ]);
     }
 
-    $usedSourceChunks = [];
+     $usedSourceChunks = [];
 
-foreach ($generated['sources'] as $generatedSource) {
-    $sourceNumber = (int) (
-        $generatedSource['source_number']
-        ?? 0
-    );
+/**
+ * Locate an AI-selected excerpt inside the actual retrieved text.
+ *
+ * The returned value comes directly from the document content, ensuring
+ * that altered, repeated, or invented quotations are never stored.
+ */
+$findExactExcerpt = static function (
+    string $content,
+    string $requestedExcerpt
+): ?string {
+    $requestedExcerpt = trim($requestedExcerpt);
 
-    $index = $sourceNumber - 1;
-
-    if (!isset($topRankedChunks[$index]['chunk'])) {
-        continue;
+    if ($content === '' || $requestedExcerpt === '') {
+        return null;
     }
 
-    $chunk = $topRankedChunks[$index]['chunk'];
+    // First try an ordinary exact match.
+    $position = mb_strpos($content, $requestedExcerpt);
 
-    $chunk['precise_excerpt'] = trim(
+    if ($position !== false) {
+        return trim(
+            mb_substr(
+                $content,
+                $position,
+                mb_strlen($requestedExcerpt)
+            )
+        );
+    }
+
+    /*
+     * Permit differences in spaces and line breaks while still returning
+     * the original document wording rather than the AI wording.
+     */
+    $normalizedRequested = preg_replace(
+        '/\s+/u',
+        ' ',
+        $requestedExcerpt
+    );
+
+    if (!is_string($normalizedRequested)) {
+        return null;
+    }
+
+    $words = preg_split(
+        '/\s+/u',
+        trim($normalizedRequested),
+        -1,
+        PREG_SPLIT_NO_EMPTY
+    );
+
+    if (!is_array($words) || $words === []) {
+        return null;
+    }
+
+    $escapedWords = array_map(
+        static fn (string $word): string => preg_quote($word, '/'),
+        $words
+    );
+
+    $pattern = '/'
+        . implode('\s+', $escapedWords)
+        . '/iu';
+
+    if (preg_match($pattern, $content, $matches) !== 1) {
+        return null;
+    }
+
+    return trim((string) $matches[0]);
+};
+
+foreach ($generated['sources'] as $generatedSource) {
+    $requestedExcerpt = trim(
         (string) (
             $generatedSource['excerpt']
             ?? ''
         )
     );
 
-    if ($chunk['precise_excerpt'] === '') {
+    if ($requestedExcerpt === '') {
         continue;
     }
 
-    $usedSourceChunks[] = $chunk;
-}
-
-if ($usedSourceChunks === []) {
-    $fallbackChunk = $topRankedChunks[0]['chunk'];
-
-    $fallbackChunk['precise_excerpt'] = trim(
-        (string) (
-            $fallbackChunk['content']
-            ?? ''
-        )
+    $sourceNumber = (int) (
+        $generatedSource['source_number']
+        ?? 0
     );
 
-    $usedSourceChunks[] = $fallbackChunk;
+    $preferredIndex = $sourceNumber - 1;
+    $matchedChunk = null;
+    $exactExcerpt = null;
+
+    /*
+     * Check the source number suggested by OpenAI first, but do not trust
+     * it unless the excerpt actually exists in that chunk.
+     */
+    if (isset($topRankedChunks[$preferredIndex]['chunk'])) {
+        $candidateChunk =
+            $topRankedChunks[$preferredIndex]['chunk'];
+
+        $candidateContent = (string) (
+            $candidateChunk['content']
+            ?? ''
+        );
+
+        $candidateExcerpt = $findExactExcerpt(
+            $candidateContent,
+            $requestedExcerpt
+        );
+
+        if ($candidateExcerpt !== null) {
+            $matchedChunk = $candidateChunk;
+            $exactExcerpt = $candidateExcerpt;
+        }
+    }
+
+    /*
+     * If OpenAI supplied the wrong source number, find the retrieved chunk
+     * that actually contains the excerpt.
+     */
+    if ($matchedChunk === null) {
+        foreach ($topRankedChunks as $rankedChunk) {
+            if (!isset($rankedChunk['chunk'])) {
+                continue;
+            }
+
+            $candidateChunk = $rankedChunk['chunk'];
+
+            $candidateContent = (string) (
+                $candidateChunk['content']
+                ?? ''
+            );
+
+            $candidateExcerpt = $findExactExcerpt(
+                $candidateContent,
+                $requestedExcerpt
+            );
+
+            if ($candidateExcerpt === null) {
+                continue;
+            }
+
+            $matchedChunk = $candidateChunk;
+            $exactExcerpt = $candidateExcerpt;
+            break;
+        }
+    }
+
+    /*
+     * Never save an excerpt that cannot be verified against the retrieved
+     * document text.
+     */
+    if ($matchedChunk === null || $exactExcerpt === null) {
+        continue;
+    }
+
+    $matchedChunk['precise_excerpt'] = $exactExcerpt;
+    $usedSourceChunks[] = $matchedChunk;
+}
+
+/*
+ * Do not fall back to an unrelated chunk. If no AI excerpt can be verified,
+ * return a review response instead of displaying false evidence.
+ */
+if ($usedSourceChunks === []) {
+    $questionLogger->updateOutcome(
+        $questionRecordId,
+        'not_found',
+        1
+    );
+
+    JsonResponse::send(200, [
+        'success' => true,
+        'title' => 'The supporting excerpts could not be verified.',
+        'answer' => (
+            'The documents may contain relevant information, but the '
+            . 'supporting excerpts could not be matched exactly. The '
+            . 'question has been saved for review.'
+        ),
+        'source' => 'No verified supporting excerpt was found.',
+        'strength' => 'Needs review',
+    ]);
 }
 
     $bestScore = (int) $topRankedChunks[0]['score'];
