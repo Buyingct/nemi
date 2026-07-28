@@ -169,7 +169,7 @@ final class OpenAIService
         ];
 
         file_put_contents(
-    '/tmp/openai_stats.txt',
+    __DIR__ . '/../openai_stats.txt',
     "Question:\n"
     . $question
     . "\n\n"
