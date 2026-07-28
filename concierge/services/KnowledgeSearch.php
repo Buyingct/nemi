@@ -382,7 +382,33 @@ if ($isWindowDoorQuestion) {
         }
     }
 }
-        
+    
+    /*
+ * Prefer higher-authority governing documents when multiple
+ * documents contain relevant language.
+ */
+switch ($category) {
+    case 'declaration':
+        $score += 100;
+        break;
+
+    case 'bylaws':
+        $score += 80;
+        break;
+
+    case 'rules':
+        $score += 60;
+        break;
+
+    case 'budget':
+        $score += 30;
+        break;
+
+    case 'other':
+        $score += 10;
+        break;
+}
+
 return max($score, 0);
     }
 
