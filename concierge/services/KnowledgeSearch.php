@@ -389,23 +389,23 @@ if ($isWindowDoorQuestion) {
  */
 switch ($category) {
     case 'declaration':
-        $score += 100;
+        $score += 20;
         break;
 
     case 'bylaws':
-        $score += 80;
+        $score += 16;
         break;
 
     case 'rules':
-        $score += 60;
+        $score += 12;
         break;
 
     case 'budget':
-        $score += 30;
+        $score += 6;
         break;
 
     case 'other':
-        $score += 10;
+        $score += 4;
         break;
 }
 
