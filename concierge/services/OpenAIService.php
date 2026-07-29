@@ -168,21 +168,35 @@ final class OpenAIService
             'max_output_tokens' => 400,
         ];
 
-        file_put_contents(
+        file_put_contents($debugLines = [
+    '========================================',
+    'Time: ' . date('Y-m-d H:i:s'),
+    'Question: ' . $question,
+    'Chunks: ' . count($rankedChunks),
+    'Input characters: ' . strlen($input),
+    'Instructions characters: ' . strlen($instructions),
+];
+
+foreach ($rankedChunks as $index => $rankedChunk) {
+    $chunk = $rankedChunk['chunk'] ?? [];
+
+    $debugLines[] = sprintf(
+        'Chunk %d characters: %d | %s',
+        $index + 1,
+        strlen((string) ($chunk['content'] ?? '')),
+        trim((string) ($chunk['section_title'] ?? 'Untitled'))
+    );
+}
+
+$debugLines[] = '';
+
+file_put_contents(
     __DIR__ . '/../openai_stats.txt',
-    "Question:\n"
-    . $question
-    . "\n\n"
-    . "Chunks: "
-    . count($rankedChunks)
-    . "\n"
-    . "Input characters: "
-    . strlen($input)
-    . "\n"
-    . "Instructions characters: "
-    . strlen($instructions)
-    . "\n"
+    implode("\n", $debugLines) . "\n",
+    FILE_APPEND | LOCK_EX
 );
+
+$response = $this->postJson($payload););
 
         $response = $this->postJson($payload);
         $text = $this->extractOutputText($response);
