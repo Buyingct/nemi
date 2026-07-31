@@ -385,13 +385,18 @@ final class DocumentProcessor
                     $sectionTitle !== null
                     && trim(implode("\n", $sectionLines)) !== ''
                 ) {
-                    $chunks[] = [
-                        'section_title' => $sectionTitle,
-                        'page_number' => null,
-                        'content' => trim(
-                            implode("\n", $sectionLines)
-                        ),
-                    ];
+                    $sectionContent = trim(
+                        implode("\n", $sectionLines)
+                    );
+
+                    $chunks = array_merge(
+                        $chunks,
+                        $this->splitLargeSection(
+                            $sectionTitle,
+                            null,
+                            $sectionContent
+                        )
+                    );
                 }
 
                 $sectionTitle = mb_substr(
@@ -449,13 +454,18 @@ final class DocumentProcessor
             $sectionTitle !== null
             && trim(implode("\n", $sectionLines)) !== ''
         ) {
-            $chunks[] = [
-                'section_title' => $sectionTitle,
-                'page_number' => null,
-                'content' => trim(
-                    implode("\n", $sectionLines)
-                ),
-            ];
+            $sectionContent = trim(
+                implode("\n", $sectionLines)
+            );
+
+            $chunks = array_merge(
+                $chunks,
+                $this->splitLargeSection(
+                    $sectionTitle,
+                    null,
+                    $sectionContent
+                )
+            );
         }
 
         return array_values(
@@ -643,6 +653,174 @@ final class DocumentProcessor
     );
 }
 
+
+
+    /**
+     * Splits an oversized legal section into paragraph-aware search chunks.
+     *
+     * Every resulting row keeps the original legal section title and page
+     * number. The source document remains unchanged; only the searchable
+     * knowledge representation is divided into smaller pieces.
+     *
+     * @return array<int, array{
+     *     section_title: string|null,
+     *     page_number: int|null,
+     *     content: string
+     * }>
+     */
+    private function splitLargeSection(
+        ?string $sectionTitle,
+        ?int $pageNumber,
+        string $content
+    ): array {
+        $content = trim($content);
+
+        if ($content === '') {
+            return [];
+        }
+
+        $maximumChunkLength = 1800;
+
+        if (mb_strlen($content) <= $maximumChunkLength) {
+            return [[
+                'section_title' => $sectionTitle,
+                'page_number' => $pageNumber,
+                'content' => $content,
+            ]];
+        }
+
+        $paragraphs = preg_split(
+            "/\n\s*\n/u",
+            $content,
+            -1,
+            PREG_SPLIT_NO_EMPTY
+        );
+
+        if (!is_array($paragraphs) || $paragraphs === []) {
+            $paragraphs = [$content];
+        }
+
+        $pieces = [];
+
+        foreach ($paragraphs as $paragraph) {
+            $paragraph = trim($paragraph);
+
+            if ($paragraph === '') {
+                continue;
+            }
+
+            /*
+             * Most legal paragraphs fit comfortably inside the limit. If a
+             * single paragraph is unusually long, split it at sentence
+             * boundaries rather than allowing one giant knowledge row.
+             */
+            if (mb_strlen($paragraph) <= $maximumChunkLength) {
+                $pieces[] = $paragraph;
+                continue;
+            }
+
+            $sentences = preg_split(
+                '/(?<=[.!?;])\s+(?=[A-Z0-9("\[])/u',
+                $paragraph,
+                -1,
+                PREG_SPLIT_NO_EMPTY
+            );
+
+            if (!is_array($sentences) || count($sentences) <= 1) {
+                for (
+                    $offset = 0;
+                    $offset < mb_strlen($paragraph);
+                    $offset += $maximumChunkLength
+                ) {
+                    $pieces[] = trim(
+                        mb_substr(
+                            $paragraph,
+                            $offset,
+                            $maximumChunkLength
+                        )
+                    );
+                }
+
+                continue;
+            }
+
+            $sentenceBuffer = '';
+
+            foreach ($sentences as $sentence) {
+                $sentence = trim($sentence);
+
+                if ($sentence === '') {
+                    continue;
+                }
+
+                $candidate = $sentenceBuffer === ''
+                    ? $sentence
+                    : $sentenceBuffer . ' ' . $sentence;
+
+                if (
+                    mb_strlen($candidate) > $maximumChunkLength
+                    && $sentenceBuffer !== ''
+                ) {
+                    $pieces[] = $sentenceBuffer;
+                    $sentenceBuffer = $sentence;
+                    continue;
+                }
+
+                $sentenceBuffer = $candidate;
+            }
+
+            if ($sentenceBuffer !== '') {
+                $pieces[] = $sentenceBuffer;
+            }
+        }
+
+        $chunks = [];
+        $buffer = '';
+
+        foreach ($pieces as $piece) {
+            $piece = trim($piece);
+
+            if ($piece === '') {
+                continue;
+            }
+
+            $candidate = $buffer === ''
+                ? $piece
+                : $buffer . "\n\n" . $piece;
+
+            if (
+                mb_strlen($candidate) > $maximumChunkLength
+                && $buffer !== ''
+            ) {
+                $chunks[] = [
+                    'section_title' => $sectionTitle,
+                    'page_number' => $pageNumber,
+                    'content' => $buffer,
+                ];
+
+                $buffer = $piece;
+                continue;
+            }
+
+            $buffer = $candidate;
+        }
+
+        if ($buffer !== '') {
+            $chunks[] = [
+                'section_title' => $sectionTitle,
+                'page_number' => $pageNumber,
+                'content' => $buffer,
+            ];
+        }
+
+        return array_values(
+            array_filter(
+                $chunks,
+                static fn (array $chunk): bool =>
+                    mb_strlen(trim((string) $chunk['content'])) >= 40
+            )
+        );
+    }
 
 
     private function looksLikeHeading(string $text): bool
