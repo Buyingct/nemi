@@ -78,6 +78,34 @@ function avatarDot(string $seed): string {
     display:flex; align-items:center; justify-content:space-between;
     padding:20px 28px; background:#fff; border-bottom:2px solid var(--edge);
   }
+
+  .main-nav{
+  display:flex;
+  gap:8px;
+  padding:10px 28px;
+  background:#fff;
+  border-bottom:1px solid #d9e2e8;
+  overflow-x:auto;
+}
+
+.main-nav a{
+  color:var(--ink);
+  text-decoration:none;
+  font-weight:700;
+  padding:9px 14px;
+  border-radius:999px;
+  white-space:nowrap;
+}
+
+.main-nav a:hover{
+  background:var(--pill);
+}
+
+.main-nav a.active{
+  background:var(--ink);
+  color:#fff;
+}
+
   .brand{ display:flex; align-items:center; gap:16px; }
   .brand .logo{
     width:200px; height:40px; background:#001a3a; border-radius:8px;
@@ -140,6 +168,14 @@ function avatarDot(string $seed): string {
     <a class="btn" href="/app/grant_access.php">✅ Grant Client Access</a>
   </div>
 </header>
+
+<nav class="main-nav">
+  <a class="active" href="/app/realtor_portal.php">Home</a>
+  <a href="/app/transactions.php">Transactions</a>
+  <a href="/app/clients.php">Clients</a>
+  <a href="/app/forms.php">Forms</a>
+  <a href="/app/messages.php">Messages</a>
+</nav>
 
 <div class="wrap">
   <div class="grid">
