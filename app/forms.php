@@ -679,21 +679,25 @@ header{
 }
 </style>
 
+<link rel="stylesheet" href="/css/nemi-shell.css">
+
 </head>
 
-<body>
+<body class="theme-fercodini-teal">
 
-<header>
-  <div class="brand">
-    <div class="logo">Fercodini</div>
+<header class="nemi-header">
+
+  <div class="nemi-brand">
+    <div class="nemi-logo">Fercodini</div>
   </div>
 
-  <div class="account-name">
+  <div class="nemi-account-name">
     <?= h($meName) ?>
   </div>
+
 </header>
 
-<nav class="main-nav">
+<nav class="nemi-nav">
   <a href="/app/realtor_portal.php">Home</a>
   <a href="/app/transactions.php">Transactions</a>
   <a href="/app/clients.php">Clients</a>
@@ -701,9 +705,9 @@ header{
   <a href="/app/messages.php">Messages</a>
 </nav>
 
-<main class="wrap">
+<main class="nemi-wrap">
 
-  <div class="page-heading">
+  <div class="nemi-page-heading">
     <h1>Forms</h1>
     <p>What shall we work on?</p>
   </div>

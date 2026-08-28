@@ -1,0 +1,509 @@
+/* =========================================================
+   NEMI SHELL
+   Shared Realtor dashboard + Forms + Transactions + Clients
+   ========================================================= */
+
+
+/* ---------- DEFAULT NEMI THEME ---------- */
+
+:root{
+
+  /* Backgrounds */
+  --nemi-page-bg:#f6f3ec;
+  --nemi-page-bg-2:#eee8de;
+
+  /* Glass surfaces */
+  --nemi-glass:rgba(255,255,255,.58);
+  --nemi-glass-strong:rgba(255,255,255,.78);
+  --nemi-glass-border:rgba(255,255,255,.72);
+
+  /* Text */
+  --nemi-text:#172033;
+  --nemi-text-muted:#6f706d;
+
+  /* Brand */
+  --nemi-primary:#47433e;
+  --nemi-secondary:#b49a77;
+  --nemi-accent:#ddd0be;
+
+  /* States */
+  --nemi-active:var(--nemi-primary);
+  --nemi-active-text:#fff;
+
+  /* Effects */
+  --nemi-shadow:
+    0 14px 38px rgba(50,42,34,.10);
+
+  --nemi-shadow-hover:
+    0 20px 45px rgba(50,42,34,.15);
+
+  --nemi-radius:20px;
+}
+
+
+/* =========================================================
+   BROKERAGE THEME FAMILIES
+   ========================================================= */
+
+
+/* ---------- FERCODINI / TEAL ---------- */
+
+body.theme-fercodini-teal{
+
+  --nemi-page-bg:#f4f8f8;
+  --nemi-page-bg-2:#e8f0f1;
+
+  --nemi-primary:#123a63;
+  --nemi-secondary:#4b9298;
+  --nemi-accent:#ffffff;
+
+}
+
+
+/* ---------- FERCODINI / ROYAL ---------- */
+
+body.theme-fercodini-royal{
+
+  --nemi-page-bg:#f5f7fb;
+  --nemi-page-bg-2:#e8edf6;
+
+  --nemi-primary:#17408b;
+  --nemi-secondary:#4b9298;
+  --nemi-accent:#ffffff;
+
+}
+
+
+/* ---------- FERCODINI / LIGHT ---------- */
+
+body.theme-fercodini-light{
+
+  --nemi-page-bg:#f8fbfb;
+  --nemi-page-bg-2:#edf4f4;
+
+  --nemi-primary:#254b6c;
+  --nemi-secondary:#67a6aa;
+  --nemi-accent:#ffffff;
+
+}
+
+
+/* ---------- NEMI / NATURAL ---------- */
+
+body.theme-nemi-natural{
+
+  --nemi-page-bg:#f7f4ed;
+  --nemi-page-bg-2:#eee7dc;
+
+  --nemi-primary:#45423e;
+  --nemi-secondary:#b69b75;
+  --nemi-accent:#e5d9ca;
+
+}
+
+
+/* ---------- NEMI / PEARL ---------- */
+
+body.theme-nemi-pearl{
+
+  --nemi-page-bg:#f9f8f5;
+  --nemi-page-bg-2:#efede8;
+
+  --nemi-primary:#484b4d;
+  --nemi-secondary:#aaa49b;
+  --nemi-accent:#f0ece5;
+
+}
+
+
+/* ---------- NEMI / LIGHT OAK ---------- */
+
+body.theme-nemi-oak{
+
+  --nemi-page-bg:#f7f2e8;
+  --nemi-page-bg-2:#ebe1d1;
+
+  --nemi-primary:#51483f;
+  --nemi-secondary:#b69870;
+  --nemi-accent:#dfcfb9;
+
+}
+
+
+/* =========================================================
+   GLOBAL SHELL
+   ========================================================= */
+
+html{
+  min-height:100%;
+}
+
+body{
+  margin:0;
+  min-height:100vh;
+
+  font-family:
+    Poppins,
+    system-ui,
+    -apple-system,
+    "Segoe UI",
+    Roboto,
+    Arial,
+    sans-serif;
+
+  color:var(--nemi-text);
+
+  background:
+    radial-gradient(
+      circle at 15% 5%,
+      color-mix(
+        in srgb,
+        var(--nemi-secondary) 16%,
+        transparent
+      ),
+      transparent 30%
+    ),
+
+    radial-gradient(
+      circle at 88% 18%,
+      color-mix(
+        in srgb,
+        var(--nemi-primary) 8%,
+        transparent
+      ),
+      transparent 34%
+    ),
+
+    linear-gradient(
+      135deg,
+      var(--nemi-page-bg),
+      var(--nemi-page-bg-2)
+    );
+
+  background-attachment:fixed;
+}
+
+
+/* =========================================================
+   HEADER
+   ========================================================= */
+
+.nemi-header{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+
+  gap:18px;
+
+  padding:18px 28px;
+
+  background:var(--nemi-glass);
+
+  border-bottom:
+    1px solid var(--nemi-glass-border);
+
+  backdrop-filter:
+    blur(22px)
+    saturate(145%);
+
+  -webkit-backdrop-filter:
+    blur(22px)
+    saturate(145%);
+
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.85),
+    0 8px 30px rgba(0,0,0,.04);
+}
+
+
+.nemi-brand{
+  display:flex;
+  align-items:center;
+  gap:16px;
+}
+
+
+.nemi-logo{
+  min-width:165px;
+  height:40px;
+
+  padding:0 18px;
+
+  display:flex;
+  align-items:center;
+  justify-content:center;
+
+  border-radius:14px;
+
+  background:var(--nemi-primary);
+
+  color:#fff;
+
+  font-weight:800;
+
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.16),
+    0 8px 20px rgba(0,0,0,.14);
+}
+
+
+.nemi-account-name{
+  color:var(--nemi-primary);
+  font-weight:700;
+}
+
+
+/* =========================================================
+   MAIN NAVIGATION
+   ========================================================= */
+
+.nemi-nav{
+  display:flex;
+  gap:8px;
+
+  padding:10px 28px;
+
+  overflow-x:auto;
+
+  background:
+    rgba(255,255,255,.38);
+
+  backdrop-filter:blur(18px);
+  -webkit-backdrop-filter:blur(18px);
+
+  border-bottom:
+    1px solid var(--nemi-glass-border);
+}
+
+
+.nemi-nav a{
+  text-decoration:none;
+
+  color:var(--nemi-text);
+
+  font-weight:700;
+
+  padding:9px 15px;
+
+  border-radius:999px;
+
+  white-space:nowrap;
+
+  transition:
+    background .18s ease,
+    color .18s ease,
+    transform .18s ease;
+}
+
+
+.nemi-nav a:hover{
+  background:
+    rgba(255,255,255,.62);
+
+  transform:
+    translateY(-1px);
+}
+
+
+.nemi-nav a.active{
+  background:
+    var(--nemi-active);
+
+  color:
+    var(--nemi-active-text);
+
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.22),
+    0 8px 20px rgba(0,0,0,.12);
+}
+
+
+/* =========================================================
+   PAGE WRAPPER
+   ========================================================= */
+
+.nemi-wrap{
+  max-width:1040px;
+
+  margin:
+    0 auto;
+
+  padding:
+    42px 22px 70px;
+}
+
+
+.nemi-page-heading{
+  margin-bottom:28px;
+}
+
+
+.nemi-page-heading h1{
+  margin:
+    0 0 5px;
+
+  font-size:32px;
+
+  font-weight:800;
+
+  letter-spacing:-.035em;
+
+  color:
+    var(--nemi-primary);
+}
+
+
+.nemi-page-heading p{
+  margin:0;
+
+  color:
+    var(--nemi-text-muted);
+
+  font-size:18px;
+
+  font-weight:500;
+}
+
+
+/* =========================================================
+   GLASS COMPONENT
+   ========================================================= */
+
+.nemi-glass{
+  background:
+    var(--nemi-glass);
+
+  border:
+    1px solid var(--nemi-glass-border);
+
+  border-radius:
+    var(--nemi-radius);
+
+  backdrop-filter:
+    blur(20px)
+    saturate(145%);
+
+  -webkit-backdrop-filter:
+    blur(20px)
+    saturate(145%);
+
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.88),
+    var(--nemi-shadow);
+}
+
+
+/* =========================================================
+   BUTTONS
+   ========================================================= */
+
+.nemi-btn{
+  display:inline-flex;
+
+  align-items:center;
+  justify-content:center;
+
+  gap:8px;
+
+  padding:
+    10px 16px;
+
+  border:
+    1px solid
+    var(--nemi-glass-border);
+
+  border-radius:
+    999px;
+
+  font-family:
+    inherit;
+
+  font-weight:
+    700;
+
+  text-decoration:
+    none;
+
+  cursor:
+    pointer;
+
+  background:
+    var(--nemi-glass);
+
+  color:
+    var(--nemi-text);
+
+  backdrop-filter:
+    blur(16px);
+
+  -webkit-backdrop-filter:
+    blur(16px);
+}
+
+
+.nemi-btn.primary{
+  background:
+    var(--nemi-primary);
+
+  color:#fff;
+
+  border-color:
+    transparent;
+}
+
+
+.nemi-btn.secondary{
+  background:
+    var(--nemi-secondary);
+
+  color:#fff;
+
+  border-color:
+    transparent;
+}
+
+
+/* =========================================================
+   MOBILE
+   ========================================================= */
+
+@media(max-width:720px){
+
+  .nemi-header{
+    padding:
+      15px 17px;
+  }
+
+  .nemi-logo{
+    min-width:
+      145px;
+
+    height:
+      38px;
+  }
+
+  .nemi-account-name{
+    display:none;
+  }
+
+  .nemi-nav{
+    padding:
+      9px 14px;
+  }
+
+  .nemi-wrap{
+    padding:
+      30px 16px 60px;
+  }
+
+  .nemi-page-heading h1{
+    font-size:
+      28px;
+  }
+
+  .nemi-page-heading p{
+    font-size:
+      17px;
+  }
+
+}
