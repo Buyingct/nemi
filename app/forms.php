@@ -106,37 +106,89 @@ $buyerForms = array_values(array_filter(
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 
+
 <style>
 :root{
-  --ink:#0d1330;
-  --muted:#647481;
-  --edge:#d9e2e8;
-  --trim:#8ec3c7;
-  --accent:#d4af37;
-  --pill:#eef7f8;
-  --bg:#f7fbfd;
-  --card:#fff;
+  --ink:#172033;
+  --muted:#746c66;
+
+  --bg-1:#f7efe6;
+  --bg-2:#f1e1d2;
+
+  --glass:rgba(255,255,255,.56);
+  --glass-strong:rgba(255,255,255,.78);
+  --glass-edge:rgba(255,255,255,.72);
+
+  --gold:#d49a36;
+  --terracotta:#c96f52;
+  --teal:#5b9090;
+  --navy:#1e2d49;
+
+  --shadow-soft:0 14px 38px rgba(75,52,35,.10);
+  --shadow-hover:0 20px 45px rgba(75,52,35,.16);
 }
 
 *{
   box-sizing:border-box;
 }
 
+html{
+  min-height:100%;
+}
+
 body{
   margin:0;
+  min-height:100vh;
   font-family:Poppins,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
   color:var(--ink);
-  background:var(--bg);
+
+  background:
+    radial-gradient(
+      circle at 12% 8%,
+      rgba(212,154,54,.22),
+      transparent 28%
+    ),
+    radial-gradient(
+      circle at 88% 15%,
+      rgba(201,111,82,.18),
+      transparent 31%
+    ),
+    radial-gradient(
+      circle at 72% 88%,
+      rgba(91,144,144,.15),
+      transparent 34%
+    ),
+    linear-gradient(
+      135deg,
+      var(--bg-1),
+      var(--bg-2)
+    );
+
+  background-attachment:fixed;
 }
+
+/* =========================
+   HEADER
+========================= */
 
 header{
   display:flex;
   align-items:center;
   justify-content:space-between;
   gap:18px;
+
   padding:18px 28px;
-  background:#fff;
-  border-bottom:1px solid var(--edge);
+
+  background:rgba(255,255,255,.56);
+
+  backdrop-filter:blur(22px) saturate(145%);
+  -webkit-backdrop-filter:blur(22px) saturate(145%);
+
+  border-bottom:1px solid rgba(255,255,255,.72);
+
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.85),
+    0 8px 30px rgba(80,54,37,.06);
 }
 
 .brand{
@@ -148,45 +200,95 @@ header{
 .logo{
   width:170px;
   height:40px;
-  background:#001a3a;
-  border-radius:8px;
-  color:#fff;
+
   display:flex;
   align-items:center;
   justify-content:center;
+
+  color:#fff;
   font-weight:800;
+  letter-spacing:.02em;
+
+  border-radius:13px;
+
+  background:
+    linear-gradient(
+      135deg,
+      #1f3152,
+      #17233b
+    );
+
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.18),
+    0 8px 20px rgba(30,45,73,.20);
 }
 
 .account-name{
   font-weight:700;
+  color:var(--navy);
 }
+
+/* =========================
+   NAVIGATION
+========================= */
 
 .main-nav{
   display:flex;
   gap:8px;
+
   padding:10px 28px;
-  background:#fff;
-  border-bottom:1px solid var(--edge);
+
   overflow-x:auto;
+
+  background:rgba(255,255,255,.40);
+
+  backdrop-filter:blur(20px) saturate(140%);
+  -webkit-backdrop-filter:blur(20px) saturate(140%);
+
+  border-bottom:1px solid rgba(255,255,255,.58);
 }
 
 .main-nav a{
   color:var(--ink);
   text-decoration:none;
+
   font-weight:700;
-  padding:9px 14px;
+
+  padding:9px 15px;
+
   border-radius:999px;
+
   white-space:nowrap;
+
+  transition:
+    background .18s ease,
+    transform .18s ease,
+    box-shadow .18s ease;
 }
 
 .main-nav a:hover{
-  background:var(--pill);
+  background:rgba(255,255,255,.62);
+  transform:translateY(-1px);
 }
 
 .main-nav a.active{
-  background:var(--ink);
   color:#fff;
+
+  background:
+    linear-gradient(
+      135deg,
+      var(--gold),
+      var(--terracotta)
+    );
+
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.28),
+    0 8px 20px rgba(201,111,82,.25);
 }
+
+/* =========================
+   PAGE
+========================= */
 
 .wrap{
   max-width:1040px;
@@ -200,46 +302,101 @@ header{
 
 .page-heading h1{
   margin:0 0 5px;
-  font-size:30px;
+
+  font-size:32px;
+  font-weight:800;
+  letter-spacing:-.035em;
+
+  color:var(--navy);
 }
 
 .page-heading p{
   margin:0;
+
   color:var(--muted);
+
   font-size:18px;
+  font-weight:500;
 }
+
+/* =========================
+   SEARCH
+========================= */
 
 .search-box{
   position:relative;
-  margin-bottom:38px;
+  margin-bottom:40px;
 }
 
 .search-box input{
   width:100%;
-  border:1px solid var(--edge);
-  border-radius:16px;
-  padding:18px 20px 18px 52px;
+
+  border:1px solid var(--glass-edge);
+
+  border-radius:22px;
+
+  padding:19px 22px 19px 54px;
+
   font-family:inherit;
   font-size:16px;
-  background:#fff;
+
+  color:var(--ink);
+
+  background:rgba(255,255,255,.62);
+
+  backdrop-filter:blur(22px) saturate(150%);
+  -webkit-backdrop-filter:blur(22px) saturate(150%);
+
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.88),
+    inset 0 -1px 0 rgba(255,255,255,.28),
+    var(--shadow-soft);
+
   outline:none;
+
+  transition:
+    box-shadow .18s ease,
+    border-color .18s ease,
+    background .18s ease;
+}
+
+.search-box input::placeholder{
+  color:#8b8078;
 }
 
 .search-box input:focus{
-  border-color:#6ca1a7;
-  box-shadow:0 0 0 3px rgba(108,161,167,.12);
+  border-color:rgba(212,154,54,.55);
+
+  background:rgba(255,255,255,.76);
+
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.95),
+    0 0 0 4px rgba(212,154,54,.12),
+    0 18px 40px rgba(80,54,37,.12);
 }
 
 .search-icon{
   position:absolute;
+
   top:50%;
-  left:20px;
+  left:21px;
+
   transform:translateY(-50%);
+
   font-size:20px;
+
+  color:var(--navy);
+
+  z-index:2;
 }
 
+/* =========================
+   FORM SECTIONS
+========================= */
+
 .form-section{
-  margin:34px 0;
+  position:relative;
+  margin:36px 0;
 }
 
 .section-heading{
@@ -247,56 +404,201 @@ header{
   justify-content:space-between;
   align-items:center;
   gap:16px;
-  margin-bottom:14px;
+
+  margin-bottom:15px;
 }
 
 .section-heading h2{
   margin:0;
-  font-size:18px;
+
+  font-size:19px;
+  font-weight:800;
+
+  letter-spacing:-.025em;
+}
+
+.form-section[data-section="common"] .section-heading h2{
+  color:#a56f17;
+}
+
+.form-section[data-section="office"] .section-heading h2{
+  color:#ae543a;
+}
+
+.form-section[data-section="seller"] .section-heading h2{
+  color:#417b7c;
+}
+
+.form-section[data-section="buyer"] .section-heading h2{
+  color:var(--navy);
 }
 
 .see-all{
-  border:0;
-  background:transparent;
+  border:1px solid rgba(255,255,255,.62);
+
+  background:rgba(255,255,255,.34);
+
+  backdrop-filter:blur(16px);
+  -webkit-backdrop-filter:blur(16px);
+
   color:var(--ink);
+
   font-family:inherit;
   font-weight:700;
+
   cursor:pointer;
-  padding:8px;
+
+  padding:8px 13px;
+
+  border-radius:999px;
+
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.65);
+
+  transition:
+    background .18s ease,
+    transform .18s ease;
 }
+
+.see-all:hover{
+  background:rgba(255,255,255,.62);
+  transform:translateY(-1px);
+}
+
+/* =========================
+   FORM CARDS
+========================= */
 
 .form-list{
   display:grid;
   grid-template-columns:1fr 1fr;
-  gap:12px;
+  gap:14px;
 }
 
 .form-card{
+  position:relative;
+
   display:flex;
   align-items:center;
   justify-content:space-between;
   gap:16px;
-  min-height:72px;
-  padding:16px 18px;
-  background:#fff;
-  border:1px solid var(--edge);
-  border-radius:14px;
+
+  min-height:78px;
+
+  padding:17px 19px;
+
   text-decoration:none;
+
   color:inherit;
+
+  border:1px solid rgba(255,255,255,.76);
+
+  border-radius:21px;
+
+  background:rgba(255,255,255,.54);
+
+  backdrop-filter:blur(20px) saturate(145%);
+  -webkit-backdrop-filter:blur(20px) saturate(145%);
+
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.92),
+    inset 0 -1px 0 rgba(255,255,255,.22),
+    0 12px 28px rgba(77,52,36,.08);
+
+  overflow:hidden;
+
+  transition:
+    transform .18s ease,
+    box-shadow .18s ease,
+    border-color .18s ease,
+    background .18s ease;
+}
+
+.form-card::before{
+  content:"";
+
+  position:absolute;
+
+  inset:0;
+
+  pointer-events:none;
+
+  background:
+    linear-gradient(
+      135deg,
+      rgba(255,255,255,.28),
+      transparent 35%,
+      transparent 70%,
+      rgba(255,255,255,.12)
+    );
+
+  opacity:.75;
 }
 
 .form-card:hover{
-  border-color:#9db7bb;
-  background:#fbfefe;
+  transform:translateY(-3px);
+
+  background:rgba(255,255,255,.76);
+
+  border-color:rgba(255,255,255,.95);
+
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,1),
+    0 20px 42px rgba(77,52,36,.14);
 }
 
 .form-name{
-  font-weight:700;
+  position:relative;
+  z-index:1;
+
+  font-weight:750;
+  line-height:1.3;
 }
 
 .form-arrow{
-  font-size:20px;
+  position:relative;
+  z-index:1;
+
+  display:flex;
+  align-items:center;
+  justify-content:center;
+
+  width:32px;
+  height:32px;
+
+  flex:0 0 32px;
+
+  border-radius:50%;
+
+  font-size:21px;
+  font-weight:700;
+
+  color:var(--navy);
+
+  background:rgba(255,255,255,.54);
+
+  border:1px solid rgba(255,255,255,.75);
+
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.85);
 }
+
+.form-card:hover .form-arrow{
+  background:
+    linear-gradient(
+      135deg,
+      var(--gold),
+      var(--terracotta)
+    );
+
+  color:#fff;
+
+  border-color:transparent;
+}
+
+/* =========================
+   SEARCH / HIDDEN STATES
+========================= */
 
 .hidden-form{
   display:none;
@@ -304,13 +606,38 @@ header{
 
 .empty-search{
   display:none;
+
+  margin-top:20px;
+
   color:var(--muted);
-  padding:24px 0;
+
+  padding:20px 22px;
+
+  border:1px solid rgba(255,255,255,.7);
+
+  border-radius:20px;
+
+  background:rgba(255,255,255,.46);
+
+  backdrop-filter:blur(18px);
+  -webkit-backdrop-filter:blur(18px);
+
+  box-shadow:var(--shadow-soft);
 }
 
+/* =========================
+   MOBILE
+========================= */
+
 @media(max-width:720px){
+
   header{
-    padding:16px 18px;
+    padding:15px 17px;
+  }
+
+  .logo{
+    width:145px;
+    height:38px;
   }
 
   .account-name{
@@ -330,14 +657,28 @@ header{
   }
 
   .page-heading h1{
-    font-size:26px;
+    font-size:28px;
   }
 
   .page-heading p{
     font-size:17px;
   }
+
+  .search-box{
+    margin-bottom:32px;
+  }
+
+  .search-box input{
+    padding-top:17px;
+    padding-bottom:17px;
+  }
+
+  .form-card{
+    min-height:74px;
+  }
 }
 </style>
+
 </head>
 
 <body>
