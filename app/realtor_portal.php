@@ -164,9 +164,9 @@ function avatarDot(string $seed): string {
     <div class="hello">Welcome Realtor, <?=h($meName)?>!</div>
   </div>
   <div class="bar-actions">
-    <a class="btn" href="/admin/create_case.php">📄 Send / Request Forms</a>
-    <a class="btn" href="/app/grant_access.php">✅ Grant Client Access</a>
-  </div>
+  <a class="btn" href="/app/forms.php">📄 Forms</a>
+  <a class="btn" href="/app/grant_access.php">✅ Grant Client Access</a>
+</div>
 </header>
 
 <nav class="main-nav">
