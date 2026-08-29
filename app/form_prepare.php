@@ -1375,37 +1375,364 @@ body{
         </form>
 
 
-    <?php else: ?>
+    <?php elseif ($step === 2): ?>
+
+<form
+    class="prep-panel"
+    method="post"
+    action="/app/form_prepare.php?form=<?= h($formId) ?>&step=2"
+>
+
+    <div class="section-heading">
+
+        <h2>
+            Compensation
+        </h2>
+
+        <p>
+            Set the compensation terms that will appear in the agreement.
+        </p>
+
+    </div>
 
 
-        <div class="coming-next">
+    <div class="compensation-stack">
 
-            <div class="form-eyebrow">
-                Next
+
+        <!-- BROKERAGE SERVICE FEE -->
+
+        <section class="comp-block">
+
+            <div class="comp-block-title">
+                Brokerage service fee
             </div>
 
-            <h2>
-                Brokerage Compensation
-            </h2>
-
-            <p>
-                Your listing details are saved.
-                Next we’ll build the compensation section,
-                including your brokerage fee and the Realtor’s
-                buyer-broker compensation recommendation.
+            <p class="comp-block-copy">
+                What service fee did you agree on with the seller?
             </p>
 
-            <a
-                class="secondary-button"
-                href="/app/form_prepare.php?form=<?= h($formId) ?>"
+
+            <div class="segmented">
+
+                <label class="segment-option">
+
+                    <input
+                        type="radio"
+                        name="service_fee_type"
+                        value="percent"
+                        <?= $draft['service_fee_type'] === 'percent'
+                            ? 'checked'
+                            : '' ?>
+                    >
+
+                    <span>
+                        Percentage
+                    </span>
+
+                </label>
+
+
+                <label class="segment-option">
+
+                    <input
+                        type="radio"
+                        name="service_fee_type"
+                        value="amount"
+                        <?= $draft['service_fee_type'] === 'amount'
+                            ? 'checked'
+                            : '' ?>
+                    >
+
+                    <span>
+                        Dollar amount
+                    </span>
+
+                </label>
+
+            </div>
+
+
+            <div class="comp-value-row">
+
+                <div
+                    class="comp-value"
+                    id="service-fee-wrap"
+                >
+
+                    <span
+                        class="comp-dollar"
+                        id="service-dollar"
+                    >
+                        $
+                    </span>
+
+                    <input
+                        id="service_fee_value"
+                        name="service_fee_value"
+                        type="text"
+                        inputmode="decimal"
+                        value="<?= h($draft['service_fee_value']) ?>"
+                        autocomplete="off"
+                    >
+
+                    <span
+                        class="comp-unit"
+                        id="service-percent"
+                    >
+                        %
+                    </span>
+
+                </div>
+
+            </div>
+
+
+            <?php if (isset($errors['service_fee_value'])): ?>
+
+                <div class="field-error">
+                    <?= h($errors['service_fee_value']) ?>
+                </div>
+
+            <?php endif; ?>
+
+        </section>
+
+
+
+        <!-- BUYER-BROKER COMPENSATION -->
+
+        <section class="comp-block">
+
+            <div class="comp-block-title">
+                Buyer-broker compensation
+            </div>
+
+            <p class="comp-block-copy">
+                Will your recommendation include offering compensation
+                to a buyer’s brokerage?
+            </p>
+
+
+            <div class="authorization-choices">
+
+
+                <label class="authorization-choice">
+
+                    <input
+                        type="radio"
+                        name="buyer_broker_authorized"
+                        value="yes"
+                        <?= $draft['buyer_broker_authorized'] === 'yes'
+                            ? 'checked'
+                            : '' ?>
+                    >
+
+                    <span class="authorization-card">
+
+                        <strong>
+                            Yes
+                        </strong>
+
+                        <small>
+                            Include a buyer-broker compensation amount.
+                        </small>
+
+                    </span>
+
+                </label>
+
+
+                <label class="authorization-choice">
+
+                    <input
+                        type="radio"
+                        name="buyer_broker_authorized"
+                        value="no"
+                        <?= $draft['buyer_broker_authorized'] === 'no'
+                            ? 'checked'
+                            : '' ?>
+                    >
+
+                    <span class="authorization-card">
+
+                        <strong>
+                            No
+                        </strong>
+
+                        <small>
+                            Do not include buyer-broker compensation.
+                        </small>
+
+                    </span>
+
+                </label>
+
+
+            </div>
+
+
+            <div
+                class="buyer-comp-details"
+                id="buyer-comp-details"
             >
-                ← Back to listing basics
-            </a>
 
-        </div>
+                <div
+                    class="field"
+                    style="margin-top:24px;"
+                >
+
+                    <label>
+                        Amount to offer
+                    </label>
+
+                </div>
 
 
-    <?php endif; ?>
+                <div
+                    class="segmented"
+                    style="margin-top:10px;"
+                >
+
+                    <label class="segment-option">
+
+                        <input
+                            type="radio"
+                            name="buyer_broker_fee_type"
+                            value="percent"
+                            <?= $draft['buyer_broker_fee_type'] === 'percent'
+                                ? 'checked'
+                                : '' ?>
+                        >
+
+                        <span>
+                            Percentage
+                        </span>
+
+                    </label>
+
+
+                    <label class="segment-option">
+
+                        <input
+                            type="radio"
+                            name="buyer_broker_fee_type"
+                            value="amount"
+                            <?= $draft['buyer_broker_fee_type'] === 'amount'
+                                ? 'checked'
+                                : '' ?>
+                        >
+
+                        <span>
+                            Dollar amount
+                        </span>
+
+                    </label>
+
+                </div>
+
+
+                <div class="comp-value-row">
+
+                    <div
+                        class="comp-value"
+                        id="buyer-fee-wrap"
+                    >
+
+                        <span
+                            class="comp-dollar"
+                            id="buyer-dollar"
+                        >
+                            $
+                        </span>
+
+                        <input
+                            id="buyer_broker_fee_value"
+                            name="buyer_broker_fee_value"
+                            type="text"
+                            inputmode="decimal"
+                            value="<?= h($draft['buyer_broker_fee_value']) ?>"
+                            autocomplete="off"
+                        >
+
+                        <span
+                            class="comp-unit"
+                            id="buyer-percent"
+                        >
+                            %
+                        </span>
+
+                    </div>
+
+                </div>
+
+
+                <?php if (isset($errors['buyer_broker_fee_value'])): ?>
+
+                    <div class="field-error">
+                        <?= h($errors['buyer_broker_fee_value']) ?>
+                    </div>
+
+                <?php endif; ?>
+
+            </div>
+
+        </section>
+
+    </div>
+
+
+    <div class="actions">
+
+        <a
+            class="secondary-button"
+            href="/app/form_prepare.php?form=<?= h($formId) ?>&step=1"
+        >
+            ← Back
+        </a>
+
+
+        <button
+            class="primary-button"
+            type="submit"
+        >
+            Continue →
+        </button>
+
+    </div>
+
+</form>
+
+
+<?php elseif ($step === 3): ?>
+
+
+<div class="coming-next">
+
+    <div class="form-eyebrow">
+        Next
+    </div>
+
+    <h2>
+        Protection Period
+    </h2>
+
+    <p>
+        Compensation is saved.
+        Next we’ll set the protection period.
+    </p>
+
+
+    <a
+        class="secondary-button"
+        href="/app/form_prepare.php?form=<?= h($formId) ?>&step=2"
+    >
+        ← Back to compensation
+    </a>
+
+</div>
+
+
+<?php endif; ?>
 
 </main>
 
