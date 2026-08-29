@@ -110,7 +110,18 @@ $draft = $_SESSION[$draftKey] ?? [
     'buyer_broker_authorized' => 'yes',
 
     'buyer_broker_fee_type' => 'percent',
-    'buyer_broker_fee_value' => '',
+'buyer_broker_fee_value' => '',
+
+
+/*
+|--------------------------------------------------------------------------
+| PROTECTION PERIOD
+|--------------------------------------------------------------------------
+*/
+
+'protection_period_choice' => '60',
+'protection_period_days' => '60',
+
 ];
 
 
@@ -340,6 +351,87 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
             exit;
         }
+
+      /*
+|--------------------------------------------------------------------------
+| STEP 3 — PROTECTION PERIOD
+|--------------------------------------------------------------------------
+*/
+
+if ($step === 3) {
+
+    $choice = (string)(
+        $_POST['protection_period_choice']
+        ?? '60'
+    );
+
+    if (
+        $choice !== '30'
+        &&
+        $choice !== '60'
+        &&
+        $choice !== 'custom'
+    ) {
+        $choice = '60';
+    }
+
+    $draft['protection_period_choice'] =
+        $choice;
+
+
+    if ($choice === '30') {
+
+        $draft['protection_period_days'] =
+            '30';
+
+    } elseif ($choice === '60') {
+
+        $draft['protection_period_days'] =
+            '60';
+
+    } else {
+
+        $customDays = trim(
+            (string)(
+                $_POST['protection_period_custom']
+                ?? ''
+            )
+        );
+
+        if (
+            $customDays === ''
+            ||
+            !ctype_digit($customDays)
+            ||
+            (int)$customDays < 1
+        ) {
+
+            $errors['protection_period_custom'] =
+                'Enter the number of days.';
+
+        } else {
+
+            $draft['protection_period_days'] =
+                $customDays;
+        }
+    }
+
+
+    $_SESSION[$draftKey] = $draft;
+
+
+    if (!$errors) {
+
+        header(
+            'Location: /app/form_prepare.php'
+            . '?form=exclusive_right_to_sell'
+            . '&step=4'
+        );
+
+        exit;
+    }
+}
+
     }
 }
 
@@ -1710,8 +1802,211 @@ body{
 
 </form>
 
-
 <?php elseif ($step === 3): ?>
+
+<form
+    class="form-panel"
+    method="post"
+    action="/app/form_prepare.php?form=<?= h($formId) ?>&step=3"
+>
+
+    <div class="form-section-heading">
+
+        <h2>
+            Protection period
+        </h2>
+
+        <p>
+            How long is the protection period after the listing ends?
+        </p>
+
+    </div>
+
+
+    <section class="form-block">
+
+        <div class="form-block-title">
+            Choose the period
+        </div>
+
+        <p class="form-block-copy">
+            Select the number of days that will appear in the agreement.
+        </p>
+
+
+        <div class="form-choice-grid form-choice-grid-three">
+
+
+            <!-- 30 DAYS -->
+
+            <label class="form-choice">
+
+                <input
+                    type="radio"
+                    name="protection_period_choice"
+                    value="30"
+                    <?= $draft['protection_period_choice'] === '30'
+                        ? 'checked'
+                        : '' ?>
+                >
+
+                <span class="form-choice-card form-choice-card-compact">
+
+                    <strong>
+                        30 days
+                    </strong>
+
+                    <small>
+                        Thirty days after the listing ends.
+                    </small>
+
+                </span>
+
+            </label>
+
+
+            <!-- 60 DAYS -->
+
+            <label class="form-choice">
+
+                <input
+                    type="radio"
+                    name="protection_period_choice"
+                    value="60"
+                    <?= $draft['protection_period_choice'] === '60'
+                        ? 'checked'
+                        : '' ?>
+                >
+
+                <span class="form-choice-card form-choice-card-compact">
+
+                    <strong>
+                        60 days
+                    </strong>
+
+                    <small>
+                        Sixty days after the listing ends.
+                    </small>
+
+                </span>
+
+            </label>
+
+
+            <!-- CUSTOM -->
+
+            <label class="form-choice">
+
+                <input
+                    type="radio"
+                    name="protection_period_choice"
+                    value="custom"
+                    <?= $draft['protection_period_choice'] === 'custom'
+                        ? 'checked'
+                        : '' ?>
+                >
+
+                <span class="form-choice-card form-choice-card-compact">
+
+                    <strong>
+                        Custom
+                    </strong>
+
+                    <small>
+                        Enter a different number of days.
+                    </small>
+
+                </span>
+
+            </label>
+
+
+        </div>
+
+
+        <div
+            class="form-conditional protection-custom"
+            id="protection-custom"
+        >
+
+            <div class="form-field">
+
+                <label for="protection_period_custom">
+                    Number of days
+                </label>
+
+                <div class="form-value">
+
+                    <input
+                        id="protection_period_custom"
+                        name="protection_period_custom"
+                        type="text"
+                        inputmode="numeric"
+                        value="<?= h(
+                            $draft['protection_period_choice'] === 'custom'
+                                ? $draft['protection_period_days']
+                                : ''
+                        ) ?>"
+                        autocomplete="off"
+                    >
+
+                    <span class="form-value-unit">
+                        days
+                    </span>
+
+                </div>
+
+
+                <?php if (
+                    isset(
+                        $errors[
+                            'protection_period_custom'
+                        ]
+                    )
+                ): ?>
+
+                    <div class="form-field-error">
+
+                        <?= h(
+                            $errors[
+                                'protection_period_custom'
+                            ]
+                        ) ?>
+
+                    </div>
+
+                <?php endif; ?>
+
+            </div>
+
+        </div>
+
+    </section>
+
+
+    <div class="form-actions">
+
+        <a
+            class="form-button-secondary"
+            href="/app/form_prepare.php?form=<?= h($formId) ?>&step=2"
+        >
+            ← Back
+        </a>
+
+
+        <button
+            class="form-button-primary"
+            type="submit"
+        >
+            Continue →
+        </button>
+
+    </div>
+
+</form>
+
+
+<?php elseif ($step === 4): ?>
 
 
 <div class="coming-next">
@@ -1721,20 +2016,20 @@ body{
     </div>
 
     <h2>
-        Protection Period
+        Showings & Access
     </h2>
 
     <p>
-        Compensation is saved.
-        Next we’ll set the protection period.
+        Protection period is saved.
+        Next we’ll set the property-access and showing instructions.
     </p>
 
 
     <a
         class="form-button-secondary"
-        href="/app/form_prepare.php?form=<?= h($formId) ?>&step=2"
+        href="/app/form_prepare.php?form=<?= h($formId) ?>&step=3"
     >
-        ← Back to compensation
+        ← Back to protection period
     </a>
 
 </div>
@@ -1743,6 +2038,60 @@ body{
 <?php endif; ?>
 
 </main>
+<script>
+
+document.addEventListener(
+    'DOMContentLoaded',
+    function () {
+
+        const protectionChoices =
+            document.querySelectorAll(
+                'input[name="protection_period_choice"]'
+            );
+
+        const customArea =
+            document.getElementById(
+                'protection-custom'
+            );
+
+
+        function updateProtectionCustom() {
+
+            if (!customArea) {
+                return;
+            }
+
+            const selected =
+                document.querySelector(
+                    'input[name="protection_period_choice"]:checked'
+                );
+
+            customArea.classList.toggle(
+                'is-active',
+                selected
+                &&
+                selected.value === 'custom'
+            );
+        }
+
+
+        protectionChoices.forEach(
+            function (input) {
+
+                input.addEventListener(
+                    'change',
+                    updateProtectionCustom
+                );
+            }
+        );
+
+
+        updateProtectionCustom();
+
+    }
+);
+
+</script>
 
 </body>
 
