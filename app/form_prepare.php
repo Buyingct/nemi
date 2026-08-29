@@ -78,6 +78,13 @@ $form = [
 $draftKey = 'form_draft_' . $formId;
 
 $draft = $_SESSION[$draftKey] ?? [
+
+    /*
+    |--------------------------------------------------------------------------
+    | LISTING BASICS
+    |--------------------------------------------------------------------------
+    */
+
     'seller_1' => '',
     'seller_2' => '',
 
@@ -89,97 +96,254 @@ $draft = $_SESSION[$draftKey] ?? [
     'expiration_date' => '',
 
     'broker' => $form['brokerage'],
-];
 
-$errors = [];
-
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-
-    $draft['seller_1'] = trim(
-        (string)($_POST['seller_1'] ?? '')
-    );
-
-    $draft['seller_2'] = trim(
-        (string)($_POST['seller_2'] ?? '')
-    );
-
-    $draft['property_address'] = trim(
-        (string)($_POST['property_address'] ?? '')
-    );
-
-    $draft['list_price'] = trim(
-        (string)($_POST['list_price'] ?? '')
-    );
-
-    $draft['start_date'] = trim(
-        (string)($_POST['start_date'] ?? '')
-    );
-
-    $draft['expiration_date'] = trim(
-        (string)($_POST['expiration_date'] ?? '')
-    );
-
-    /*
-     * Broker is intentionally controlled by the brokerage/form setup,
-     * rather than asking the Realtor to type it every time.
-     */
-    $draft['broker'] = $form['brokerage'];
 
     /*
     |--------------------------------------------------------------------------
-    | BASIC VALIDATION
+    | COMPENSATION
     |--------------------------------------------------------------------------
     */
 
-    if ($draft['seller_1'] === '') {
-        $errors['seller_1'] = 'Enter the seller’s name.';
-    }
+    'service_fee_type' => 'percent',
+    'service_fee_value' => '',
 
-    if ($draft['property_address'] === '') {
-        $errors['property_address'] = 'Enter the property address.';
-    }
+    'buyer_broker_authorized' => 'yes',
 
-    if ($draft['list_price'] === '') {
-        $errors['list_price'] = 'Enter the listing price.';
-    }
+    'buyer_broker_fee_type' => 'percent',
+    'buyer_broker_fee_value' => '',
+];
 
-    if ($draft['start_date'] === '') {
-        $errors['start_date'] = 'Choose the start date.';
-    }
 
-    if ($draft['expiration_date'] === '') {
-        $errors['expiration_date'] = 'Choose the expiration date.';
-    }
-
-    /*
-     * Save draft even if incomplete.
-     * This is intentional — eventually Nemi autosaves continuously.
-     */
-    $_SESSION[$draftKey] = $draft;
-
-    if (!$errors) {
-
-        /*
-         * We are only building Step 1 today.
-         *
-         * Instead of leaving this form, move to Step 2 using a query flag.
-         * Step 2 will be Brokerage Compensation.
-         */
-
-        header(
-            'Location: /app/form_prepare.php'
-            . '?form=exclusive_right_to_sell'
-            . '&step=2'
-        );
-
-        exit;
-    }
-}
+/*
+|--------------------------------------------------------------------------
+| CURRENT STEP
+|--------------------------------------------------------------------------
+*/
 
 $step = max(
     1,
     (int)($_GET['step'] ?? 1)
 );
+
+
+$errors = [];
+
+
+/*
+|--------------------------------------------------------------------------
+| SAVE CURRENT STEP
+|--------------------------------------------------------------------------
+*/
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | STEP 1 — LISTING BASICS
+    |--------------------------------------------------------------------------
+    */
+
+    if ($step === 1) {
+
+        $draft['seller_1'] = trim(
+            (string)($_POST['seller_1'] ?? '')
+        );
+
+        $draft['seller_2'] = trim(
+            (string)($_POST['seller_2'] ?? '')
+        );
+
+        $draft['property_address'] = trim(
+            (string)($_POST['property_address'] ?? '')
+        );
+
+        $draft['list_price'] = trim(
+            (string)($_POST['list_price'] ?? '')
+        );
+
+        $draft['start_date'] = trim(
+            (string)($_POST['start_date'] ?? '')
+        );
+
+        $draft['expiration_date'] = trim(
+            (string)($_POST['expiration_date'] ?? '')
+        );
+
+        $draft['broker'] = $form['brokerage'];
+
+
+        if ($draft['seller_1'] === '') {
+            $errors['seller_1'] =
+                'Enter the seller’s name.';
+        }
+
+        if ($draft['property_address'] === '') {
+            $errors['property_address'] =
+                'Enter the property address.';
+        }
+
+        if ($draft['list_price'] === '') {
+            $errors['list_price'] =
+                'Enter the listing price.';
+        }
+
+        if ($draft['start_date'] === '') {
+            $errors['start_date'] =
+                'Choose the start date.';
+        }
+
+        if ($draft['expiration_date'] === '') {
+            $errors['expiration_date'] =
+                'Choose the expiration date.';
+        }
+
+
+        $_SESSION[$draftKey] = $draft;
+
+
+        if (!$errors) {
+
+            header(
+                'Location: /app/form_prepare.php'
+                . '?form=exclusive_right_to_sell'
+                . '&step=2'
+            );
+
+            exit;
+        }
+    }
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | STEP 2 — COMPENSATION
+    |--------------------------------------------------------------------------
+    */
+
+    if ($step === 2) {
+
+        $serviceFeeType =
+            (string)(
+                $_POST['service_fee_type']
+                ?? 'percent'
+            );
+
+        if (
+            $serviceFeeType !== 'percent'
+            &&
+            $serviceFeeType !== 'amount'
+        ) {
+            $serviceFeeType = 'percent';
+        }
+
+
+        $draft['service_fee_type'] =
+            $serviceFeeType;
+
+
+        $draft['service_fee_value'] =
+            trim(
+                (string)(
+                    $_POST['service_fee_value']
+                    ?? ''
+                )
+            );
+
+
+        $buyerAuthorized =
+            (string)(
+                $_POST['buyer_broker_authorized']
+                ?? 'yes'
+            );
+
+        if (
+            $buyerAuthorized !== 'yes'
+            &&
+            $buyerAuthorized !== 'no'
+        ) {
+            $buyerAuthorized = 'yes';
+        }
+
+
+        $draft['buyer_broker_authorized'] =
+            $buyerAuthorized;
+
+
+        $buyerFeeType =
+            (string)(
+                $_POST['buyer_broker_fee_type']
+                ?? 'percent'
+            );
+
+        if (
+            $buyerFeeType !== 'percent'
+            &&
+            $buyerFeeType !== 'amount'
+        ) {
+            $buyerFeeType = 'percent';
+        }
+
+
+        $draft['buyer_broker_fee_type'] =
+            $buyerFeeType;
+
+
+        $draft['buyer_broker_fee_value'] =
+            trim(
+                (string)(
+                    $_POST['buyer_broker_fee_value']
+                    ?? ''
+                )
+            );
+
+
+        if ($draft['service_fee_value'] === '') {
+
+            $errors['service_fee_value'] =
+                'Enter the brokerage service fee.';
+        }
+
+
+        if (
+            $draft['buyer_broker_authorized']
+            === 'no'
+        ) {
+
+            $draft['buyer_broker_fee_value'] = '';
+        }
+
+
+        if (
+            $draft['buyer_broker_authorized']
+            === 'yes'
+            &&
+            $draft['buyer_broker_fee_value']
+            === ''
+        ) {
+
+            $errors['buyer_broker_fee_value'] =
+                'Enter the buyer-broker compensation.';
+        }
+
+
+        $_SESSION[$draftKey] = $draft;
+
+
+        if (!$errors) {
+
+            header(
+                'Location: /app/form_prepare.php'
+                . '?form=exclusive_right_to_sell'
+                . '&step=3'
+            );
+
+            exit;
+        }
+    }
+}
+
+
 
 ?>
 <!doctype html>
