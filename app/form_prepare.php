@@ -1100,7 +1100,7 @@ body{
 </nav>
 
 
-form-page">
+<main class="form-page">
 
     <a
         class="back-link"
@@ -1386,12 +1386,12 @@ form-page">
     <?php elseif ($step === 2): ?>
 
 <form
-    class="prep-panel"
+    class="form-panel"
     method="post"
     action="/app/form_prepare.php?form=<?= h($formId) ?>&step=2"
 >
 
-    <div class="section-heading">
+    <div class="form-section-heading">
 
         <h2>
             Compensation
@@ -1404,25 +1404,25 @@ form-page">
     </div>
 
 
-    <div class="compensation-stack">
+    <div class="form-compensation-stack">
 
 
         <!-- BROKERAGE SERVICE FEE -->
 
-        <section class="comp-block">
+        <section class="form-block">
 
-            <div class="comp-block-title">
+            <div class="form-block-title">
                 Brokerage service fee
             </div>
 
-            <p class="comp-block-copy">
+            <p class="form-block-copy">
                 What service fee did you agree on with the seller?
             </p>
 
 
-            <div class="segmented">
+            <div class="form-segmented">
 
-                <label class="segment-option">
+                <label class="form-segment-option">
 
                     <input
                         type="radio"
@@ -1440,7 +1440,7 @@ form-page">
                 </label>
 
 
-                <label class="segment-option">
+                <label class="form-segment-option">
 
                     <input
                         type="radio"
@@ -1460,15 +1460,15 @@ form-page">
             </div>
 
 
-            <div class="comp-value-row">
+            <div class="form-value-row">
 
                 <div
-                    class="comp-value"
+                    class="form-value"
                     id="service-fee-wrap"
                 >
 
                     <span
-                        class="comp-dollar"
+                        class="form-value-prefix"
                         id="service-dollar"
                     >
                         $
@@ -1484,7 +1484,7 @@ form-page">
                     >
 
                     <span
-                        class="comp-unit"
+                        class="form-value-unit"
                         id="service-percent"
                     >
                         %
@@ -1509,22 +1509,22 @@ form-page">
 
         <!-- BUYER-BROKER COMPENSATION -->
 
-        <section class="comp-block">
+        <section class="form-block">
 
-            <div class="comp-block-title">
+            <div class="form-block-title">
                 Buyer-broker compensation
             </div>
 
-            <p class="comp-block-copy">
+            <p class="form-block-copy">
                 Will your recommendation include offering compensation
                 to a buyer’s brokerage?
             </p>
 
 
-            <div class="authorization-choices">
+            <div class="form-choice-grid">
 
 
-                <label class="authorization-choice">
+                <label class="form-choice">
 
                     <input
                         type="radio"
@@ -1535,7 +1535,7 @@ form-page">
                             : '' ?>
                     >
 
-                    <span class="authorization-card">
+                    <span class="form-choice-card">
 
                         <strong>
                             Yes
@@ -1550,7 +1550,7 @@ form-page">
                 </label>
 
 
-                <label class="authorization-choice">
+                <label class="form-choice">
 
                     <input
                         type="radio"
@@ -1561,7 +1561,7 @@ form-page">
                             : '' ?>
                     >
 
-                    <span class="authorization-card">
+                    <span class="form-choice-card">
 
                         <strong>
                             No
@@ -1597,11 +1597,11 @@ form-page">
 
 
                 <div
-                    class="segmented"
+                    class="form-segmented"
                     style="margin-top:10px;"
                 >
 
-                    <label class="segment-option">
+                    <label class="form-segment-option">
 
                         <input
                             type="radio"
@@ -1619,7 +1619,7 @@ form-page">
                     </label>
 
 
-                    <label class="segment-option">
+                    <label class="form-segment-option">
 
                         <input
                             type="radio"
@@ -1639,15 +1639,15 @@ form-page">
                 </div>
 
 
-                <div class="comp-value-row">
+                <div class="form-value-row">
 
                     <div
-                        class="comp-value"
+                        class="form-value"
                         id="buyer-fee-wrap"
                     >
 
                         <span
-                            class="comp-dollar"
+                            class="form-value-prefix"
                             id="buyer-dollar"
                         >
                             $
@@ -1663,7 +1663,7 @@ form-page">
                         >
 
                         <span
-                            class="comp-unit"
+                            class="form-value-unit"
                             id="buyer-percent"
                         >
                             %

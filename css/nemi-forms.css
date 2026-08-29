@@ -1093,3 +1093,104 @@ input:checked
     }
 
 }
+
+/* =========================================================
+   FORM STEP LAYOUT
+========================================================= */
+
+.form-compensation-stack,
+.form-step-content {
+
+    display: flex;
+    flex-direction: column;
+
+    gap: 28px;
+}
+
+
+/* =========================================================
+   BUYER COMPENSATION CONDITIONAL AREA
+========================================================= */
+
+.buyer-comp-details {
+
+    margin-top: 24px;
+}
+
+.buyer-comp-details.is-hidden {
+
+    display: none;
+}
+
+
+/* =========================================================
+   VALUE INPUT PREFIX / SUFFIX STATE
+========================================================= */
+
+.form-value-prefix {
+
+    display: none;
+}
+
+.form-value.has-prefix .form-value-prefix {
+
+    display: block;
+}
+
+.form-value.has-prefix .form-value-unit {
+
+    display: none;
+}
+
+.form-value.has-prefix input {
+
+    padding-left: 42px;
+}
+
+
+/* =========================================================
+   STEP 3 PLACEHOLDER COMPATIBILITY
+========================================================= */
+
+.coming-next {
+
+    padding:
+        60px
+        40px;
+
+    text-align: center;
+
+    border-radius: 28px;
+
+    background:
+        rgba(255, 255, 255, .76);
+
+    box-shadow:
+        0 18px 60px
+        rgba(27, 45, 67, .08);
+}
+
+.coming-next h2 {
+
+    margin:
+        0
+        0
+        12px;
+
+    font-size: 30px;
+}
+
+.coming-next p {
+
+    max-width: 580px;
+
+    margin:
+        0
+        auto
+        30px;
+
+    color:
+        var(--nemi-muted, #757575);
+
+    line-height: 1.7;
+}
