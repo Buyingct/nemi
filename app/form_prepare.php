@@ -373,6 +373,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     rel="stylesheet"
 >
 
+<link rel="stylesheet" href="/css/nemi-shell.css">
+<link rel="stylesheet" href="/css/nemi-forms.css">
+
 <style>
 
 :root{
@@ -1097,7 +1100,7 @@ body{
 </nav>
 
 
-<main class="page">
+form-page">
 
     <a
         class="back-link"
@@ -1126,29 +1129,34 @@ body{
     </p>
 
 
-    <div class="progress-row">
+   <div class="form-progress">
 
-        <div class="progress-line">
-            <div class="progress-fill"></div>
-        </div>
+    <div class="form-progress-track">
 
-        <div class="progress-label">
-            Listing basics
-        </div>
+        <div
+            class="form-progress-fill"
+            style="--progress:14%;"
+        ></div>
 
     </div>
+
+    <div class="form-progress-label">
+        Listing basics
+    </div>
+
+</div>
 
 
     <?php if ($step === 1): ?>
 
 
         <form
-            class="prep-panel"
+            class="form-panel"
             method="post"
             action="/app/form_prepare.php?form=<?= h($formId) ?>"
         >
 
-            <div class="section-heading">
+            <div class="form-section-heading">
 
                 <h2>
                     Let’s start with the listing.
@@ -1161,12 +1169,12 @@ body{
             </div>
 
 
-            <div class="field-grid">
+            <div class="form-field-grid">
 
 
                 <!-- SELLER 1 -->
 
-                <div class="field">
+                <div class="form-field">
 
                     <label for="seller_1">
                         Seller
@@ -1182,7 +1190,7 @@ body{
 
                     <?php if (isset($errors['seller_1'])): ?>
 
-                        <div class="field-error">
+                        <div class="form-field-error">
                             <?= h($errors['seller_1']) ?>
                         </div>
 
@@ -1193,7 +1201,7 @@ body{
 
                 <!-- SELLER 2 -->
 
-                <div class="field">
+                <div class="form-field">
 
                     <label for="seller_2">
                         Second seller
@@ -1206,7 +1214,7 @@ body{
                         value="<?= h($draft['seller_2']) ?>"
                     >
 
-                    <div class="field-help">
+                    <div class="form-field-help">
                         Leave blank if there is only one seller.
                     </div>
 
@@ -1215,7 +1223,7 @@ body{
 
                 <!-- PROPERTY -->
 
-                <div class="field full">
+                <div class="form-field full">
 
                     <label for="property_address">
                         Property address
@@ -1232,7 +1240,7 @@ body{
 
                     <?php if (isset($errors['property_address'])): ?>
 
-                        <div class="field-error">
+                        <div class="form-field-error">
                             <?= h($errors['property_address']) ?>
                         </div>
 
@@ -1243,15 +1251,15 @@ body{
 
                 <!-- LIST PRICE -->
 
-                <div class="field full">
+                <div class="form-field full">
 
                     <label for="list_price">
                         Listing price
                     </label>
 
-                    <div class="money-wrap">
+                    <div class="form-money">
 
-                        <span class="money-symbol">
+                        <span class="form-money-symbol">
                             $
                         </span>
 
@@ -1268,7 +1276,7 @@ body{
 
                     <?php if (isset($errors['list_price'])): ?>
 
-                        <div class="field-error">
+                        <div class="form-field-error">
                             <?= h($errors['list_price']) ?>
                         </div>
 
@@ -1279,7 +1287,7 @@ body{
 
                 <!-- START DATE -->
 
-                <div class="field">
+                <div class="form-field">
 
                     <label for="start_date">
                         Listing starts
@@ -1294,7 +1302,7 @@ body{
 
                     <?php if (isset($errors['start_date'])): ?>
 
-                        <div class="field-error">
+                        <div class="form-field-error">
                             <?= h($errors['start_date']) ?>
                         </div>
 
@@ -1305,7 +1313,7 @@ body{
 
                 <!-- EXPIRATION DATE -->
 
-                <div class="field">
+                <div class="form-field">
 
                     <label for="expiration_date">
                         Listing expires
@@ -1320,7 +1328,7 @@ body{
 
                     <?php if (isset($errors['expiration_date'])): ?>
 
-                        <div class="field-error">
+                        <div class="form-field-error">
                             <?= h($errors['expiration_date']) ?>
                         </div>
 
@@ -1331,7 +1339,7 @@ body{
 
                 <!-- BROKERAGE -->
 
-                <div class="field full">
+                <div class="form-field full">
 
                     <label for="broker">
                         Brokerage
@@ -1344,7 +1352,7 @@ body{
                         readonly
                     >
 
-                    <div class="field-help">
+                    <div class="form-field-help">
                         Nemi filled this in from your brokerage profile.
                     </div>
 
@@ -1354,17 +1362,17 @@ body{
             </div>
 
 
-            <div class="actions">
+            <div class="form-actions">
 
                 <a
-                    class="secondary-button"
+                    class="form-button-secondary"
                     href="/app/forms.php"
                 >
                     Cancel
                 </a>
 
                 <button
-                    class="primary-button"
+                    class="form-button-primary"
                     type="submit"
                 >
                     Continue →
@@ -1489,7 +1497,7 @@ body{
 
             <?php if (isset($errors['service_fee_value'])): ?>
 
-                <div class="field-error">
+                <div class="form-field-error">
                     <?= h($errors['service_fee_value']) ?>
                 </div>
 
@@ -1577,7 +1585,7 @@ body{
             >
 
                 <div
-                    class="field"
+                    class="form-field"
                     style="margin-top:24px;"
                 >
 
@@ -1668,7 +1676,7 @@ body{
 
                 <?php if (isset($errors['buyer_broker_fee_value'])): ?>
 
-                    <div class="field-error">
+                    <div class="form-field-error">
                         <?= h($errors['buyer_broker_fee_value']) ?>
                     </div>
 
@@ -1681,10 +1689,10 @@ body{
     </div>
 
 
-    <div class="actions">
+    <div class="form-actions">
 
         <a
-            class="secondary-button"
+            class="form-button-secondary"
             href="/app/form_prepare.php?form=<?= h($formId) ?>&step=1"
         >
             ← Back
@@ -1692,7 +1700,7 @@ body{
 
 
         <button
-            class="primary-button"
+            class="form-button-primary"
             type="submit"
         >
             Continue →
@@ -1723,7 +1731,7 @@ body{
 
 
     <a
-        class="secondary-button"
+        class="form-button-secondary"
         href="/app/form_prepare.php?form=<?= h($formId) ?>&step=2"
     >
         ← Back to compensation
