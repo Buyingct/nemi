@@ -49,8 +49,8 @@ $forms = [
         'office' => false,
     ],
     [
-        'id' => 'listing_agreement',
-        'name' => 'Listing Agreement',
+        'id' => 'exclusive_right_to_sell',
+        'name' => 'Exclusive Right to Sell Agreement',
         'category' => 'seller',
         'common' => true,
         'office' => false,
