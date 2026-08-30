@@ -1194,3 +1194,54 @@ input:checked
 
     line-height: 1.7;
 }
+/* =========================================================
+   THREE-COLUMN CHOICE GRID
+========================================================= */
+
+.form-choice-grid-three {
+
+    grid-template-columns:
+        repeat(
+            3,
+            minmax(0, 1fr)
+        );
+
+    max-width: 100%;
+}
+
+
+/* =========================================================
+   COMPACT CHOICE CARD
+========================================================= */
+
+.form-choice-card-compact {
+
+    min-height: 105px;
+}
+
+
+/* =========================================================
+   PROTECTION PERIOD CUSTOM FIELD
+========================================================= */
+
+.protection-custom {
+
+    display: none;
+
+    max-width: 320px;
+}
+
+.protection-custom.is-active {
+
+    display: block;
+}
+
+
+@media (max-width: 720px) {
+
+    .form-choice-grid-three {
+
+        grid-template-columns: 1fr;
+    }
+
+}
