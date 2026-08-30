@@ -1254,3 +1254,19 @@ input:checked
 .protection-custom.is-active {
     display: block;
 }
+
+/* =========================================================
+   CUSTOM SHOWING INSTRUCTIONS
+========================================================= */
+
+.showing-custom {
+
+    display: none;
+
+    margin-top: 24px;
+}
+
+.showing-custom.is-active {
+
+    display: block;
+}

@@ -122,6 +122,15 @@ $draftDefaults = [
 'protection_period_choice' => '60',
 'protection_period_days' => '60',
 
+/*
+|--------------------------------------------------------------------------
+| SHOWINGS & ACCESS
+|--------------------------------------------------------------------------
+*/
+
+'showing_instruction_choice' => 'standard',
+'showing_instructions' => '',
+
 ];
 
 /*
@@ -474,8 +483,78 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             exit;
         }
     }
+/*
+|--------------------------------------------------------------------------
+| STEP 4 — SHOWINGS & ACCESS
+|--------------------------------------------------------------------------
+*/
 
-    
+elseif ($step === 4) {
+
+    $choice =
+        (string)(
+            $_POST['showing_instruction_choice']
+            ?? 'standard'
+        );
+
+
+    if (
+        $choice !== 'standard'
+        &&
+        $choice !== 'custom'
+    ) {
+
+        $choice = 'standard';
+    }
+
+
+    $draft['showing_instruction_choice'] =
+        $choice;
+
+
+    if ($choice === 'standard') {
+
+        $draft['showing_instructions'] = '';
+
+    } else {
+
+        $instructions =
+            trim(
+                (string)(
+                    $_POST['showing_instructions']
+                    ?? ''
+                )
+            );
+
+
+        if ($instructions === '') {
+
+            $errors['showing_instructions'] =
+                'Enter the special showing instructions.';
+
+        } else {
+
+            $draft['showing_instructions'] =
+                $instructions;
+        }
+    }
+
+
+    $_SESSION[$draftKey] = $draft;
+
+
+    if (!$errors) {
+
+        header(
+            'Location: /app/form_prepare.php'
+            . '?form=exclusive_right_to_sell'
+            . '&step=5'
+        );
+
+        exit;
+    }
+}
+
 }
 
 
@@ -2049,8 +2128,163 @@ body{
 
 </form>
 
-
 <?php elseif ($step === 4): ?>
+
+
+<form
+    class="form-panel"
+    method="post"
+    action="/app/form_prepare.php?form=<?= h($formId) ?>&step=4"
+>
+
+    <div class="form-section-heading">
+
+        <h2>
+            Showings & Access
+        </h2>
+
+        <p>
+            Are there any special instructions for showing the property?
+        </p>
+
+    </div>
+
+
+    <section class="form-block">
+
+        <div class="form-block-title">
+            Showing instructions
+        </div>
+
+        <p class="form-block-copy">
+            If there’s nothing unusual about access,
+            you can leave this as standard.
+        </p>
+
+
+        <div class="form-choice-grid">
+
+
+            <!-- STANDARD -->
+
+            <label class="form-choice">
+
+                <input
+                    type="radio"
+                    name="showing_instruction_choice"
+                    value="standard"
+                    <?= $draft['showing_instruction_choice'] === 'standard'
+                        ? 'checked'
+                        : '' ?>
+                >
+
+                <span class="form-choice-card">
+
+                    <strong>
+                        No special instructions
+                    </strong>
+
+                    <small>
+                        Use the normal showing and access process.
+                    </small>
+
+                </span>
+
+            </label>
+
+
+            <!-- CUSTOM -->
+
+            <label class="form-choice">
+
+                <input
+                    type="radio"
+                    name="showing_instruction_choice"
+                    value="custom"
+                    <?= $draft['showing_instruction_choice'] === 'custom'
+                        ? 'checked'
+                        : '' ?>
+                >
+
+                <span class="form-choice-card">
+
+                    <strong>
+                        Add instructions
+                    </strong>
+
+                    <small>
+                        Include special instructions for access or showings.
+                    </small>
+
+                </span>
+
+            </label>
+
+
+        </div>
+
+
+        <div
+            class="form-conditional showing-custom"
+            id="showing-custom"
+        >
+
+            <div class="form-field">
+
+                <label for="showing_instructions">
+                    Special showing instructions
+                </label>
+
+                <textarea
+                    id="showing_instructions"
+                    name="showing_instructions"
+                    placeholder="Example: Please give seller at least 2 hours notice before showings."
+                ><?= h($draft['showing_instructions']) ?></textarea>
+
+
+                <div class="form-field-help">
+                    These instructions will be included with the agreement where applicable.
+                </div>
+
+
+                <?php if (isset($errors['showing_instructions'])): ?>
+
+                    <div class="form-field-error">
+                        <?= h($errors['showing_instructions']) ?>
+                    </div>
+
+                <?php endif; ?>
+
+            </div>
+
+        </div>
+
+    </section>
+
+
+    <div class="form-actions">
+
+        <a
+            class="form-button-secondary"
+            href="/app/form_prepare.php?form=<?= h($formId) ?>&step=3"
+        >
+            ← Back
+        </a>
+
+
+        <button
+            class="form-button-primary"
+            type="submit"
+        >
+            Continue →
+        </button>
+
+    </div>
+
+</form>
+
+
+<?php elseif ($step === 5): ?>
 
 
 <div class="coming-next">
@@ -2060,20 +2294,19 @@ body{
     </div>
 
     <h2>
-        Showings & Access
+        Seller Disclosures
     </h2>
 
     <p>
-        Protection period is saved.
-        Next we’ll set the property-access and showing instructions.
+        Showing instructions are saved.
+        Next we’ll review the seller disclosure items required by the agreement.
     </p>
-
 
     <a
         class="form-button-secondary"
-        href="/app/form_prepare.php?form=<?= h($formId) ?>&step=3"
+        href="/app/form_prepare.php?form=<?= h($formId) ?>&step=4"
     >
-        ← Back to protection period
+        ← Back to showings & access
     </a>
 
 </div>
@@ -2082,60 +2315,8 @@ body{
 <?php endif; ?>
 
 </main>
-<script>
 
-document.addEventListener(
-    'DOMContentLoaded',
-    function () {
-
-        const protectionChoices =
-            document.querySelectorAll(
-                'input[name="protection_period_choice"]'
-            );
-
-        const customArea =
-            document.getElementById(
-                'protection-custom'
-            );
-
-
-        function updateProtectionCustom() {
-
-            if (!customArea) {
-                return;
-            }
-
-            const selected =
-                document.querySelector(
-                    'input[name="protection_period_choice"]:checked'
-                );
-
-            customArea.classList.toggle(
-                'is-active',
-                selected
-                &&
-                selected.value === 'custom'
-            );
-        }
-
-
-        protectionChoices.forEach(
-            function (input) {
-
-                input.addEventListener(
-                    'change',
-                    updateProtectionCustom
-                );
-            }
-        );
-
-
-        updateProtectionCustom();
-
-    }
-);
-
-</script>
+<script src="/js/nemi-forms.js"></script>
 
 </body>
 
