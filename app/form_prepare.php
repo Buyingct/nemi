@@ -1478,11 +1478,13 @@ body{
 
 <div class="form-field">
 
+    <div class="seller-label-row">
+
     <label for="seller_1">
         Seller
     </label>
 
-
+    
     <button
         type="button"
         class="seller-contact-toggle"
@@ -1490,6 +1492,8 @@ body{
     >
         Choose from Contacts
     </button>
+
+</div>
 
 
     <div
