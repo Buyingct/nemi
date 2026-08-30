@@ -2326,12 +2326,12 @@ body{
     <div class="form-section-heading">
 
         <h2>
-            Review & Sign
-        </h2>
+    Exclusive Right to Sell Agreement
+</h2>
 
-        <p>
-            Check the agreement details before sending it to your client.
-        </p>
+<p>
+    Review the agreement details, then sign and send it to your client.
+</p>
 
     </div>
 
@@ -2344,7 +2344,7 @@ body{
     <section class="form-block">
 
         <div class="form-block-title">
-            Listing
+            Agreement Details
         </div>
 
 
@@ -2422,24 +2422,179 @@ body{
 
 
 
-    <!-- =====================================================
-         COMPENSATION
-    ====================================================== -->
+     <!-- =====================================================
+     FEES
+====================================================== -->
 
-    <section class="form-block">
+<section class="form-block">
+
+    <div class="form-review-title-row">
 
         <div class="form-block-title">
-            Compensation
+            Fees
+        </div>
+
+        <a
+            href="/app/form_prepare.php?form=<?= h($formId) ?>&step=2"
+            class="form-review-edit"
+        >
+            Edit
+        </a>
+
+    </div>
+
+
+    <?php
+
+    $serviceFeeIsPercent =
+        $draft['service_fee_type'] === 'percent';
+
+    $buyerFeeIsPercent =
+        $draft['buyer_broker_authorized'] === 'yes'
+        &&
+        $draft['buyer_broker_fee_type'] === 'percent';
+
+    $canShowFeeSplit =
+        $serviceFeeIsPercent
+        &&
+        $buyerFeeIsPercent
+        &&
+        is_numeric($draft['service_fee_value'])
+        &&
+        is_numeric($draft['buyer_broker_fee_value']);
+
+    $listingBrokeragePercent = null;
+
+    if ($canShowFeeSplit) {
+
+        $listingBrokeragePercent =
+            (float)$draft['service_fee_value']
+            -
+            (float)$draft['buyer_broker_fee_value'];
+    }
+
+    ?>
+
+
+    <?php if ($canShowFeeSplit): ?>
+
+        <div class="form-fee-total">
+
+            <small>
+                Total service fee
+            </small>
+
+            <strong>
+                <?= h($draft['service_fee_value']) ?>%
+            </strong>
+
+            <span>
+                TOTAL
+            </span>
+
         </div>
 
 
-        <div class="form-review-list">
+        <div class="form-fee-breakdown">
 
+
+            <div class="form-fee-part">
+
+                <strong>
+                    <?= h(
+                        rtrim(
+                            rtrim(
+                                number_format(
+                                    $listingBrokeragePercent,
+                                    2,
+                                    '.',
+                                    ''
+                                ),
+                                '0'
+                            ),
+                            '.'
+                        )
+                    ) ?>%
+                </strong>
+
+                <div>
+
+                    <b>
+                        <?= h($draft['broker']) ?>
+                    </b>
+
+                    <small>
+                        Represents the seller
+                    </small>
+
+                </div>
+
+            </div>
+
+
+            <div class="form-fee-plus">
+                +
+            </div>
+
+
+            <div class="form-fee-part">
+
+                <strong>
+                    <?= h($draft['buyer_broker_fee_value']) ?>%
+                </strong>
+
+                <div>
+
+                    <b>
+                        Buyer’s Brokerage
+                    </b>
+
+                    <small>
+                        Represents the buyer
+                    </small>
+
+                </div>
+
+            </div>
+
+
+        </div>
+
+
+        <div class="form-fee-confirmation">
+
+            <?= h($draft['service_fee_value']) ?>% total =
+            <?= h(
+                rtrim(
+                    rtrim(
+                        number_format(
+                            $listingBrokeragePercent,
+                            2,
+                            '.',
+                            ''
+                        ),
+                        '0'
+                    ),
+                    '.'
+                )
+            ) ?>% listing brokerage
+            +
+            <?= h($draft['buyer_broker_fee_value']) ?>% buyer’s brokerage
+
+        </div>
+
+
+    <?php else: ?>
+
+        <div class="form-review-list">
 
             <div class="form-review-row">
 
                 <div>
-                    <small>Brokerage service fee</small>
+
+                    <small>
+                        Total service fee
+                    </small>
 
                     <strong>
 
@@ -2454,56 +2609,48 @@ body{
                         <?php endif; ?>
 
                     </strong>
+
                 </div>
 
-
-                <a
-                    href="/app/form_prepare.php?form=<?= h($formId) ?>&step=2"
-                    class="form-review-edit"
-                >
-                    Edit
-                </a>
-
             </div>
-
 
 
             <div class="form-review-row">
 
                 <div>
-                    <small>Buyer-broker compensation</small>
+
+                    <small>
+                        Buyer’s brokerage
+                    </small>
 
                     <strong>
 
                         <?php if ($draft['buyer_broker_authorized'] === 'no'): ?>
 
-                            Not authorized
+                            No compensation offered
+
+                        <?php elseif ($draft['buyer_broker_fee_type'] === 'percent'): ?>
+
+                            <?= h($draft['buyer_broker_fee_value']) ?>%
 
                         <?php else: ?>
 
-                            Authorized —
-
-                            <?php if ($draft['buyer_broker_fee_type'] === 'percent'): ?>
-
-                                <?= h($draft['buyer_broker_fee_value']) ?>%
-
-                            <?php else: ?>
-
-                                $<?= h($draft['buyer_broker_fee_value']) ?>
-
-                            <?php endif; ?>
+                            $<?= h($draft['buyer_broker_fee_value']) ?>
 
                         <?php endif; ?>
 
                     </strong>
+
                 </div>
 
             </div>
 
-
+     
         </div>
 
-    </section>
+    <?php endif; ?>
+
+</section>
 
 
 

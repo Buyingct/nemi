@@ -1470,3 +1470,164 @@ input:checked
     }
 
 }
+/* =========================================================
+   REVIEW — FEE SUMMARY
+========================================================= */
+
+.form-fee-total {
+
+    display: flex;
+    align-items: baseline;
+
+    gap: 10px;
+
+    margin-top: 22px;
+}
+
+
+.form-fee-total small {
+
+    color:
+        var(--nemi-muted, #757575);
+
+    font-size: 13px;
+}
+
+
+.form-fee-total strong {
+
+    color:
+        var(--nemi-text, #172033);
+
+    font-size: 34px;
+    font-weight: 700;
+
+    line-height: 1;
+}
+
+
+.form-fee-total span {
+
+    color:
+        var(--nemi-primary, #327d7c);
+
+    font-size: 11px;
+    font-weight: 800;
+
+    letter-spacing: .08em;
+}
+
+
+.form-fee-breakdown {
+
+    display: flex;
+    align-items: stretch;
+
+    gap: 16px;
+
+    margin-top: 24px;
+}
+
+
+.form-fee-part {
+
+    display: flex;
+    align-items: center;
+
+    flex: 1;
+
+    gap: 18px;
+
+    padding: 22px;
+
+    border:
+        1px solid
+        rgba(23, 32, 51, .09);
+
+    border-radius: 18px;
+
+    background:
+        rgba(255, 255, 255, .55);
+}
+
+
+.form-fee-part > strong {
+
+    flex: 0 0 auto;
+
+    color:
+        var(--nemi-text, #172033);
+
+    font-size: 28px;
+    font-weight: 700;
+}
+
+
+.form-fee-part b {
+
+    display: block;
+
+    color:
+        var(--nemi-text, #172033);
+
+    font-size: 14px;
+}
+
+
+.form-fee-part small {
+
+    display: block;
+
+    margin-top: 4px;
+
+    color:
+        var(--nemi-muted, #757575);
+
+    font-size: 12px;
+}
+
+
+.form-fee-plus {
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    color:
+        var(--nemi-muted, #757575);
+
+    font-size: 22px;
+}
+
+
+.form-fee-confirmation {
+
+    margin-top: 18px;
+
+    padding-top: 16px;
+
+    border-top:
+        1px solid
+        rgba(23, 32, 51, .07);
+
+    color:
+        var(--nemi-muted, #757575);
+
+    font-size: 12px;
+}
+
+
+@media (max-width: 720px) {
+
+    .form-fee-breakdown {
+
+        flex-direction: column;
+    }
+
+
+    .form-fee-plus {
+
+        min-height: 20px;
+    }
+
+}
