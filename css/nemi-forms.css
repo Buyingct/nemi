@@ -1771,3 +1771,222 @@ input:checked
 
     gap: 14px;
 }
+
+/* =========================================================
+   SELLER CONTACT INPUT
+========================================================= */
+
+.seller-input-wrap {
+    position: relative;
+    width: 100%;
+}
+
+
+/*
+|--------------------------------------------------------------------------
+| PLUS / CONTACT BUTTON
+|--------------------------------------------------------------------------
+*/
+
+.seller-contact-plus {
+    position: absolute;
+
+    left: 6px;
+    top: 50%;
+
+    z-index: 2;
+
+    width: 46px;
+    height: 46px;
+
+    transform: translateY(-50%);
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    padding: 0;
+
+    border: 0;
+    border-radius: 12px;
+
+    background:
+        rgba(50, 125, 124, .08);
+
+    color:
+        var(--nemi-primary, #327d7c);
+
+    font: inherit;
+    font-size: 27px;
+    font-weight: 400;
+    line-height: 1;
+
+    cursor: pointer;
+
+    transition:
+        background .15s ease,
+        transform .15s ease;
+}
+
+
+.seller-contact-plus:hover {
+    background:
+        rgba(50, 125, 124, .14);
+}
+
+
+.seller-contact-plus:active {
+    transform:
+        translateY(-50%)
+        scale(.96);
+}
+
+
+/*
+|--------------------------------------------------------------------------
+| MAKE ROOM FOR PLUS
+|--------------------------------------------------------------------------
+*/
+
+.seller-input-wrap input {
+    padding-left: 64px !important;
+}
+
+
+/*
+|--------------------------------------------------------------------------
+| CONTACT PICKER
+|--------------------------------------------------------------------------
+*/
+
+.seller-contact-panel {
+    grid-column: 1 / -1;
+
+    width: 100%;
+
+    padding: 18px;
+
+    border:
+        1px solid
+        rgba(23, 32, 51, .08);
+
+    border-radius: 18px;
+
+    background:
+        rgba(255, 255, 255, .98);
+
+    box-shadow:
+        0 16px 40px
+        rgba(23, 32, 51, .08);
+}
+
+
+.seller-contact-panel-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    gap: 16px;
+
+    margin-bottom: 14px;
+}
+
+
+.seller-contact-panel-head strong {
+    font-size: 14px;
+}
+
+
+.seller-contact-close {
+    width: 36px;
+    height: 36px;
+
+    border: 0;
+    border-radius: 50%;
+
+    background:
+        rgba(23, 32, 51, .05);
+
+    color:
+        var(--nemi-text, #172033);
+
+    font: inherit;
+    font-size: 22px;
+
+    cursor: pointer;
+}
+
+
+.seller-contact-search {
+    width: 100%;
+
+    min-height: 46px;
+
+    margin-bottom: 10px;
+    padding: 0 14px;
+
+    border:
+        1px solid
+        rgba(23, 32, 51, .10);
+
+    border-radius: 12px;
+
+    font: inherit;
+    font-size: 14px;
+
+    outline: none;
+}
+
+
+.seller-contact-list {
+    display: flex;
+    flex-direction: column;
+
+    gap: 4px;
+
+    max-height: 240px;
+
+    overflow-y: auto;
+}
+
+
+.seller-contact-option {
+    display: flex;
+    flex-direction: column;
+
+    gap: 2px;
+
+    width: 100%;
+
+    padding: 11px 12px;
+
+    border: 0;
+    border-radius: 10px;
+
+    background: transparent;
+
+    color:
+        var(--nemi-text, #172033);
+
+    font: inherit;
+    text-align: left;
+
+    cursor: pointer;
+}
+
+
+.seller-contact-option:hover {
+    background:
+        rgba(50, 125, 124, .07);
+}
+
+
+.seller-contact-option strong {
+    font-size: 13px;
+}
+
+
+.seller-contact-option small {
+    color: #7a838d;
+    font-size: 11px;
+}

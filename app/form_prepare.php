@@ -91,15 +91,39 @@ $draftDefaults = [
     |--------------------------------------------------------------------------
     */
 
-    'seller_1' => '',
+   'seller_1' => '',
 'seller_2' => '',
+
+
+/*
+|--------------------------------------------------------------------------
+| SELLER 1 CONTACT SNAPSHOT
+|--------------------------------------------------------------------------
+*/
 
 'seller_1_contact_id' => '',
 'seller_1_email' => '',
+'seller_1_phone' => '',
 'seller_1_street' => '',
 'seller_1_city' => '',
 'seller_1_state' => '',
 'seller_1_zip' => '',
+
+
+/*
+|--------------------------------------------------------------------------
+| SELLER 2 CONTACT SNAPSHOT
+|--------------------------------------------------------------------------
+*/
+
+'seller_2_contact_id' => '',
+'seller_2_email' => '',
+'seller_2_phone' => '',
+'seller_2_street' => '',
+'seller_2_city' => '',
+'seller_2_state' => '',
+'seller_2_zip' => '',
+
 
 'property_address' => '',
 
@@ -231,11 +255,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         /*
 |--------------------------------------------------------------------------
-| SELLER CONTACT
+| SELLER 1 CONTACT
 |--------------------------------------------------------------------------
 */
 
-$selectedContactId =
+$seller1ContactId =
     trim(
         (string)(
             $_POST['seller_1_contact_id']
@@ -243,52 +267,171 @@ $selectedContactId =
         )
     );
 
+
 $draft['seller_1_contact_id'] =
-    $selectedContactId;
+    $seller1ContactId;
 
 
 if (
-    $selectedContactId !== ''
+    $seller1ContactId !== ''
     &&
-    ctype_digit($selectedContactId)
+    ctype_digit($seller1ContactId)
 ) {
 
-    $selectedContact =
+    $seller1Contact =
         getPersonalContact(
-            (int)$selectedContactId,
+            (int)$seller1ContactId,
             $uid
         );
 
 
-    if ($selectedContact) {
+    if ($seller1Contact) {
+
+        /*
+        |--------------------------------------------------------------------------
+        | SNAPSHOT THE CONTACT AS IT EXISTS NOW
+        |--------------------------------------------------------------------------
+        */
 
         $draft['seller_1'] =
             trim(
-                $selectedContact['first_name']
+                $seller1Contact['first_name']
                 . ' '
-                . $selectedContact['last_name']
+                . $seller1Contact['last_name']
             );
 
         $draft['seller_1_email'] =
-            (string)$selectedContact['email'];
+            (string)($seller1Contact['email'] ?? '');
+
+        $draft['seller_1_phone'] =
+            (string)($seller1Contact['phone'] ?? '');
 
         $draft['seller_1_street'] =
-            (string)$selectedContact['street'];
+            (string)($seller1Contact['street'] ?? '');
 
         $draft['seller_1_city'] =
-            (string)$selectedContact['city'];
+            (string)($seller1Contact['city'] ?? '');
 
         $draft['seller_1_state'] =
-            (string)$selectedContact['state'];
+            (string)($seller1Contact['state'] ?? '');
 
         $draft['seller_1_zip'] =
-            (string)$selectedContact['zip'];
+            (string)($seller1Contact['zip'] ?? '');
+
+    } else {
+
+        $draft['seller_1_contact_id'] = '';
+
     }
 
 }
 else {
 
+    /*
+    |--------------------------------------------------------------------------
+    | MANUAL SELLER
+    |--------------------------------------------------------------------------
+    |
+    | Important:
+    | Clear any old contact snapshot so a previously selected
+    | person's email/address does not remain attached to a
+    | manually typed seller.
+    |
+    */
+
     $draft['seller_1_contact_id'] = '';
+
+    $draft['seller_1_email'] = '';
+    $draft['seller_1_phone'] = '';
+    $draft['seller_1_street'] = '';
+    $draft['seller_1_city'] = '';
+    $draft['seller_1_state'] = '';
+    $draft['seller_1_zip'] = '';
+}
+
+
+/*
+|--------------------------------------------------------------------------
+| SELLER 2 CONTACT
+|--------------------------------------------------------------------------
+*/
+
+$seller2ContactId =
+    trim(
+        (string)(
+            $_POST['seller_2_contact_id']
+            ?? ''
+        )
+    );
+
+
+$draft['seller_2_contact_id'] =
+    $seller2ContactId;
+
+
+if (
+    $seller2ContactId !== ''
+    &&
+    ctype_digit($seller2ContactId)
+) {
+
+    $seller2Contact =
+        getPersonalContact(
+            (int)$seller2ContactId,
+            $uid
+        );
+
+
+    if ($seller2Contact) {
+
+        /*
+        |--------------------------------------------------------------------------
+        | SNAPSHOT SELLER 2
+        |--------------------------------------------------------------------------
+        */
+
+        $draft['seller_2'] =
+            trim(
+                $seller2Contact['first_name']
+                . ' '
+                . $seller2Contact['last_name']
+            );
+
+        $draft['seller_2_email'] =
+            (string)($seller2Contact['email'] ?? '');
+
+        $draft['seller_2_phone'] =
+            (string)($seller2Contact['phone'] ?? '');
+
+        $draft['seller_2_street'] =
+            (string)($seller2Contact['street'] ?? '');
+
+        $draft['seller_2_city'] =
+            (string)($seller2Contact['city'] ?? '');
+
+        $draft['seller_2_state'] =
+            (string)($seller2Contact['state'] ?? '');
+
+        $draft['seller_2_zip'] =
+            (string)($seller2Contact['zip'] ?? '');
+
+    } else {
+
+        $draft['seller_2_contact_id'] = '';
+
+    }
+
+}
+else {
+
+    $draft['seller_2_contact_id'] = '';
+
+    $draft['seller_2_email'] = '';
+    $draft['seller_2_phone'] = '';
+    $draft['seller_2_street'] = '';
+    $draft['seller_2_city'] = '';
+    $draft['seller_2_state'] = '';
+    $draft['seller_2_zip'] = '';
 }
 
         if ($draft['seller_1'] === '') {
@@ -644,7 +787,84 @@ elseif ($step === 4) {
 
 }
 
+/*
+|--------------------------------------------------------------------------
+| AGREEMENT SELLER CONTACT INFORMATION
+|--------------------------------------------------------------------------
+|
+| The CAR agreement has shared Seller contact fields.
+|
+| We keep each seller's contact information separate internally,
+| then choose available information for the agreement itself.
+|
+*/
 
+
+/*
+|--------------------------------------------------------------------------
+| EMAIL
+|--------------------------------------------------------------------------
+*/
+
+$agreementSellerEmail =
+    $draft['seller_1_email'] !== ''
+        ? $draft['seller_1_email']
+        : $draft['seller_2_email'];
+
+
+/*
+|--------------------------------------------------------------------------
+| PHONE
+|--------------------------------------------------------------------------
+*/
+
+$agreementSellerPhone =
+    $draft['seller_1_phone'] !== ''
+        ? $draft['seller_1_phone']
+        : $draft['seller_2_phone'];
+
+
+/*
+|--------------------------------------------------------------------------
+| MAILING ADDRESS
+|--------------------------------------------------------------------------
+|
+| Do not combine half of one person's address with half
+| of another person's address.
+|
+| If Seller 1 has a street address, use Seller 1's complete
+| address snapshot. Otherwise use Seller 2's.
+|
+*/
+
+if ($draft['seller_1_street'] !== '') {
+
+    $agreementSellerStreet =
+        $draft['seller_1_street'];
+
+    $agreementSellerCity =
+        $draft['seller_1_city'];
+
+    $agreementSellerState =
+        $draft['seller_1_state'];
+
+    $agreementSellerZip =
+        $draft['seller_1_zip'];
+
+} else {
+
+    $agreementSellerStreet =
+        $draft['seller_2_street'];
+
+    $agreementSellerCity =
+        $draft['seller_2_city'];
+
+    $agreementSellerState =
+        $draft['seller_2_state'];
+
+    $agreementSellerZip =
+        $draft['seller_2_zip'];
+}
 
 
 ?>
@@ -1474,110 +1694,43 @@ body{
             <div class="form-field-grid">
 
 
-                <!-- SELLER 1 -->
+              
+             <!-- SELLER 1 -->
 
 <div class="form-field">
-
-    <div class="seller-label-row">
 
     <label for="seller_1">
         Seller
     </label>
 
-    
-    <button
-        type="button"
-        class="seller-contact-toggle"
-        id="seller-contact-toggle"
-    >
-        Choose from Contacts
-    </button>
+    <div class="seller-input-wrap">
 
-</div>
+        <button
+            type="button"
+            class="seller-contact-plus"
+            data-contact-target="1"
+            aria-label="Choose seller from Contacts"
+            title="Choose from Contacts"
+        >
+            +
+        </button>
 
-
-    <div
-        class="seller-contact-panel"
-        id="seller-contact-panel"
-        hidden
-    >
-
-        <?php if (!$myContacts): ?>
-
-            <div class="seller-contact-empty">
-                No contacts yet.
-            </div>
-
-        <?php else: ?>
-
-            <input
-                type="search"
-                id="seller-contact-search"
-                class="seller-contact-search"
-                placeholder="Search contacts..."
-                autocomplete="off"
-            >
-
-
-            <div class="seller-contact-list">
-
-                <?php foreach ($myContacts as $contact): ?>
-
-                    <?php
-                    $contactName =
-                        trim(
-                            $contact['first_name']
-                            . ' '
-                            . $contact['last_name']
-                        );
-                    ?>
-
-                    <button
-                        type="button"
-                        class="seller-contact-option"
-                        data-contact-id="<?= h($contact['id']) ?>"
-                        data-name="<?= h($contactName) ?>"
-                    >
-
-                        <strong>
-                            <?= h($contactName) ?>
-                        </strong>
-
-                        <?php if (!empty($contact['email'])): ?>
-
-                            <small>
-                                <?= h($contact['email']) ?>
-                            </small>
-
-                        <?php endif; ?>
-
-                    </button>
-
-                <?php endforeach; ?>
-
-            </div>
-
-        <?php endif; ?>
+        <input
+            id="seller_1"
+            name="seller_1"
+            type="text"
+            value="<?= h($draft['seller_1']) ?>"
+            autocomplete="name"
+        >
 
     </div>
 
-
     <input
         type="hidden"
-        name="seller_1_contact_id"
         id="seller_1_contact_id"
+        name="seller_1_contact_id"
         value="<?= h($draft['seller_1_contact_id']) ?>"
     >
-
-
-    <input
-        id="seller_1"
-        name="seller_1"
-        type="text"
-        value="<?= h($draft['seller_1']) ?>"
-        autocomplete="name"
-    >
-
 
     <?php if (isset($errors['seller_1'])): ?>
 
@@ -1590,26 +1743,138 @@ body{
 </div>
 
 
-                <!-- SELLER 2 -->
+<!-- SELLER 2 -->
 
-                <div class="form-field">
+<div class="form-field">
 
-                    <label for="seller_2">
-                        Second seller
-                    </label>
+    <label for="seller_2">
+        Seller 2
+    </label>
 
-                    <input
-                        id="seller_2"
-                        name="seller_2"
-                        type="text"
-                        value="<?= h($draft['seller_2']) ?>"
-                    >
+    <div class="seller-input-wrap">
 
-                    <div class="form-field-help">
-                        Leave blank if there is only one seller.
-                    </div>
+        <button
+            type="button"
+            class="seller-contact-plus"
+            data-contact-target="2"
+            aria-label="Choose second seller from Contacts"
+            title="Choose from Contacts"
+        >
+            +
+        </button>
 
-                </div>
+        <input
+            id="seller_2"
+            name="seller_2"
+            type="text"
+            value="<?= h($draft['seller_2']) ?>"
+            autocomplete="name"
+        >
+
+    </div>
+
+    <input
+        type="hidden"
+        id="seller_2_contact_id"
+        name="seller_2_contact_id"
+        value="<?= h($draft['seller_2_contact_id'] ?? '') ?>"
+    >
+
+    <div class="form-field-help">
+        Leave blank if there is only one seller.
+    </div>
+
+</div>
+
+
+<!-- CONTACT PICKER -->
+
+<div
+    class="seller-contact-panel"
+    id="seller-contact-panel"
+    hidden
+>
+
+    <div class="seller-contact-panel-head">
+
+        <strong>
+            Choose from Contacts
+        </strong>
+
+        <button
+            type="button"
+            class="seller-contact-close"
+            id="seller-contact-close"
+            aria-label="Close Contacts"
+        >
+            ×
+        </button>
+
+    </div>
+
+
+    <?php if (!$myContacts): ?>
+
+        <div class="seller-contact-empty">
+            No contacts yet.
+        </div>
+
+    <?php else: ?>
+
+        <input
+            type="search"
+            id="seller-contact-search"
+            class="seller-contact-search"
+            placeholder="Search contacts..."
+            autocomplete="off"
+        >
+
+
+        <div class="seller-contact-list">
+
+            <?php foreach ($myContacts as $contact): ?>
+
+                <?php
+                $contactName =
+                    trim(
+                        $contact['first_name']
+                        . ' '
+                        . $contact['last_name']
+                    );
+                ?>
+
+                <button
+                    type="button"
+                    class="seller-contact-option"
+
+                    data-contact-id="<?= h($contact['id']) ?>"
+                    data-name="<?= h($contactName) ?>"
+                >
+
+                    <strong>
+                        <?= h($contactName) ?>
+                    </strong>
+
+                    <?php if (!empty($contact['email'])): ?>
+
+                        <small>
+                            <?= h($contact['email']) ?>
+                        </small>
+
+                    <?php endif; ?>
+
+                </button>
+
+            <?php endforeach; ?>
+
+        </div>
+
+    <?php endif; ?>
+
+</div>
+
+
+
 
 
                 <!-- PROPERTY -->
@@ -2583,7 +2848,147 @@ body{
 
     </section>
 
+          <!-- =====================================================
+         SELLER CONTACT DETAILS
+    ====================================================== -->
 
+    <section class="form-block">
+
+        <div class="form-review-title-row">
+
+            <div class="form-block-title">
+                Seller Contact Details
+            </div>
+
+            <a
+                href="/app/form_prepare.php?form=<?= h($formId) ?>&step=1"
+                class="form-review-edit"
+            >
+                Edit
+            </a>
+
+        </div>
+
+
+        <div class="form-review-list">
+
+
+            <!-- EMAIL -->
+
+            <div class="form-review-row">
+
+                <div>
+
+                    <small>
+                        Seller email
+                    </small>
+
+                    <strong>
+
+                        <?php if ($agreementSellerEmail !== ''): ?>
+
+                            <?= h($agreementSellerEmail) ?>
+
+                        <?php else: ?>
+
+                            Not provided
+
+                        <?php endif; ?>
+
+                    </strong>
+
+                </div>
+
+            </div>
+
+
+            <!-- PHONE -->
+
+            <div class="form-review-row">
+
+                <div>
+
+                    <small>
+                        Seller phone
+                    </small>
+
+                    <strong>
+
+                        <?php if ($agreementSellerPhone !== ''): ?>
+
+                            <?= h($agreementSellerPhone) ?>
+
+                        <?php else: ?>
+
+                            Not provided
+
+                        <?php endif; ?>
+
+                    </strong>
+
+                </div>
+
+            </div>
+
+
+            <!-- ADDRESS -->
+
+            <div class="form-review-row">
+
+                <div>
+
+                    <small>
+                        Seller mailing address
+                    </small>
+
+                    <strong>
+
+                        <?php if ($agreementSellerStreet !== ''): ?>
+
+                            <?= h($agreementSellerStreet) ?>
+
+                            <?php if (
+                                $agreementSellerCity !== ''
+                                ||
+                                $agreementSellerState !== ''
+                                ||
+                                $agreementSellerZip !== ''
+                            ): ?>
+
+                                <br>
+
+                                <?= h($agreementSellerCity) ?>
+
+                                <?php if (
+                                    $agreementSellerCity !== ''
+                                    &&
+                                    $agreementSellerState !== ''
+                                ): ?>
+                                    ,
+                                <?php endif; ?>
+
+                                <?= h($agreementSellerState) ?>
+
+                                <?= h($agreementSellerZip) ?>
+
+                            <?php endif; ?>
+
+                        <?php else: ?>
+
+                            Not provided
+
+                        <?php endif; ?>
+
+                    </strong>
+
+                </div>
+
+            </div>
+
+
+        </div>
+
+    </section>
 
      <!-- =====================================================
      FEES
@@ -3040,85 +3445,144 @@ body{
 <script>
 document.addEventListener('DOMContentLoaded', function () {
 
-    const toggle =
-        document.getElementById('seller-contact-toggle');
-
     const panel =
         document.getElementById('seller-contact-panel');
 
     const search =
         document.getElementById('seller-contact-search');
 
-    const sellerInput =
-        document.getElementById('seller_1');
+    const closeButton =
+        document.getElementById('seller-contact-close');
 
-    const contactIdInput =
-        document.getElementById('seller_1_contact_id');
+    const plusButtons =
+        document.querySelectorAll('.seller-contact-plus');
+
+    const contactOptions =
+        document.querySelectorAll('.seller-contact-option');
 
 
     /*
     |--------------------------------------------------------------------------
-    | Only run this on Step 1
+    | NOTHING TO DO IF THIS IS NOT STEP 1
     |--------------------------------------------------------------------------
     */
 
-    if (!toggle || !panel || !sellerInput || !contactIdInput) {
+    if (!panel || plusButtons.length === 0) {
         return;
     }
 
 
     /*
     |--------------------------------------------------------------------------
-    | OPEN / CLOSE CONTACTS
+    | WHICH SELLER ARE WE CHOOSING FOR?
     |--------------------------------------------------------------------------
     */
 
-    toggle.addEventListener('click', function () {
+    let activeSeller = null;
 
-        panel.hidden = !panel.hidden;
 
-        if (!panel.hidden && search) {
-            search.focus();
-        }
+    /*
+    |--------------------------------------------------------------------------
+    | OPEN CONTACT PICKER
+    |--------------------------------------------------------------------------
+    */
+
+    plusButtons.forEach(function (button) {
+
+        button.addEventListener('click', function () {
+
+            activeSeller =
+                button.dataset.contactTarget || null;
+
+
+            if (!activeSeller) {
+                return;
+            }
+
+
+            panel.hidden = false;
+
+
+            if (search) {
+
+                search.value = '';
+
+                contactOptions.forEach(function (option) {
+                    option.hidden = false;
+                });
+
+                search.focus();
+            }
+
+        });
 
     });
 
 
     /*
     |--------------------------------------------------------------------------
-    | SELECT CONTACT
+    | CLOSE CONTACT PICKER
     |--------------------------------------------------------------------------
     */
 
-    document
-        .querySelectorAll('.seller-contact-option')
-        .forEach(function (button) {
+    if (closeButton) {
 
-            button.addEventListener('click', function () {
+        closeButton.addEventListener('click', function () {
 
-                const contactId =
-                    button.dataset.contactId || '';
+            panel.hidden = true;
 
-                const contactName =
-                    button.dataset.name || '';
-
-
-                contactIdInput.value =
-                    contactId;
-
-                sellerInput.value =
-                    contactName;
-
-
-                toggle.textContent =
-                    '✓ ' + contactName;
-
-
-                panel.hidden = true;
-
-            });
+            activeSeller = null;
 
         });
+
+    }
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | CHOOSE CONTACT
+    |--------------------------------------------------------------------------
+    */
+
+    contactOptions.forEach(function (button) {
+
+        button.addEventListener('click', function () {
+
+            if (!activeSeller) {
+                return;
+            }
+
+
+            const sellerInput =
+                document.getElementById(
+                    'seller_' + activeSeller
+                );
+
+            const contactIdInput =
+                document.getElementById(
+                    'seller_' + activeSeller + '_contact_id'
+                );
+
+
+            if (!sellerInput || !contactIdInput) {
+                return;
+            }
+
+
+            sellerInput.value =
+                button.dataset.name || '';
+
+            contactIdInput.value =
+                button.dataset.contactId || '';
+
+
+            panel.hidden = true;
+
+            activeSeller = null;
+
+        });
+
+    });
 
 
     /*
@@ -3137,21 +3601,19 @@ document.addEventListener('DOMContentLoaded', function () {
                     .toLowerCase();
 
 
-            document
-                .querySelectorAll('.seller-contact-option')
-                .forEach(function (button) {
+            contactOptions.forEach(function (button) {
 
-                    const contactText =
-                        button.textContent
-                            .toLowerCase();
+                const text =
+                    button.textContent
+                        .toLowerCase();
 
 
-                    button.hidden =
-                        query !== ''
-                        &&
-                        !contactText.includes(query);
+                button.hidden =
+                    query !== ''
+                    &&
+                    !text.includes(query);
 
-                });
+            });
 
         });
 
@@ -3160,24 +3622,41 @@ document.addEventListener('DOMContentLoaded', function () {
 
     /*
     |--------------------------------------------------------------------------
-    | REALTOR MANUALLY CHANGES SELLER
+    | MANUAL SELLER EDIT
     |--------------------------------------------------------------------------
     |
-    | Once the Realtor edits the name manually,
-    | we stop treating it as the selected saved contact.
+    | If Realtor manually changes a seller after choosing
+    | a saved contact, remove the saved contact connection.
     |
     */
 
-    sellerInput.addEventListener('input', function () {
+    ['1', '2'].forEach(function (sellerNumber) {
 
-        if (contactIdInput.value === '') {
+        const sellerInput =
+            document.getElementById(
+                'seller_' + sellerNumber
+            );
+
+        const contactIdInput =
+            document.getElementById(
+                'seller_' + sellerNumber + '_contact_id'
+            );
+
+
+        if (!sellerInput || !contactIdInput) {
             return;
         }
 
-        contactIdInput.value = '';
 
-        toggle.textContent =
-            'Choose from Contacts';
+        sellerInput.addEventListener('input', function () {
+
+            if (contactIdInput.value !== '') {
+
+                contactIdInput.value = '';
+
+            }
+
+        });
 
     });
 
