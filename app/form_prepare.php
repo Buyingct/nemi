@@ -153,6 +153,8 @@ $step = max(
 );
 
 
+
+
 $errors = [];
 
 
@@ -248,7 +250,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     |--------------------------------------------------------------------------
     */
 
-    if ($step === 2) {
+    elseif ($step === 2) {
 
         $serviceFeeType =
             (string)(
@@ -263,7 +265,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         ) {
             $serviceFeeType = 'percent';
         }
-
 
         $draft['service_fee_type'] =
             $serviceFeeType;
@@ -292,7 +293,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $buyerAuthorized = 'yes';
         }
 
-
         $draft['buyer_broker_authorized'] =
             $buyerAuthorized;
 
@@ -310,7 +310,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         ) {
             $buyerFeeType = 'percent';
         }
-
 
         $draft['buyer_broker_fee_type'] =
             $buyerFeeType;
@@ -367,89 +366,118 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
             exit;
         }
-
-      /*
-|--------------------------------------------------------------------------
-| STEP 3 — PROTECTION PERIOD
-|--------------------------------------------------------------------------
-*/
-
-if ($step === 3) {
-
-    $choice = (string)(
-        $_POST['protection_period_choice']
-        ?? '60'
-    );
-
-    if (
-        $choice !== '30'
-        &&
-        $choice !== '60'
-        &&
-        $choice !== 'custom'
-    ) {
-        $choice = '60';
     }
 
-    $draft['protection_period_choice'] =
-        $choice;
 
+    /*
+    |--------------------------------------------------------------------------
+    | STEP 3 — PROTECTION PERIOD
+    |--------------------------------------------------------------------------
+    */
 
-    if ($choice === '30') {
+    elseif ($step === 3) {
 
-        $draft['protection_period_days'] =
-            '30';
-
-    } elseif ($choice === '60') {
-
-        $draft['protection_period_days'] =
-            '60';
-
-    } else {
-
-        $customDays = trim(
+        $choice =
             (string)(
-                $_POST['protection_period_custom']
+                $_POST['protection_period_choice']
                 ?? ''
-            )
-        );
+            );
+
 
         if (
-            $customDays === ''
-            ||
-            !ctype_digit($customDays)
-            ||
-            (int)$customDays < 1
+            $choice !== '30'
+            &&
+            $choice !== '60'
+            &&
+            $choice !== 'custom'
         ) {
 
-            $errors['protection_period_custom'] =
-                'Enter the number of days.';
+            $errors['protection_period_choice'] =
+                'Choose a protection period.';
+        }
 
-        } else {
 
-            $draft['protection_period_days'] =
-                $customDays;
+        if (!$errors) {
+
+            $draft['protection_period_choice'] =
+                $choice;
+
+
+            if ($choice === '30') {
+
+                $draft['protection_period_days'] =
+                    '30';
+            }
+
+
+            elseif ($choice === '60') {
+
+                $draft['protection_period_days'] =
+                    '60';
+            }
+
+
+            elseif ($choice === 'custom') {
+
+                $customDays =
+                    trim(
+                        (string)(
+                            $_POST[
+                                'protection_period_custom'
+                            ]
+                            ?? ''
+                        )
+                    );
+
+
+                if (
+                    $customDays === ''
+                    ||
+                    !ctype_digit($customDays)
+                    ||
+                    (int)$customDays < 1
+                ) {
+
+                    $errors[
+                        'protection_period_custom'
+                    ] =
+                        'Enter the number of days.';
+                }
+
+                else {
+
+                    $draft[
+                        'protection_period_days'
+                    ] =
+                        $customDays;
+                }
+            }
+        }
+
+
+        /*
+         * Save the selected choice even if
+         * Custom still needs correction.
+         */
+
+        $_SESSION[$draftKey] = $draft;
+
+
+        if (!$errors) {
+
+            header(
+                'Location: /app/form_prepare.php'
+                . '?form=exclusive_right_to_sell'
+                . '&step=4'
+            );
+
+            exit;
         }
     }
 
-
-    $_SESSION[$draftKey] = $draft;
-
-
-    if (!$errors) {
-
-        header(
-            'Location: /app/form_prepare.php'
-            . '?form=exclusive_right_to_sell'
-            . '&step=4'
-        );
-
-        exit;
-    }
+    
 }
 
-    }
-}
 
 
 
