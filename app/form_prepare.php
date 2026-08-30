@@ -27,6 +27,12 @@ if ($meName === '') {
         : 'Realtor';
 }
 
+require_once __DIR__ . '/contact_storage.php';
+
+$myContacts = getPersonalContacts(
+    $uid
+);
+
 /*
 |--------------------------------------------------------------------------
 | FORM REGISTRY — V0.1
@@ -86,9 +92,16 @@ $draftDefaults = [
     */
 
     'seller_1' => '',
-    'seller_2' => '',
+'seller_2' => '',
 
-    'property_address' => '',
+'seller_1_contact_id' => '',
+'seller_1_email' => '',
+'seller_1_street' => '',
+'seller_1_city' => '',
+'seller_1_state' => '',
+'seller_1_zip' => '',
+
+'property_address' => '',
 
     'list_price' => '',
 
@@ -216,6 +229,67 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         $draft['broker'] = $form['brokerage'];
 
+        /*
+|--------------------------------------------------------------------------
+| SELLER CONTACT
+|--------------------------------------------------------------------------
+*/
+
+$selectedContactId =
+    trim(
+        (string)(
+            $_POST['seller_1_contact_id']
+            ?? ''
+        )
+    );
+
+$draft['seller_1_contact_id'] =
+    $selectedContactId;
+
+
+if (
+    $selectedContactId !== ''
+    &&
+    ctype_digit($selectedContactId)
+) {
+
+    $selectedContact =
+        getPersonalContact(
+            (int)$selectedContactId,
+            $uid
+        );
+
+
+    if ($selectedContact) {
+
+        $draft['seller_1'] =
+            trim(
+                $selectedContact['first_name']
+                . ' '
+                . $selectedContact['last_name']
+            );
+
+        $draft['seller_1_email'] =
+            (string)$selectedContact['email'];
+
+        $draft['seller_1_street'] =
+            (string)$selectedContact['street'];
+
+        $draft['seller_1_city'] =
+            (string)$selectedContact['city'];
+
+        $draft['seller_1_state'] =
+            (string)$selectedContact['state'];
+
+        $draft['seller_1_zip'] =
+            (string)$selectedContact['zip'];
+    }
+
+}
+else {
+
+    $draft['seller_1_contact_id'] = '';
+}
 
         if ($draft['seller_1'] === '') {
             $errors['seller_1'] =
@@ -1402,29 +1476,114 @@ body{
 
                 <!-- SELLER 1 -->
 
-                <div class="form-field">
+<div class="form-field">
 
-                    <label for="seller_1">
-                        Seller
-                    </label>
+    <label for="seller_1">
+        Seller
+    </label>
 
-                    <input
-                        id="seller_1"
-                        name="seller_1"
-                        type="text"
-                        value="<?= h($draft['seller_1']) ?>"
-                        autocomplete="name"
+
+    <button
+        type="button"
+        class="seller-contact-toggle"
+        id="seller-contact-toggle"
+    >
+        Choose from Contacts
+    </button>
+
+
+    <div
+        class="seller-contact-panel"
+        id="seller-contact-panel"
+        hidden
+    >
+
+        <?php if (!$myContacts): ?>
+
+            <div class="seller-contact-empty">
+                No contacts yet.
+            </div>
+
+        <?php else: ?>
+
+            <input
+                type="search"
+                id="seller-contact-search"
+                class="seller-contact-search"
+                placeholder="Search contacts..."
+                autocomplete="off"
+            >
+
+
+            <div class="seller-contact-list">
+
+                <?php foreach ($myContacts as $contact): ?>
+
+                    <?php
+                    $contactName =
+                        trim(
+                            $contact['first_name']
+                            . ' '
+                            . $contact['last_name']
+                        );
+                    ?>
+
+                    <button
+                        type="button"
+                        class="seller-contact-option"
+                        data-contact-id="<?= h($contact['id']) ?>"
+                        data-name="<?= h($contactName) ?>"
                     >
 
-                    <?php if (isset($errors['seller_1'])): ?>
+                        <strong>
+                            <?= h($contactName) ?>
+                        </strong>
 
-                        <div class="form-field-error">
-                            <?= h($errors['seller_1']) ?>
-                        </div>
+                        <?php if (!empty($contact['email'])): ?>
 
-                    <?php endif; ?>
+                            <small>
+                                <?= h($contact['email']) ?>
+                            </small>
 
-                </div>
+                        <?php endif; ?>
+
+                    </button>
+
+                <?php endforeach; ?>
+
+            </div>
+
+        <?php endif; ?>
+
+    </div>
+
+
+    <input
+        type="hidden"
+        name="seller_1_contact_id"
+        id="seller_1_contact_id"
+        value="<?= h($draft['seller_1_contact_id']) ?>"
+    >
+
+
+    <input
+        id="seller_1"
+        name="seller_1"
+        type="text"
+        value="<?= h($draft['seller_1']) ?>"
+        autocomplete="name"
+    >
+
+
+    <?php if (isset($errors['seller_1'])): ?>
+
+        <div class="form-field-error">
+            <?= h($errors['seller_1']) ?>
+        </div>
+
+    <?php endif; ?>
+
+</div>
 
 
                 <!-- SELLER 2 -->
@@ -2873,6 +3032,153 @@ body{
 </main>
 
 <script src="/js/nemi-forms.js"></script>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+
+    const toggle =
+        document.getElementById('seller-contact-toggle');
+
+    const panel =
+        document.getElementById('seller-contact-panel');
+
+    const search =
+        document.getElementById('seller-contact-search');
+
+    const sellerInput =
+        document.getElementById('seller_1');
+
+    const contactIdInput =
+        document.getElementById('seller_1_contact_id');
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | Only run this on Step 1
+    |--------------------------------------------------------------------------
+    */
+
+    if (!toggle || !panel || !sellerInput || !contactIdInput) {
+        return;
+    }
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | OPEN / CLOSE CONTACTS
+    |--------------------------------------------------------------------------
+    */
+
+    toggle.addEventListener('click', function () {
+
+        panel.hidden = !panel.hidden;
+
+        if (!panel.hidden && search) {
+            search.focus();
+        }
+
+    });
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | SELECT CONTACT
+    |--------------------------------------------------------------------------
+    */
+
+    document
+        .querySelectorAll('.seller-contact-option')
+        .forEach(function (button) {
+
+            button.addEventListener('click', function () {
+
+                const contactId =
+                    button.dataset.contactId || '';
+
+                const contactName =
+                    button.dataset.name || '';
+
+
+                contactIdInput.value =
+                    contactId;
+
+                sellerInput.value =
+                    contactName;
+
+
+                toggle.textContent =
+                    '✓ ' + contactName;
+
+
+                panel.hidden = true;
+
+            });
+
+        });
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | SEARCH CONTACTS
+    |--------------------------------------------------------------------------
+    */
+
+    if (search) {
+
+        search.addEventListener('input', function () {
+
+            const query =
+                search.value
+                    .trim()
+                    .toLowerCase();
+
+
+            document
+                .querySelectorAll('.seller-contact-option')
+                .forEach(function (button) {
+
+                    const contactText =
+                        button.textContent
+                            .toLowerCase();
+
+
+                    button.hidden =
+                        query !== ''
+                        &&
+                        !contactText.includes(query);
+
+                });
+
+        });
+
+    }
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | REALTOR MANUALLY CHANGES SELLER
+    |--------------------------------------------------------------------------
+    |
+    | Once the Realtor edits the name manually,
+    | we stop treating it as the selected saved contact.
+    |
+    */
+
+    sellerInput.addEventListener('input', function () {
+
+        if (contactIdInput.value === '') {
+            return;
+        }
+
+        contactIdInput.value = '';
+
+        toggle.textContent =
+            'Choose from Contacts';
+
+    });
+
+});
+</script>
 
 </body>
 
