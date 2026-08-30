@@ -77,7 +77,7 @@ $form = [
 
 $draftKey = 'form_draft_' . $formId;
 
-$draft = $_SESSION[$draftKey] ?? [
+$draftDefaults = [
 
     /*
     |--------------------------------------------------------------------------
@@ -124,6 +124,22 @@ $draft = $_SESSION[$draftKey] ?? [
 
 ];
 
+/*
+|--------------------------------------------------------------------------
+| MERGE SAVED DRAFT WITH CURRENT FORM DEFAULTS
+|--------------------------------------------------------------------------
+|
+| This allows us to add new fields to a form without breaking drafts
+| that were created before those fields existed.
+|
+*/
+
+$savedDraft = $_SESSION[$draftKey] ?? [];
+
+$draft = array_replace(
+    $draftDefaults,
+    is_array($savedDraft) ? $savedDraft : []
+);
 
 /*
 |--------------------------------------------------------------------------
