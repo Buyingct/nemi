@@ -1245,3 +1245,12 @@ input:checked
     }
 
 }
+
+.protection-custom {
+    display: none;
+    max-width: 320px;
+}
+
+.protection-custom.is-active {
+    display: block;
+}
