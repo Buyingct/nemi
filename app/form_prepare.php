@@ -124,12 +124,14 @@ $draftDefaults = [
 
 /*
 |--------------------------------------------------------------------------
-| SHOWINGS & ACCESS
+| FINAL DETAILS
 |--------------------------------------------------------------------------
 */
 
 'showing_instruction_choice' => 'standard',
 'showing_instructions' => '',
+
+'other_terms' => '',
 
 ];
 
@@ -156,10 +158,14 @@ $draft = array_replace(
 |--------------------------------------------------------------------------
 */
 
-$step = max(
-    1,
-    (int)($_GET['step'] ?? 1)
-);
+$stepParam = (string)($_GET['step'] ?? '1');
+
+$step = $stepParam === 'review'
+    ? 'review'
+    : max(
+        1,
+        (int)$stepParam
+    );
 
 
 
@@ -485,7 +491,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 /*
 |--------------------------------------------------------------------------
-| STEP 4 — SHOWINGS & ACCESS
+| STEP 4 — FINAL DETAILS
 |--------------------------------------------------------------------------
 */
 
@@ -512,47 +518,54 @@ elseif ($step === 4) {
         $choice;
 
 
+    /*
+    |--------------------------------------------------------------------------
+    | SPECIAL SHOWING INSTRUCTIONS
+    |--------------------------------------------------------------------------
+    */
+
     if ($choice === 'standard') {
 
         $draft['showing_instructions'] = '';
 
     } else {
 
-        $instructions =
+        $draft['showing_instructions'] =
             trim(
                 (string)(
                     $_POST['showing_instructions']
                     ?? ''
                 )
             );
-
-
-        if ($instructions === '') {
-
-            $errors['showing_instructions'] =
-                'Enter the special showing instructions.';
-
-        } else {
-
-            $draft['showing_instructions'] =
-                $instructions;
-        }
     }
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | OTHER TERMS / SPECIAL INSTRUCTIONS
+    |--------------------------------------------------------------------------
+    */
+
+    $draft['other_terms'] =
+        trim(
+            (string)(
+                $_POST['other_terms']
+                ?? ''
+            )
+        );
 
 
     $_SESSION[$draftKey] = $draft;
 
 
-    if (!$errors) {
+    
+    header(
+        'Location: /app/form_prepare.php'
+        . '?form=exclusive_right_to_sell'
+        . '&step=review'
+    );
 
-        header(
-            'Location: /app/form_prepare.php'
-            . '?form=exclusive_right_to_sell'
-            . '&step=5'
-        );
-
-        exit;
-    }
+    exit;
 }
 
 }
@@ -2140,15 +2153,19 @@ body{
     <div class="form-section-heading">
 
         <h2>
-            Showings & Access
+            Final Details
         </h2>
 
         <p>
-            Are there any special instructions for showing the property?
+            Add anything else that needs to appear in the agreement.
         </p>
 
     </div>
 
+
+    <!-- =====================================================
+         SHOWING INSTRUCTIONS
+    ====================================================== -->
 
     <section class="form-block">
 
@@ -2157,15 +2174,12 @@ body{
         </div>
 
         <p class="form-block-copy">
-            If there’s nothing unusual about access,
-            you can leave this as standard.
+            Are there any special instructions for showing the property?
         </p>
 
 
         <div class="form-choice-grid">
 
-
-            <!-- STANDARD -->
 
             <label class="form-choice">
 
@@ -2192,8 +2206,6 @@ body{
 
             </label>
 
-
-            <!-- CUSTOM -->
 
             <label class="form-choice">
 
@@ -2241,25 +2253,45 @@ body{
                     placeholder="Example: Please give seller at least 2 hours notice before showings."
                 ><?= h($draft['showing_instructions']) ?></textarea>
 
-
-                <div class="form-field-help">
-                    These instructions will be included with the agreement where applicable.
-                </div>
-
-
-                <?php if (isset($errors['showing_instructions'])): ?>
-
-                    <div class="form-field-error">
-                        <?= h($errors['showing_instructions']) ?>
-                    </div>
-
-                <?php endif; ?>
-
             </div>
 
         </div>
 
     </section>
+
+
+
+    <!-- =====================================================
+         OTHER TERMS
+    ====================================================== -->
+
+    <section class="form-block">
+
+        <div class="form-block-title">
+            Other Terms, Conditions, or Special Instructions
+        </div>
+
+        <p class="form-block-copy">
+            Leave this blank if there are no additional terms.
+        </p>
+
+
+        <div class="form-field">
+
+            <label for="other_terms">
+                Other terms
+            </label>
+
+            <textarea
+                id="other_terms"
+                name="other_terms"
+                placeholder="Enter any additional terms, conditions, or special instructions."
+            ><?= h($draft['other_terms']) ?></textarea>
+
+        </div>
+
+    </section>
+
 
 
     <div class="form-actions">
@@ -2276,7 +2308,7 @@ body{
             class="form-button-primary"
             type="submit"
         >
-            Continue →
+            Done — Review & Sign →
         </button>
 
     </div>
@@ -2284,30 +2316,407 @@ body{
 </form>
 
 
-<?php elseif ($step === 5): ?>
+
+<?php elseif ($step === 'review'): ?>
 
 
-<div class="coming-next">
+<div class="form-panel">
 
-    <div class="form-eyebrow">
-        Next
+
+    <div class="form-section-heading">
+
+        <h2>
+            Review & Sign
+        </h2>
+
+        <p>
+            Check the agreement details before sending it to your client.
+        </p>
+
     </div>
 
-    <h2>
-        Seller Disclosures
-    </h2>
 
-    <p>
-        Showing instructions are saved.
-        Next we’ll review the seller disclosure items required by the agreement.
-    </p>
 
-    <a
-        class="form-button-secondary"
-        href="/app/form_prepare.php?form=<?= h($formId) ?>&step=4"
-    >
-        ← Back to showings & access
-    </a>
+    <!-- =====================================================
+         LISTING
+    ====================================================== -->
+
+    <section class="form-block">
+
+        <div class="form-block-title">
+            Listing
+        </div>
+
+
+        <div class="form-review-list">
+
+
+            <div class="form-review-row">
+
+                <div>
+                    <small>Seller</small>
+
+                    <strong>
+                        <?= h($draft['seller_1']) ?>
+
+                        <?php if ($draft['seller_2'] !== ''): ?>
+                            &amp; <?= h($draft['seller_2']) ?>
+                        <?php endif; ?>
+                    </strong>
+                </div>
+
+                <a
+                    href="/app/form_prepare.php?form=<?= h($formId) ?>&step=1"
+                    class="form-review-edit"
+                >
+                    Edit
+                </a>
+
+            </div>
+
+
+            <div class="form-review-row">
+
+                <div>
+                    <small>Property</small>
+
+                    <strong>
+                        <?= h($draft['property_address']) ?>
+                    </strong>
+                </div>
+
+            </div>
+
+
+            <div class="form-review-row">
+
+                <div>
+                    <small>Listing price</small>
+
+                    <strong>
+                        $<?= h($draft['list_price']) ?>
+                    </strong>
+                </div>
+
+            </div>
+
+
+            <div class="form-review-row">
+
+                <div>
+                    <small>Listing period</small>
+
+                    <strong>
+                        <?= h($draft['start_date']) ?>
+                        –
+                        <?= h($draft['expiration_date']) ?>
+                    </strong>
+                </div>
+
+            </div>
+
+
+        </div>
+
+    </section>
+
+
+
+    <!-- =====================================================
+         COMPENSATION
+    ====================================================== -->
+
+    <section class="form-block">
+
+        <div class="form-block-title">
+            Compensation
+        </div>
+
+
+        <div class="form-review-list">
+
+
+            <div class="form-review-row">
+
+                <div>
+                    <small>Brokerage service fee</small>
+
+                    <strong>
+
+                        <?php if ($draft['service_fee_type'] === 'percent'): ?>
+
+                            <?= h($draft['service_fee_value']) ?>%
+
+                        <?php else: ?>
+
+                            $<?= h($draft['service_fee_value']) ?>
+
+                        <?php endif; ?>
+
+                    </strong>
+                </div>
+
+
+                <a
+                    href="/app/form_prepare.php?form=<?= h($formId) ?>&step=2"
+                    class="form-review-edit"
+                >
+                    Edit
+                </a>
+
+            </div>
+
+
+
+            <div class="form-review-row">
+
+                <div>
+                    <small>Buyer-broker compensation</small>
+
+                    <strong>
+
+                        <?php if ($draft['buyer_broker_authorized'] === 'no'): ?>
+
+                            Not authorized
+
+                        <?php else: ?>
+
+                            Authorized —
+
+                            <?php if ($draft['buyer_broker_fee_type'] === 'percent'): ?>
+
+                                <?= h($draft['buyer_broker_fee_value']) ?>%
+
+                            <?php else: ?>
+
+                                $<?= h($draft['buyer_broker_fee_value']) ?>
+
+                            <?php endif; ?>
+
+                        <?php endif; ?>
+
+                    </strong>
+                </div>
+
+            </div>
+
+
+        </div>
+
+    </section>
+
+
+
+    <!-- =====================================================
+         PROTECTION
+    ====================================================== -->
+
+    <section class="form-block">
+
+        <div class="form-review-title-row">
+
+            <div class="form-block-title">
+                Protection Period
+            </div>
+
+            <a
+                href="/app/form_prepare.php?form=<?= h($formId) ?>&step=3"
+                class="form-review-edit"
+            >
+                Edit
+            </a>
+
+        </div>
+
+
+        <strong class="form-review-value">
+            <?= h($draft['protection_period_days']) ?> days
+        </strong>
+
+    </section>
+
+
+
+    <!-- =====================================================
+         FINAL DETAILS
+    ====================================================== -->
+
+    <section class="form-block">
+
+        <div class="form-review-title-row">
+
+            <div class="form-block-title">
+                Final Details
+            </div>
+
+            <a
+                href="/app/form_prepare.php?form=<?= h($formId) ?>&step=4"
+                class="form-review-edit"
+            >
+                Edit
+            </a>
+
+        </div>
+
+
+        <div class="form-review-list">
+
+
+            <div class="form-review-row">
+
+                <div>
+
+                    <small>
+                        Special showing instructions
+                    </small>
+
+                    <strong>
+                        <?= $draft['showing_instructions'] !== ''
+                            ? nl2br(h($draft['showing_instructions']))
+                            : 'None' ?>
+                    </strong>
+
+                </div>
+
+            </div>
+
+
+
+            <div class="form-review-row">
+
+                <div>
+
+                    <small>
+                        Other terms
+                    </small>
+
+                    <strong>
+                        <?= $draft['other_terms'] !== ''
+                            ? nl2br(h($draft['other_terms']))
+                            : 'None' ?>
+                    </strong>
+
+                </div>
+
+            </div>
+
+
+        </div>
+
+    </section>
+
+
+
+    <!-- =====================================================
+         REALTOR / BROKERAGE
+    ====================================================== -->
+
+    <section class="form-block">
+
+        <div class="form-block-title">
+            Prepared by
+        </div>
+
+
+        <div class="form-review-list">
+
+
+            <div class="form-review-row">
+
+                <div>
+                    <small>Authorized agent</small>
+
+                    <strong>
+                        <?= h($meName) ?>
+                    </strong>
+                </div>
+
+            </div>
+
+
+            <div class="form-review-row">
+
+                <div>
+                    <small>Brokerage</small>
+
+                    <strong>
+                        <?= h($draft['broker']) ?>
+                    </strong>
+                </div>
+
+            </div>
+
+
+            <div class="form-review-row">
+
+                <div>
+                    <small>Email</small>
+
+                    <strong>
+                        <?= h($meEmail) ?>
+                    </strong>
+                </div>
+
+            </div>
+
+
+        </div>
+
+    </section>
+
+
+
+    <!-- =====================================================
+         SIGNATURE — FIRST VISUAL VERSION
+    ====================================================== -->
+
+    <section class="form-sign-block">
+
+        <div>
+
+            <div class="form-block-title">
+                Realtor Signature
+            </div>
+
+            <p>
+                Sign the prepared agreement before sending it
+                to your client for Guided View.
+            </p>
+
+        </div>
+
+
+        <button
+            type="button"
+            class="form-sign-button"
+        >
+            Sign Agreement
+        </button>
+
+    </section>
+
+
+
+    <div class="form-actions">
+
+        <a
+            class="form-button-secondary"
+            href="/app/form_prepare.php?form=<?= h($formId) ?>&step=4"
+        >
+            ← Back
+        </a>
+
+
+        <button
+            class="form-button-primary"
+            type="button"
+            disabled
+        >
+            Sign before sending
+        </button>
+
+    </div>
+
 
 </div>
 

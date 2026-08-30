@@ -1270,3 +1270,203 @@ input:checked
 
     display: block;
 }
+/* =========================================================
+   REVIEW & SIGN
+========================================================= */
+
+.form-review-list {
+
+    display: flex;
+    flex-direction: column;
+}
+
+
+.form-review-row {
+
+    display: flex;
+
+    align-items: flex-start;
+    justify-content: space-between;
+
+    gap: 24px;
+
+    padding:
+        18px
+        0;
+
+    border-bottom:
+        1px solid
+        rgba(23, 32, 51, .07);
+}
+
+
+.form-review-row:last-child {
+
+    border-bottom: 0;
+}
+
+
+.form-review-row small {
+
+    display: block;
+
+    margin-bottom: 5px;
+
+    color:
+        var(--nemi-muted, #757575);
+
+    font-size: 12px;
+}
+
+
+.form-review-row strong {
+
+    display: block;
+
+    color:
+        var(--nemi-text, #172033);
+
+    font-size: 15px;
+    font-weight: 600;
+
+    line-height: 1.55;
+}
+
+
+.form-review-edit {
+
+    flex: 0 0 auto;
+
+    color:
+        var(--nemi-primary, #327d7c);
+
+    text-decoration: none;
+
+    font-size: 13px;
+    font-weight: 700;
+}
+
+
+.form-review-title-row {
+
+    display: flex;
+
+    align-items: center;
+    justify-content: space-between;
+
+    gap: 20px;
+}
+
+
+.form-review-value {
+
+    display: block;
+
+    margin-top: 16px;
+
+    font-size: 22px;
+}
+
+
+/* =========================================================
+   SIGNATURE
+========================================================= */
+
+.form-sign-block {
+
+    display: flex;
+
+    align-items: center;
+    justify-content: space-between;
+
+    gap: 30px;
+
+    margin-top: 28px;
+
+    padding: 30px;
+
+    border:
+        1px solid
+        rgba(23, 32, 51, .08);
+
+    border-radius: 22px;
+
+    background:
+        rgba(50, 125, 124, .055);
+}
+
+
+.form-sign-block p {
+
+    max-width: 540px;
+
+    margin:
+        6px
+        0
+        0;
+
+    color:
+        var(--nemi-muted, #757575);
+
+    font-size: 13px;
+
+    line-height: 1.65;
+}
+
+
+.form-sign-button {
+
+    flex: 0 0 auto;
+
+    min-height: 52px;
+
+    padding:
+        0
+        24px;
+
+    border:
+        1px solid
+        rgba(50, 125, 124, .32);
+
+    border-radius: 999px;
+
+    background: #fff;
+
+    color:
+        var(--nemi-primary, #327d7c);
+
+    font: inherit;
+
+    font-size: 13px;
+    font-weight: 700;
+
+    cursor: pointer;
+}
+
+
+.form-button-primary:disabled {
+
+    opacity: .45;
+
+    cursor: not-allowed;
+
+    transform: none;
+}
+
+
+@media (max-width: 720px) {
+
+    .form-sign-block {
+
+        align-items: stretch;
+
+        flex-direction: column;
+    }
+
+
+    .form-sign-button {
+
+        width: 100%;
+    }
+
+}
