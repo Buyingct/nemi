@@ -1943,55 +1943,98 @@ body{
 
                 <!-- START DATE -->
 
-                <div class="form-field">
+<div class="form-field">
 
-                    <label for="start_date">
-                        Listing starts
-                    </label>
+    <div class="date-label-row">
 
-                    <input
-                        id="start_date"
-                        name="start_date"
-                        type="date"
-                        value="<?= h($draft['start_date']) ?>"
-                    >
+        <label for="start_date">
+            Listing starts
+        </label>
 
-                    <?php if (isset($errors['start_date'])): ?>
+        <button
+            type="button"
+            class="date-quick-button"
+            id="start-date-today"
+        >
+            Today
+        </button>
 
-                        <div class="form-field-error">
-                            <?= h($errors['start_date']) ?>
-                        </div>
+    </div>
 
-                    <?php endif; ?>
+    <input
+        id="start_date"
+        name="start_date"
+        type="date"
+        value="<?= h($draft['start_date']) ?>"
+    >
 
-                </div>
+    <?php if (isset($errors['start_date'])): ?>
+
+        <div class="form-field-error">
+            <?= h($errors['start_date']) ?>
+        </div>
+
+    <?php endif; ?>
+
+</div>
 
 
                 <!-- EXPIRATION DATE -->
 
-                <div class="form-field">
+<div class="form-field">
 
-                    <label for="expiration_date">
-                        Listing expires
-                    </label>
+    <div class="date-label-row">
 
-                    <input
-                        id="expiration_date"
-                        name="expiration_date"
-                        type="date"
-                        value="<?= h($draft['expiration_date']) ?>"
-                    >
+        <label for="expiration_date">
+            Listing expires
+        </label>
 
-                    <?php if (isset($errors['expiration_date'])): ?>
+        <div class="date-quick-options">
 
-                        <div class="form-field-error">
-                            <?= h($errors['expiration_date']) ?>
-                        </div>
+            <button
+                type="button"
+                class="date-quick-button"
+                data-expiration-months="3"
+            >
+                3mo
+            </button>
 
-                    <?php endif; ?>
+            <button
+                type="button"
+                class="date-quick-button"
+                data-expiration-months="6"
+            >
+                6mo
+            </button>
 
-                </div>
+            <button
+                type="button"
+                class="date-quick-button"
+                data-expiration-months="12"
+            >
+                12mo
+            </button>
 
+        </div>
+
+    </div>
+
+    <input
+        id="expiration_date"
+        name="expiration_date"
+        type="date"
+        value="<?= h($draft['expiration_date']) ?>"
+    >
+
+    <?php if (isset($errors['expiration_date'])): ?>
+
+        <div class="form-field-error">
+            <?= h($errors['expiration_date']) ?>
+        </div>
+
+    <?php endif; ?>
+
+</div>
 
                 <!-- BROKERAGE -->
 
@@ -3659,6 +3702,359 @@ document.addEventListener('DOMContentLoaded', function () {
         });
 
     });
+
+   /*
+|--------------------------------------------------------------------------
+| QUICK DATE PICKS
+|--------------------------------------------------------------------------
+*/
+
+const startDateInput =
+    document.getElementById('start_date');
+
+const expirationDateInput =
+    document.getElementById('expiration_date');
+
+const todayButton =
+    document.getElementById('start-date-today');
+
+const expirationButtons =
+    document.querySelectorAll(
+        '[data-expiration-months]'
+    );
+
+
+/*
+|--------------------------------------------------------------------------
+| FORMAT DATE FOR HTML DATE INPUT
+|--------------------------------------------------------------------------
+|
+| HTML date inputs store:
+|
+| YYYY-MM-DD
+|
+| The browser displays it in the user's normal local format.
+|
+*/
+
+function formatDateForInput(date) {
+
+    const year =
+        date.getFullYear();
+
+    const month =
+        String(
+            date.getMonth() + 1
+        ).padStart(2, '0');
+
+    const day =
+        String(
+            date.getDate()
+        ).padStart(2, '0');
+
+
+    return (
+        year
+        + '-'
+        + month
+        + '-'
+        + day
+    );
+}
+
+
+/*
+|--------------------------------------------------------------------------
+| READ HTML DATE WITHOUT TIMEZONE SHIFT
+|--------------------------------------------------------------------------
+*/
+
+function dateFromInput(value) {
+
+    if (!value) {
+        return null;
+    }
+
+
+    const parts =
+        value.split('-');
+
+
+    if (parts.length !== 3) {
+        return null;
+    }
+
+
+    return new Date(
+        Number(parts[0]),
+        Number(parts[1]) - 1,
+        Number(parts[2])
+    );
+}
+
+
+/*
+|--------------------------------------------------------------------------
+| ADD MONTHS SAFELY
+|--------------------------------------------------------------------------
+|
+| Example:
+|
+| 8/30/26 + 3 months
+| becomes
+| 11/30/26
+|
+| If starting on a month-end date that doesn't exist later,
+| Nemi uses the final valid day of that month.
+|
+| Example:
+|
+| 8/31 + 6 months
+| becomes the final day of February.
+|
+*/
+
+function addMonthsClamped(
+    originalDate,
+    months
+) {
+
+    const originalDay =
+        originalDate.getDate();
+
+
+    const target =
+        new Date(
+            originalDate.getFullYear(),
+            originalDate.getMonth() + months,
+            1
+        );
+
+
+    const lastDayOfTargetMonth =
+        new Date(
+            target.getFullYear(),
+            target.getMonth() + 1,
+            0
+        ).getDate();
+
+
+    target.setDate(
+        Math.min(
+            originalDay,
+            lastDayOfTargetMonth
+        )
+    );
+
+
+    return target;
+}
+
+
+/*
+|--------------------------------------------------------------------------
+| TODAY
+|--------------------------------------------------------------------------
+*/
+
+if (
+    todayButton
+    &&
+    startDateInput
+) {
+
+    todayButton.addEventListener(
+        'click',
+        function () {
+
+            const today =
+                new Date();
+
+
+            startDateInput.value =
+                formatDateForInput(today);
+
+
+            /*
+            |--------------------------------------------------------------
+            | Notify anything else listening to the field.
+            |--------------------------------------------------------------
+            */
+
+            startDateInput.dispatchEvent(
+                new Event(
+                    'change',
+                    {
+                        bubbles: true
+                    }
+                )
+            );
+
+        }
+    );
+
+}
+
+
+/*
+|--------------------------------------------------------------------------
+| 3 / 6 / 12 MONTH EXPIRATION
+|--------------------------------------------------------------------------
+*/
+
+expirationButtons.forEach(
+    function (button) {
+
+        button.addEventListener(
+            'click',
+            function () {
+
+                if (
+                    !startDateInput
+                    ||
+                    !expirationDateInput
+                ) {
+                    return;
+                }
+
+
+                /*
+                |----------------------------------------------------------
+                | Need a start date first.
+                |
+                | If Realtor hasn't chosen one yet,
+                | use today automatically.
+                |----------------------------------------------------------
+                */
+
+                if (
+                    startDateInput.value === ''
+                ) {
+
+                    startDateInput.value =
+                        formatDateForInput(
+                            new Date()
+                        );
+
+                }
+
+
+                const startDate =
+                    dateFromInput(
+                        startDateInput.value
+                    );
+
+
+                if (!startDate) {
+                    return;
+                }
+
+
+                const months =
+                    Number(
+                        button.dataset
+                            .expirationMonths
+                    );
+
+
+                if (!months) {
+                    return;
+                }
+
+
+                const expirationDate =
+                    addMonthsClamped(
+                        startDate,
+                        months
+                    );
+
+
+                expirationDateInput.value =
+                    formatDateForInput(
+                        expirationDate
+                    );
+
+
+                expirationDateInput
+                    .dispatchEvent(
+                        new Event(
+                            'change',
+                            {
+                                bubbles: true
+                            }
+                        )
+                    );
+
+
+                /*
+                |----------------------------------------------------------
+                | Visual selection
+                |----------------------------------------------------------
+                */
+
+                expirationButtons.forEach(
+                    function (otherButton) {
+
+                        otherButton
+                            .classList
+                            .remove(
+                                'is-selected'
+                            );
+
+                    }
+                );
+
+
+                button
+                    .classList
+                    .add(
+                        'is-selected'
+                    );
+
+            }
+        );
+
+    }
+);
+
+
+/*
+|--------------------------------------------------------------------------
+| CUSTOM EXPIRATION DATE
+|--------------------------------------------------------------------------
+|
+| If Realtor manually chooses another date from the calendar,
+| remove the highlighted 3mo / 6mo / 12mo shortcut.
+|
+*/
+
+if (expirationDateInput) {
+
+    expirationDateInput.addEventListener(
+        'change',
+        function (event) {
+
+            if (!event.isTrusted) {
+                return;
+            }
+
+
+            expirationButtons.forEach(
+                function (button) {
+
+                    button
+                        .classList
+                        .remove(
+                            'is-selected'
+                        );
+
+                }
+            );
+
+        }
+    );
+
+}
 
 });
 </script>

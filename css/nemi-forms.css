@@ -1990,3 +1990,147 @@ input:checked
     color: #7a838d;
     font-size: 11px;
 }
+
+/* =========================================================
+   QUICK DATE PICKS
+========================================================= */
+
+.date-label-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    gap: 12px;
+
+    margin-bottom: 7px;
+}
+
+
+.date-label-row label {
+    margin-bottom: 0;
+}
+
+
+.date-quick-options {
+    display: flex;
+    align-items: center;
+
+    gap: 5px;
+}
+
+
+/*
+|--------------------------------------------------------------------------
+| QUICK BUTTON
+|--------------------------------------------------------------------------
+*/
+
+.date-quick-button {
+    appearance: none;
+    -webkit-appearance: none;
+
+    min-width: 42px;
+    min-height: 32px;
+
+    padding:
+        5px
+        9px;
+
+    border:
+        1px solid
+        rgba(50, 125, 124, .16);
+
+    border-radius: 9px;
+
+    background:
+        rgba(50, 125, 124, .055);
+
+    color:
+        var(
+            --nemi-primary,
+            #327d7c
+        );
+
+    font: inherit;
+    font-size: 11px;
+    font-weight: 750;
+    line-height: 1;
+
+    cursor: pointer;
+
+    transition:
+        background .15s ease,
+        border-color .15s ease,
+        transform .1s ease;
+}
+
+
+.date-quick-button:hover {
+    background:
+        rgba(50, 125, 124, .10);
+
+    border-color:
+        rgba(50, 125, 124, .26);
+}
+
+
+.date-quick-button:active {
+    transform:
+        scale(.96);
+}
+
+
+/*
+|--------------------------------------------------------------------------
+| SELECTED DURATION
+|--------------------------------------------------------------------------
+*/
+
+.date-quick-button.is-selected {
+    background:
+        var(
+            --nemi-primary,
+            #327d7c
+        );
+
+    border-color:
+        var(
+            --nemi-primary,
+            #327d7c
+        );
+
+    color:
+        #ffffff;
+}
+
+
+/*
+|--------------------------------------------------------------------------
+| MOBILE
+|--------------------------------------------------------------------------
+*/
+
+@media (max-width: 600px) {
+
+    .date-label-row {
+        gap: 8px;
+    }
+
+
+    .date-quick-options {
+        gap: 4px;
+    }
+
+
+    .date-quick-button {
+        min-width: 44px;
+        min-height: 36px;
+
+        padding:
+            6px
+            8px;
+
+        font-size: 11px;
+    }
+
+}
