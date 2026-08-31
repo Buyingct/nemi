@@ -1,6 +1,6 @@
 /* =========================================================
    NEMI FORMS
-   Shared preparation UI for all Nemi forms
+   Shared preparation UI for Nemi forms
 ========================================================= */
 
 
@@ -9,7 +9,6 @@
 ========================================================= */
 
 .form-page {
-
     width: min(
         940px,
         calc(100% - 34px)
@@ -27,12 +26,12 @@
 ========================================================= */
 
 .back-link {
-
     display: inline-flex;
 
     margin-bottom: 30px;
 
-    color: var(--nemi-muted, #757575);
+    color:
+        var(--nemi-muted, #757575);
 
     text-decoration: none;
 
@@ -42,10 +41,10 @@
 
 
 .form-eyebrow {
-
     margin-bottom: 10px;
 
-    color: var(--nemi-primary, #327d7c);
+    color:
+        var(--nemi-primary, #327d7c);
 
     font-size: 13px;
     font-weight: 700;
@@ -57,18 +56,19 @@
 
 
 .form-title {
-
     max-width: 760px;
 
     margin: 0;
 
-    color: var(--nemi-text, #172033);
+    color:
+        var(--nemi-text, #172033);
 
-    font-size: clamp(
-        30px,
-        5vw,
-        46px
-    );
+    font-size:
+        clamp(
+            30px,
+            5vw,
+            46px
+        );
 
     line-height: 1.08;
 
@@ -77,7 +77,6 @@
 
 
 .form-intro {
-
     max-width: 660px;
 
     margin:
@@ -98,7 +97,6 @@
 ========================================================= */
 
 .form-progress {
-
     display: flex;
 
     align-items: center;
@@ -110,7 +108,6 @@
 
 
 .form-progress-track {
-
     flex: 1;
 
     height: 5px;
@@ -124,8 +121,8 @@
 
 
 .form-progress-fill {
-
-    width: var(--progress, 14%);
+    width:
+        var(--progress, 14%);
 
     height: 100%;
 
@@ -138,15 +135,16 @@
             var(--nemi-secondary, #315b9a)
         );
 
-    transition: width .25s ease;
+    transition:
+        width .25s ease;
 }
 
 
 .form-progress-label {
-
     flex: 0 0 auto;
 
-    color: var(--nemi-muted, #757575);
+    color:
+        var(--nemi-muted, #757575);
 
     font-size: 13px;
     font-weight: 600;
@@ -158,7 +156,6 @@
 ========================================================= */
 
 .form-panel {
-
     padding:
         44px
         46px;
@@ -176,26 +173,27 @@
         0 18px 60px
         rgba(27, 45, 67, .08);
 
-    backdrop-filter: blur(18px);
+    backdrop-filter:
+        blur(18px);
 
-    -webkit-backdrop-filter: blur(18px);
+    -webkit-backdrop-filter:
+        blur(18px);
 }
 
 
 .form-section-heading {
-
     margin-bottom: 32px;
 }
 
 
 .form-section-heading h2 {
-
     margin:
         0
         0
         8px;
 
-    color: var(--nemi-text, #172033);
+    color:
+        var(--nemi-text, #172033);
 
     font-size: 25px;
 
@@ -204,10 +202,10 @@
 
 
 .form-section-heading p {
-
     margin: 0;
 
-    color: var(--nemi-muted, #757575);
+    color:
+        var(--nemi-muted, #757575);
 
     font-size: 15px;
 }
@@ -218,7 +216,6 @@
 ========================================================= */
 
 .form-field-grid {
-
     display: grid;
 
     grid-template-columns:
@@ -234,7 +231,6 @@
 
 
 .form-field {
-
     display: flex;
 
     flex-direction: column;
@@ -244,14 +240,13 @@
 
 
 .form-field.full {
-
     grid-column: 1 / -1;
 }
 
 
 .form-field label {
-
-    color: var(--nemi-text, #172033);
+    color:
+        var(--nemi-text, #172033);
 
     font-size: 13px;
     font-weight: 700;
@@ -261,7 +256,6 @@
 .form-field input,
 .form-field select,
 .form-field textarea {
-
     width: 100%;
 
     min-height: 58px;
@@ -269,6 +263,8 @@
     padding:
         0
         17px;
+
+    box-sizing: border-box;
 
     outline: none;
 
@@ -281,7 +277,8 @@
     background:
         rgba(255, 255, 255, .9);
 
-    color: var(--nemi-text, #172033);
+    color:
+        var(--nemi-text, #172033);
 
     font: inherit;
 
@@ -295,7 +292,6 @@
 
 
 .form-field textarea {
-
     min-height: 120px;
 
     padding:
@@ -309,7 +305,6 @@
 .form-field input:focus,
 .form-field select:focus,
 .form-field textarea:focus {
-
     border-color:
         rgba(50, 125, 124, .75);
 
@@ -322,7 +317,6 @@
 
 
 .form-field input[readonly] {
-
     color: #59636e;
 
     background:
@@ -333,10 +327,10 @@
 
 
 .form-field-help {
-
     margin-top: -2px;
 
-    color: var(--nemi-muted, #757575);
+    color:
+        var(--nemi-muted, #757575);
 
     font-size: 12px;
 
@@ -345,7 +339,6 @@
 
 
 .form-field-error {
-
     color: #b74242;
 
     font-size: 12px;
@@ -358,28 +351,28 @@
 ========================================================= */
 
 .form-money {
-
     position: relative;
 }
 
 
 .form-money-symbol {
-
     position: absolute;
 
     top: 50%;
     left: 17px;
 
-    transform: translateY(-50%);
+    transform:
+        translateY(-50%);
 
     color: #6c7681;
 
     font-weight: 600;
+
+    pointer-events: none;
 }
 
 
 .form-money input {
-
     padding-left: 34px;
 }
 
@@ -389,7 +382,6 @@
 ========================================================= */
 
 .form-actions {
-
     display: flex;
 
     align-items: center;
@@ -408,7 +400,6 @@
 
 
 .form-button-secondary {
-
     display: inline-flex;
 
     align-items: center;
@@ -438,7 +429,6 @@
 
 
 .form-button-primary {
-
     display: inline-flex;
 
     align-items: center;
@@ -481,8 +471,8 @@
 
 
 .form-button-primary:hover {
-
-    transform: translateY(-1px);
+    transform:
+        translateY(-1px);
 
     box-shadow:
         0 13px 29px
@@ -490,17 +480,20 @@
 }
 
 
+.form-button-primary:disabled {
+    opacity: .45;
+
+    cursor: not-allowed;
+
+    transform: none;
+}
+
+
 /* =========================================================
    SEGMENTED CONTROL
-
-   Reusable for:
-   - percentage / dollar amount
-   - yes / no
-   - option groups
 ========================================================= */
 
 .form-segmented {
-
     display: flex;
 
     width: max-content;
@@ -521,13 +514,11 @@
 
 
 .form-segment-option {
-
     position: relative;
 }
 
 
 .form-segment-option input {
-
     position: absolute;
 
     opacity: 0;
@@ -537,7 +528,6 @@
 
 
 .form-segment-option span {
-
     display: flex;
 
     align-items: center;
@@ -567,8 +557,8 @@
 
 .form-segment-option
 input:checked + span {
-
-    color: var(--nemi-text, #172033);
+    color:
+        var(--nemi-text, #172033);
 
     background: #fff;
 
@@ -580,12 +570,9 @@ input:checked + span {
 
 /* =========================================================
    FORM BLOCK
-
-   Reusable container inside a preparation step.
 ========================================================= */
 
 .form-block {
-
     padding: 30px;
 
     border:
@@ -600,16 +587,15 @@ input:checked + span {
 
 
 .form-block + .form-block {
-
     margin-top: 28px;
 }
 
 
 .form-block-title {
-
     margin-bottom: 6px;
 
-    color: var(--nemi-text, #172033);
+    color:
+        var(--nemi-text, #172033);
 
     font-size: 18px;
     font-weight: 700;
@@ -619,7 +605,6 @@ input:checked + span {
 
 
 .form-block-copy {
-
     max-width: 650px;
 
     margin:
@@ -627,7 +612,8 @@ input:checked + span {
         0
         25px;
 
-    color: var(--nemi-muted, #757575);
+    color:
+        var(--nemi-muted, #757575);
 
     font-size: 14px;
 
@@ -637,12 +623,10 @@ input:checked + span {
 
 /* =========================================================
    LARGE VALUE INPUT
-
-   Used for percentages, dollar amounts, days, etc.
+   Percentages / dollar amounts / days
 ========================================================= */
 
 .form-value-row {
-
     display: flex;
 
     align-items: flex-end;
@@ -654,18 +638,17 @@ input:checked + span {
 
 
 .form-value {
-
     position: relative;
 
-    width: min(
-        270px,
-        100%
-    );
+    width:
+        min(
+            270px,
+            100%
+        );
 }
 
 
 .form-value input {
-
     width: 100%;
 
     height: 74px;
@@ -675,6 +658,8 @@ input:checked + span {
         54px
         0
         20px;
+
+    box-sizing: border-box;
 
     outline: none;
 
@@ -686,12 +671,15 @@ input:checked + span {
 
     background: #fff;
 
-    color: var(--nemi-text, #172033);
+    color:
+        var(--nemi-text, #172033);
 
     font: inherit;
 
     font-size: 30px;
     font-weight: 700;
+
+    line-height: 1;
 
     letter-spacing: -.03em;
 
@@ -702,7 +690,6 @@ input:checked + span {
 
 
 .form-value input:focus {
-
     border-color:
         rgba(50, 125, 124, .75);
 
@@ -712,56 +699,74 @@ input:checked + span {
 }
 
 
-.form-value-unit {
+/* RIGHT UNIT: %, days, etc. */
 
+.form-value-unit {
     position: absolute;
 
     top: 50%;
     right: 19px;
 
-    transform: translateY(-50%);
+    transform:
+        translateY(-50%);
 
     color: #737d88;
 
     font-size: 18px;
     font-weight: 700;
 
+    line-height: 1;
+
     pointer-events: none;
 }
 
 
+/* LEFT PREFIX: $, etc. */
+
 .form-value-prefix {
+    display: none;
 
     position: absolute;
 
     top: 50%;
     left: 19px;
 
-    transform: translateY(-50%);
+    transform:
+        translateY(-50%);
 
     color: #737d88;
 
-    font-size: 19px;
+    font-size: 18px;
     font-weight: 700;
+
+    line-height: 1;
 
     pointer-events: none;
 }
 
 
-.form-value.has-prefix input {
+.form-value.has-prefix
+.form-value-prefix {
+    display: block;
+}
 
-    padding-left: 42px;
+
+.form-value.has-prefix
+.form-value-unit {
+    display: none;
+}
+
+
+.form-value.has-prefix input {
+    padding-left: 50px;
 }
 
 
 /* =========================================================
    CHOICE CARDS
-
-   Reusable for yes/no and larger decisions.
 ========================================================= */
 
 .form-choice-grid {
-
     display: grid;
 
     grid-template-columns:
@@ -776,14 +781,23 @@ input:checked + span {
 }
 
 
-.form-choice {
+.form-choice-grid-three {
+    grid-template-columns:
+        repeat(
+            3,
+            minmax(0, 1fr)
+        );
 
+    max-width: 100%;
+}
+
+
+.form-choice {
     position: relative;
 }
 
 
 .form-choice input {
-
     position: absolute;
 
     opacity: 0;
@@ -793,7 +807,6 @@ input:checked + span {
 
 
 .form-choice-card {
-
     position: relative;
 
     display: block;
@@ -819,31 +832,36 @@ input:checked + span {
 }
 
 
-.form-choice-card:hover {
+.form-choice-card-compact {
+    min-height: 105px;
+}
 
-    transform: translateY(-1px);
+
+.form-choice-card:hover {
+    transform:
+        translateY(-1px);
 }
 
 
 .form-choice-card strong {
-
     display: block;
 
     margin-bottom: 7px;
 
-    color: var(--nemi-text, #172033);
+    color:
+        var(--nemi-text, #172033);
 
     font-size: 15px;
 }
 
 
 .form-choice-card small {
-
     display: block;
 
     padding-right: 24px;
 
-    color: var(--nemi-muted, #757575);
+    color:
+        var(--nemi-muted, #757575);
 
     font-size: 12px;
 
@@ -855,7 +873,6 @@ input:checked + span {
 input:checked
 +
 .form-choice-card {
-
     border-color:
         rgba(50, 125, 124, .70);
 
@@ -869,7 +886,6 @@ input:checked
 input:checked
 +
 .form-choice-card::after {
-
     content: "✓";
 
     position: absolute;
@@ -877,10 +893,25 @@ input:checked
     top: 16px;
     right: 18px;
 
-    color: var(--nemi-primary, #327d7c);
+    color:
+        var(--nemi-primary, #327d7c);
 
     font-size: 18px;
     font-weight: 800;
+}
+
+
+/* =========================================================
+   STEP CONTENT
+========================================================= */
+
+.form-compensation-stack,
+.form-step-content {
+    display: flex;
+
+    flex-direction: column;
+
+    gap: 28px;
 }
 
 
@@ -889,14 +920,54 @@ input:checked
 ========================================================= */
 
 .form-conditional {
-
     margin-top: 24px;
 }
 
 
 .form-conditional.is-hidden {
-
     display: none;
+}
+
+
+.buyer-comp-details {
+    margin-top: 24px;
+}
+
+
+.buyer-comp-details.is-hidden {
+    display: none;
+}
+
+
+/* =========================================================
+   PROTECTION PERIOD
+========================================================= */
+
+.protection-custom {
+    display: none;
+
+    max-width: 320px;
+}
+
+
+.protection-custom.is-active {
+    display: block;
+}
+
+
+/* =========================================================
+   CUSTOM SHOWING INSTRUCTIONS
+========================================================= */
+
+.showing-custom {
+    display: none;
+
+    margin-top: 24px;
+}
+
+
+.showing-custom.is-active {
+    display: block;
 }
 
 
@@ -905,7 +976,6 @@ input:checked
 ========================================================= */
 
 .form-note {
-
     display: flex;
 
     gap: 12px;
@@ -930,230 +1000,21 @@ input:checked
 
 
 .form-note-icon {
-
     flex: 0 0 auto;
 
-    color: var(--nemi-primary, #327d7c);
+    color:
+        var(--nemi-primary, #327d7c);
 
     font-size: 17px;
 }
 
 
 /* =========================================================
-   NEXT STEP / PLACEHOLDER
+   PLACEHOLDER / NEXT STEP
 ========================================================= */
 
-.form-next {
-
-    padding:
-        60px
-        40px;
-
-    text-align: center;
-
-    border-radius: 28px;
-
-    background:
-        rgba(255, 255, 255, .76);
-
-    box-shadow:
-        0 18px 60px
-        rgba(27, 45, 67, .08);
-}
-
-
-.form-next h2 {
-
-    margin:
-        0
-        0
-        12px;
-
-    color: var(--nemi-text, #172033);
-
-    font-size: 30px;
-}
-
-
-.form-next p {
-
-    max-width: 580px;
-
-    margin:
-        0
-        auto
-        30px;
-
-    color: var(--nemi-muted, #757575);
-
-    line-height: 1.7;
-}
-
-
-/* =========================================================
-   MOBILE
-========================================================= */
-
-@media (max-width: 720px) {
-
-    .form-page {
-
-        width:
-            calc(100% - 28px);
-
-        margin-top: 36px;
-    }
-
-
-    .form-intro {
-
-        margin-bottom: 32px;
-    }
-
-
-    .form-panel {
-
-        padding:
-            30px
-            20px;
-
-        border-radius: 22px;
-    }
-
-
-    .form-field-grid {
-
-        grid-template-columns: 1fr;
-    }
-
-
-    .form-field.full {
-
-        grid-column: auto;
-    }
-
-
-    .form-block {
-
-        padding:
-            22px
-            18px;
-    }
-
-
-    .form-choice-grid {
-
-        grid-template-columns: 1fr;
-    }
-
-
-    .form-value-row {
-
-        align-items: stretch;
-
-        flex-direction: column;
-    }
-
-
-    .form-actions {
-
-        align-items: stretch;
-
-        flex-direction: column-reverse;
-    }
-
-
-    .form-button-primary {
-
-        width: 100%;
-    }
-
-
-    .form-button-secondary {
-
-        width: 100%;
-    }
-
-
-    .form-segmented {
-
-        width: 100%;
-    }
-
-
-    .form-segment-option {
-
-        flex: 1;
-    }
-
-
-    .form-segment-option span {
-
-        width: 100%;
-    }
-
-}
-
-/* =========================================================
-   FORM STEP LAYOUT
-========================================================= */
-
-.form-compensation-stack,
-.form-step-content {
-
-    display: flex;
-    flex-direction: column;
-
-    gap: 28px;
-}
-
-
-/* =========================================================
-   BUYER COMPENSATION CONDITIONAL AREA
-========================================================= */
-
-.buyer-comp-details {
-
-    margin-top: 24px;
-}
-
-.buyer-comp-details.is-hidden {
-
-    display: none;
-}
-
-
-/* =========================================================
-   VALUE INPUT PREFIX / SUFFIX STATE
-========================================================= */
-
-.form-value-prefix {
-
-    display: none;
-}
-
-.form-value.has-prefix .form-value-prefix {
-
-    display: block;
-}
-
-.form-value.has-prefix .form-value-unit {
-
-    display: none;
-}
-
-.form-value.has-prefix input {
-
-    padding-left: 42px;
-}
-
-
-/* =========================================================
-   STEP 3 PLACEHOLDER COMPATIBILITY
-========================================================= */
-
+.form-next,
 .coming-next {
-
     padding:
         60px
         40px;
@@ -1170,18 +1031,23 @@ input:checked
         rgba(27, 45, 67, .08);
 }
 
-.coming-next h2 {
 
+.form-next h2,
+.coming-next h2 {
     margin:
         0
         0
         12px;
 
+    color:
+        var(--nemi-text, #172033);
+
     font-size: 30px;
 }
 
-.coming-next p {
 
+.form-next p,
+.coming-next p {
     max-width: 580px;
 
     margin:
@@ -1194,95 +1060,20 @@ input:checked
 
     line-height: 1.7;
 }
-/* =========================================================
-   THREE-COLUMN CHOICE GRID
-========================================================= */
-
-.form-choice-grid-three {
-
-    grid-template-columns:
-        repeat(
-            3,
-            minmax(0, 1fr)
-        );
-
-    max-width: 100%;
-}
 
 
-/* =========================================================
-   COMPACT CHOICE CARD
-========================================================= */
-
-.form-choice-card-compact {
-
-    min-height: 105px;
-}
-
-
-/* =========================================================
-   PROTECTION PERIOD CUSTOM FIELD
-========================================================= */
-
-.protection-custom {
-
-    display: none;
-
-    max-width: 320px;
-}
-
-.protection-custom.is-active {
-
-    display: block;
-}
-
-
-@media (max-width: 720px) {
-
-    .form-choice-grid-three {
-
-        grid-template-columns: 1fr;
-    }
-
-}
-
-.protection-custom {
-    display: none;
-    max-width: 320px;
-}
-
-.protection-custom.is-active {
-    display: block;
-}
-
-/* =========================================================
-   CUSTOM SHOWING INSTRUCTIONS
-========================================================= */
-
-.showing-custom {
-
-    display: none;
-
-    margin-top: 24px;
-}
-
-.showing-custom.is-active {
-
-    display: block;
-}
 /* =========================================================
    REVIEW & SIGN
 ========================================================= */
 
 .form-review-list {
-
     display: flex;
+
     flex-direction: column;
 }
 
 
 .form-review-row {
-
     display: flex;
 
     align-items: flex-start;
@@ -1301,13 +1092,11 @@ input:checked
 
 
 .form-review-row:last-child {
-
     border-bottom: 0;
 }
 
 
 .form-review-row small {
-
     display: block;
 
     margin-bottom: 5px;
@@ -1320,7 +1109,6 @@ input:checked
 
 
 .form-review-row strong {
-
     display: block;
 
     color:
@@ -1334,7 +1122,6 @@ input:checked
 
 
 .form-review-edit {
-
     flex: 0 0 auto;
 
     color:
@@ -1348,7 +1135,6 @@ input:checked
 
 
 .form-review-title-row {
-
     display: flex;
 
     align-items: center;
@@ -1359,7 +1145,6 @@ input:checked
 
 
 .form-review-value {
-
     display: block;
 
     margin-top: 16px;
@@ -1373,7 +1158,6 @@ input:checked
 ========================================================= */
 
 .form-sign-block {
-
     display: flex;
 
     align-items: center;
@@ -1397,7 +1181,6 @@ input:checked
 
 
 .form-sign-block p {
-
     max-width: 540px;
 
     margin:
@@ -1415,7 +1198,6 @@ input:checked
 
 
 .form-sign-button {
-
     flex: 0 0 auto;
 
     min-height: 52px;
@@ -1444,39 +1226,13 @@ input:checked
 }
 
 
-.form-button-primary:disabled {
-
-    opacity: .45;
-
-    cursor: not-allowed;
-
-    transform: none;
-}
-
-
-@media (max-width: 720px) {
-
-    .form-sign-block {
-
-        align-items: stretch;
-
-        flex-direction: column;
-    }
-
-
-    .form-sign-button {
-
-        width: 100%;
-    }
-
-}
 /* =========================================================
    REVIEW — FEE SUMMARY
 ========================================================= */
 
 .form-fee-total {
-
     display: flex;
+
     align-items: baseline;
 
     gap: 10px;
@@ -1486,7 +1242,6 @@ input:checked
 
 
 .form-fee-total small {
-
     color:
         var(--nemi-muted, #757575);
 
@@ -1495,7 +1250,6 @@ input:checked
 
 
 .form-fee-total strong {
-
     color:
         var(--nemi-text, #172033);
 
@@ -1507,7 +1261,6 @@ input:checked
 
 
 .form-fee-total span {
-
     color:
         var(--nemi-primary, #327d7c);
 
@@ -1519,8 +1272,8 @@ input:checked
 
 
 .form-fee-breakdown {
-
     display: flex;
+
     align-items: stretch;
 
     gap: 16px;
@@ -1530,8 +1283,8 @@ input:checked
 
 
 .form-fee-part {
-
     display: flex;
+
     align-items: center;
 
     flex: 1;
@@ -1552,7 +1305,6 @@ input:checked
 
 
 .form-fee-part > strong {
-
     flex: 0 0 auto;
 
     color:
@@ -1564,7 +1316,6 @@ input:checked
 
 
 .form-fee-part b {
-
     display: block;
 
     color:
@@ -1575,7 +1326,6 @@ input:checked
 
 
 .form-fee-part small {
-
     display: block;
 
     margin-top: 4px;
@@ -1588,8 +1338,8 @@ input:checked
 
 
 .form-fee-plus {
-
     display: flex;
+
     align-items: center;
     justify-content: center;
 
@@ -1601,7 +1351,6 @@ input:checked
 
 
 .form-fee-confirmation {
-
     margin-top: 18px;
 
     padding-top: 16px;
@@ -1617,176 +1366,26 @@ input:checked
 }
 
 
-@media (max-width: 720px) {
-
-    .form-fee-breakdown {
-
-        flex-direction: column;
-    }
-
-
-    .form-fee-plus {
-
-        min-height: 20px;
-    }
-
-}
-
-/* =========================================================
-   SELLER CONTACT PICKER
-========================================================= */
-
-.seller-contact-toggle {
-    align-self: flex-start;
-
-    border: 0;
-    padding: 0;
-
-    background: transparent;
-
-    color: var(--nemi-primary, #327d7c);
-
-    font: inherit;
-    font-size: 12px;
-    font-weight: 700;
-
-    cursor: pointer;
-}
-
-.seller-contact-toggle:hover {
-    text-decoration: underline;
-}
-
-.seller-contact-panel {
-    width: 100%;
-
-    margin-top: 2px;
-    padding: 10px;
-
-    border:
-        1px solid
-        rgba(23, 32, 51, .08);
-
-    border-radius: 14px;
-
-    background:
-        rgba(255,255,255,.98);
-
-    box-shadow:
-        0 12px 30px
-        rgba(23,32,51,.08);
-}
-
-.seller-contact-search {
-    width: 100%;
-
-    min-height: 40px;
-
-    margin-bottom: 8px;
-    padding: 0 12px;
-
-    border:
-        1px solid
-        rgba(23,32,51,.10);
-
-    border-radius: 10px;
-
-    font: inherit;
-    font-size: 13px;
-
-    outline: none;
-}
-
-.seller-contact-search:focus {
-    border-color:
-        rgba(50,125,124,.65);
-
-    box-shadow:
-        0 0 0 3px
-        rgba(50,125,124,.08);
-}
-
-.seller-contact-list {
-    display: flex;
-    flex-direction: column;
-
-    gap: 4px;
-
-    max-height: 220px;
-
-    overflow-y: auto;
-}
-
-.seller-contact-option {
-    display: flex;
-    flex-direction: column;
-
-    gap: 2px;
-
-    width: 100%;
-
-    padding: 9px 10px;
-
-    border: 0;
-    border-radius: 9px;
-
-    background: transparent;
-
-    color:
-        var(--nemi-text, #172033);
-
-    font: inherit;
-    text-align: left;
-
-    cursor: pointer;
-}
-
-.seller-contact-option:hover {
-    background:
-        rgba(50,125,124,.07);
-}
-
-.seller-contact-option strong {
-    font-size: 13px;
-    font-weight: 700;
-}
-
-.seller-contact-option small {
-    color: #7a838d;
-    font-size: 11px;
-}
-
-.seller-contact-empty {
-    padding: 8px 4px;
-
-    color: #7a838d;
-
-    font-size: 12px;
-}
-
-.seller-label-row {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-
-    gap: 14px;
-}
-
 /* =========================================================
    SELLER CONTACT INPUT
 ========================================================= */
 
 .seller-input-wrap {
     position: relative;
+
     width: 100%;
 }
 
 
-/*
-|--------------------------------------------------------------------------
-| PLUS / CONTACT BUTTON
-|--------------------------------------------------------------------------
-*/
+.seller-input-wrap input {
+    padding-left:
+        64px !important;
+}
+
+
+/* =========================================================
+   SELLER CONTACT + BUTTON
+========================================================= */
 
 .seller-contact-plus {
     position: absolute;
@@ -1799,15 +1398,21 @@ input:checked
     width: 46px;
     height: 46px;
 
-    transform: translateY(-50%);
+    transform:
+        translateY(-50%);
 
     display: flex;
+
     align-items: center;
     justify-content: center;
 
     padding: 0;
 
+    appearance: none;
+    -webkit-appearance: none;
+
     border: 0;
+
     border-radius: 12px;
 
     background:
@@ -1817,8 +1422,10 @@ input:checked
         var(--nemi-primary, #327d7c);
 
     font: inherit;
+
     font-size: 27px;
     font-weight: 400;
+
     line-height: 1;
 
     cursor: pointer;
@@ -1842,22 +1449,9 @@ input:checked
 }
 
 
-/*
-|--------------------------------------------------------------------------
-| MAKE ROOM FOR PLUS
-|--------------------------------------------------------------------------
-*/
-
-.seller-input-wrap input {
-    padding-left: 64px !important;
-}
-
-
-/*
-|--------------------------------------------------------------------------
-| CONTACT PICKER
-|--------------------------------------------------------------------------
-*/
+/* =========================================================
+   SELLER CONTACT PICKER
+========================================================= */
 
 .seller-contact-panel {
     grid-column: 1 / -1;
@@ -1865,6 +1459,8 @@ input:checked
     width: 100%;
 
     padding: 18px;
+
+    box-sizing: border-box;
 
     border:
         1px solid
@@ -1881,8 +1477,14 @@ input:checked
 }
 
 
+.seller-contact-panel[hidden] {
+    display: none !important;
+}
+
+
 .seller-contact-panel-head {
     display: flex;
+
     align-items: center;
     justify-content: space-between;
 
@@ -1901,7 +1503,18 @@ input:checked
     width: 36px;
     height: 36px;
 
+    display: flex;
+
+    align-items: center;
+    justify-content: center;
+
+    padding: 0;
+
+    appearance: none;
+    -webkit-appearance: none;
+
     border: 0;
+
     border-radius: 50%;
 
     background:
@@ -1911,6 +1524,7 @@ input:checked
         var(--nemi-text, #172033);
 
     font: inherit;
+
     font-size: 22px;
 
     cursor: pointer;
@@ -1923,7 +1537,12 @@ input:checked
     min-height: 46px;
 
     margin-bottom: 10px;
-    padding: 0 14px;
+
+    padding:
+        0
+        14px;
+
+    box-sizing: border-box;
 
     border:
         1px solid
@@ -1931,15 +1550,32 @@ input:checked
 
     border-radius: 12px;
 
-    font: inherit;
-    font-size: 14px;
-
     outline: none;
+
+    background: #fff;
+
+    color:
+        var(--nemi-text, #172033);
+
+    font: inherit;
+
+    font-size: 14px;
+}
+
+
+.seller-contact-search:focus {
+    border-color:
+        rgba(50, 125, 124, .65);
+
+    box-shadow:
+        0 0 0 3px
+        rgba(50, 125, 124, .08);
 }
 
 
 .seller-contact-list {
     display: flex;
+
     flex-direction: column;
 
     gap: 4px;
@@ -1952,15 +1588,22 @@ input:checked
 
 .seller-contact-option {
     display: flex;
+
     flex-direction: column;
 
     gap: 2px;
 
     width: 100%;
 
-    padding: 11px 12px;
+    padding:
+        11px
+        12px;
+
+    appearance: none;
+    -webkit-appearance: none;
 
     border: 0;
+
     border-radius: 10px;
 
     background: transparent;
@@ -1969,6 +1612,7 @@ input:checked
         var(--nemi-text, #172033);
 
     font: inherit;
+
     text-align: left;
 
     cursor: pointer;
@@ -1983,13 +1627,27 @@ input:checked
 
 .seller-contact-option strong {
     font-size: 13px;
+    font-weight: 700;
 }
 
 
 .seller-contact-option small {
     color: #7a838d;
+
     font-size: 11px;
 }
+
+
+.seller-contact-empty {
+    padding:
+        8px
+        4px;
+
+    color: #7a838d;
+
+    font-size: 12px;
+}
+
 
 /* =========================================================
    QUICK DATE PICKS
@@ -1997,6 +1655,7 @@ input:checked
 
 .date-label-row {
     display: flex;
+
     align-items: center;
     justify-content: space-between;
 
@@ -2013,28 +1672,28 @@ input:checked
 
 .date-quick-options {
     display: flex;
+
     align-items: center;
 
     gap: 5px;
 }
 
 
-/*
-|--------------------------------------------------------------------------
-| QUICK BUTTON
-|--------------------------------------------------------------------------
-*/
-
 .date-quick-button {
-    appearance: none;
-    -webkit-appearance: none;
-
     min-width: 42px;
     min-height: 32px;
+
+    display: inline-flex;
+
+    align-items: center;
+    justify-content: center;
 
     padding:
         5px
         9px;
+
+    appearance: none;
+    -webkit-appearance: none;
 
     border:
         1px solid
@@ -2046,14 +1705,13 @@ input:checked
         rgba(50, 125, 124, .055);
 
     color:
-        var(
-            --nemi-primary,
-            #327d7c
-        );
+        var(--nemi-primary, #327d7c);
 
     font: inherit;
+
     font-size: 11px;
-    font-weight: 750;
+    font-weight: 700;
+
     line-height: 1;
 
     cursor: pointer;
@@ -2080,35 +1738,131 @@ input:checked
 }
 
 
-/*
-|--------------------------------------------------------------------------
-| SELECTED DURATION
-|--------------------------------------------------------------------------
-*/
-
 .date-quick-button.is-selected {
-    background:
-        var(
-            --nemi-primary,
-            #327d7c
-        );
-
     border-color:
-        var(
-            --nemi-primary,
-            #327d7c
-        );
+        var(--nemi-primary, #327d7c);
 
-    color:
-        #ffffff;
+    background:
+        var(--nemi-primary, #327d7c);
+
+    color: #fff;
 }
 
 
-/*
-|--------------------------------------------------------------------------
-| MOBILE
-|--------------------------------------------------------------------------
-*/
+/* =========================================================
+   MOBILE
+========================================================= */
+
+@media (max-width: 720px) {
+
+    .form-page {
+        width:
+            calc(100% - 28px);
+
+        margin-top: 36px;
+    }
+
+
+    .form-intro {
+        margin-bottom: 32px;
+    }
+
+
+    .form-panel {
+        padding:
+            30px
+            20px;
+
+        border-radius: 22px;
+    }
+
+
+    .form-field-grid {
+        grid-template-columns: 1fr;
+    }
+
+
+    .form-field.full {
+        grid-column: auto;
+    }
+
+
+    .form-block {
+        padding:
+            22px
+            18px;
+    }
+
+
+    .form-choice-grid,
+    .form-choice-grid-three {
+        grid-template-columns: 1fr;
+    }
+
+
+    .form-value-row {
+        align-items: stretch;
+
+        flex-direction: column;
+    }
+
+
+    .form-actions {
+        align-items: stretch;
+
+        flex-direction: column-reverse;
+    }
+
+
+    .form-button-primary,
+    .form-button-secondary {
+        width: 100%;
+    }
+
+
+    .form-segmented {
+        width: 100%;
+    }
+
+
+    .form-segment-option {
+        flex: 1;
+    }
+
+
+    .form-segment-option span {
+        width: 100%;
+
+        box-sizing: border-box;
+    }
+
+
+    .form-sign-block {
+        align-items: stretch;
+
+        flex-direction: column;
+    }
+
+
+    .form-sign-button {
+        width: 100%;
+    }
+
+
+    .form-fee-breakdown {
+        flex-direction: column;
+    }
+
+
+    .form-fee-plus {
+        min-height: 20px;
+    }
+}
+
+
+/* =========================================================
+   SMALL PHONE DATE CONTROLS
+========================================================= */
 
 @media (max-width: 600px) {
 
@@ -2132,5 +1886,5 @@ input:checked
 
         font-size: 11px;
     }
-
+    
 }
