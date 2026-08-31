@@ -3792,6 +3792,119 @@ document.addEventListener('DOMContentLoaded', function () {
 
     });
 
+    /*
+|--------------------------------------------------------------------------
+| COMPENSATION TYPE SWITCHING
+|--------------------------------------------------------------------------
+|
+| Percentage selected  -> show %
+| Dollar amount        -> show $
+|
+| Applies to both:
+| - Brokerage service fee
+| - Buyer-broker compensation
+|
+*/
+
+function setupCompensationTypeSwitch(
+    radioName,
+    wrapId
+) {
+
+    const wrap =
+        document.getElementById(wrapId);
+
+    const radios =
+        document.querySelectorAll(
+            'input[name="' + radioName + '"]'
+        );
+
+
+    if (!wrap || radios.length === 0) {
+        return;
+    }
+
+
+    function updateCompensationSymbol() {
+
+        const selected =
+            document.querySelector(
+                'input[name="' + radioName + '"]:checked'
+            );
+
+
+        if (!selected) {
+            return;
+        }
+
+
+        if (selected.value === 'amount') {
+
+            wrap.classList.add(
+                'has-prefix'
+            );
+
+        } else {
+
+            wrap.classList.remove(
+                'has-prefix'
+            );
+
+        }
+
+    }
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | INITIAL STATE
+    |--------------------------------------------------------------------------
+    */
+
+    updateCompensationSymbol();
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | CHANGE STATE
+    |--------------------------------------------------------------------------
+    */
+
+    radios.forEach(function (radio) {
+
+        radio.addEventListener(
+            'change',
+            updateCompensationSymbol
+        );
+
+    });
+
+}
+
+
+/*
+|--------------------------------------------------------------------------
+| BROKERAGE SERVICE FEE
+|--------------------------------------------------------------------------
+*/
+
+setupCompensationTypeSwitch(
+    'service_fee_type',
+    'service-fee-wrap'
+);
+
+
+/*
+|--------------------------------------------------------------------------
+| BUYER-BROKER FEE
+|--------------------------------------------------------------------------
+*/
+
+setupCompensationTypeSwitch(
+    'buyer_broker_fee_type',
+    'buyer-fee-wrap'
+);
+
 });
 
 
