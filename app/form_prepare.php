@@ -3854,6 +3854,39 @@ function setupCompensationTypeSwitch(
     }
 
 
+    /*
+    |--------------------------------------------------------------------------
+    | USE THE EXISTING RIGHT-SIDE SYMBOL
+    |--------------------------------------------------------------------------
+    */
+
+    const percentSymbol =
+        wrap.querySelector(
+            '.form-value-unit'
+        );
+
+    const dollarSymbol =
+        wrap.querySelector(
+            '.form-value-prefix'
+        );
+
+
+    if (!percentSymbol) {
+        return;
+    }
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | WE ONLY NEED ONE VISIBLE SYMBOL
+    |--------------------------------------------------------------------------
+    */
+
+    if (dollarSymbol) {
+        dollarSymbol.style.display = 'none';
+    }
+
+
     function updateSymbol() {
 
         const selected =
@@ -3861,26 +3894,45 @@ function setupCompensationTypeSwitch(
                 'input[name="' + radioName + '"]:checked'
             );
 
+
         if (!selected) {
             return;
         }
 
 
+        /*
+        |--------------------------------------------------------------------------
+        | CHANGE THE ACTUAL CHARACTER
+        |--------------------------------------------------------------------------
+        */
+
         if (selected.value === 'amount') {
 
-            wrap.classList.add('has-prefix');
+            percentSymbol.textContent = '$';
 
         } else {
 
-            wrap.classList.remove('has-prefix');
+            percentSymbol.textContent = '%';
 
         }
 
     }
 
 
+    /*
+    |--------------------------------------------------------------------------
+    | CORRECT SYMBOL WHEN PAGE LOADS
+    |--------------------------------------------------------------------------
+    */
+
     updateSymbol();
 
+
+    /*
+    |--------------------------------------------------------------------------
+    | SWITCH IMMEDIATELY WHEN REALTOR TAPS OPTION
+    |--------------------------------------------------------------------------
+    */
 
     radios.forEach(function (radio) {
 
