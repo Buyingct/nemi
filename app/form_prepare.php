@@ -3576,47 +3576,36 @@ body{
 <script>
 document.addEventListener('DOMContentLoaded', function () {
 
-    const panel =
-        document.getElementById('seller-contact-panel');
 
-    const search =
-        document.getElementById('seller-contact-search');
+/* =========================================================
+   CONTACT PICKER
+========================================================= */
 
-    const closeButton =
-        document.getElementById('seller-contact-close');
+const panel =
+    document.getElementById('seller-contact-panel');
 
-    const plusButtons =
-        document.querySelectorAll('.seller-contact-plus');
+const search =
+    document.getElementById('seller-contact-search');
 
-    const contactOptions =
-        document.querySelectorAll('.seller-contact-option');
+const closeButton =
+    document.getElementById('seller-contact-close');
 
+const plusButtons =
+    document.querySelectorAll('.seller-contact-plus');
 
-    /*
-    |--------------------------------------------------------------------------
-    | NOTHING TO DO IF THIS IS NOT STEP 1
-    |--------------------------------------------------------------------------
-    */
+const contactOptions =
+    document.querySelectorAll('.seller-contact-option');
 
-    if (!panel || plusButtons.length === 0) {
-        return;
-    }
+let activeSeller = null;
 
 
-    /*
-    |--------------------------------------------------------------------------
-    | WHICH SELLER ARE WE CHOOSING FOR?
-    |--------------------------------------------------------------------------
-    */
+/*
+|--------------------------------------------------------------------------
+| OPEN CONTACT PICKER
+|--------------------------------------------------------------------------
+*/
 
-    let activeSeller = null;
-
-
-    /*
-    |--------------------------------------------------------------------------
-    | OPEN CONTACT PICKER
-    |--------------------------------------------------------------------------
-    */
+if (panel && plusButtons.length > 0) {
 
     plusButtons.forEach(function (button) {
 
@@ -3625,14 +3614,11 @@ document.addEventListener('DOMContentLoaded', function () {
             activeSeller =
                 button.dataset.contactTarget || null;
 
-
             if (!activeSeller) {
                 return;
             }
 
-
             panel.hidden = false;
-
 
             if (search) {
 
@@ -3661,7 +3647,6 @@ document.addEventListener('DOMContentLoaded', function () {
         closeButton.addEventListener('click', function () {
 
             panel.hidden = true;
-
             activeSeller = null;
 
         });
@@ -3677,235 +3662,108 @@ document.addEventListener('DOMContentLoaded', function () {
 
     contactOptions.forEach(function (button) {
 
-    button.addEventListener('click', function () {
+        button.addEventListener('click', function () {
 
-        if (!activeSeller) {
-            return;
-        }
-
-
-        /*
-        |--------------------------------------------------------------------------
-        | FIND THIS SELLER'S FIELDS
-        |--------------------------------------------------------------------------
-        */
-
-        const sellerInput =
-            document.getElementById(
-                'seller_' + activeSeller
-            );
-
-        const contactIdInput =
-            document.getElementById(
-                'seller_' + activeSeller + '_contact_id'
-            );
-
-        const emailInput =
-            document.getElementById(
-                'seller_' + activeSeller + '_email'
-            );
-
-        const phoneInput =
-            document.getElementById(
-                'seller_' + activeSeller + '_phone'
-            );
-
-        const streetInput =
-            document.getElementById(
-                'seller_' + activeSeller + '_street'
-            );
-
-        const cityInput =
-            document.getElementById(
-                'seller_' + activeSeller + '_city'
-            );
-
-        const stateInput =
-            document.getElementById(
-                'seller_' + activeSeller + '_state'
-            );
-
-        const zipInput =
-            document.getElementById(
-                'seller_' + activeSeller + '_zip'
-            );
+            if (!activeSeller) {
+                return;
+            }
 
 
-        if (!sellerInput || !contactIdInput) {
-            return;
-        }
+            const sellerInput =
+                document.getElementById(
+                    'seller_' + activeSeller
+                );
+
+            const contactIdInput =
+                document.getElementById(
+                    'seller_' + activeSeller + '_contact_id'
+                );
+
+            const emailInput =
+                document.getElementById(
+                    'seller_' + activeSeller + '_email'
+                );
+
+            const phoneInput =
+                document.getElementById(
+                    'seller_' + activeSeller + '_phone'
+                );
+
+            const streetInput =
+                document.getElementById(
+                    'seller_' + activeSeller + '_street'
+                );
+
+            const cityInput =
+                document.getElementById(
+                    'seller_' + activeSeller + '_city'
+                );
+
+            const stateInput =
+                document.getElementById(
+                    'seller_' + activeSeller + '_state'
+                );
+
+            const zipInput =
+                document.getElementById(
+                    'seller_' + activeSeller + '_zip'
+                );
 
 
-        /*
-        |--------------------------------------------------------------------------
-        | FILL CONTACT SNAPSHOT IMMEDIATELY
-        |--------------------------------------------------------------------------
-        */
-
-        sellerInput.value =
-            button.dataset.name || '';
-
-        contactIdInput.value =
-            button.dataset.contactId || '';
+            if (!sellerInput || !contactIdInput) {
+                return;
+            }
 
 
-        if (emailInput) {
-            emailInput.value =
-                button.dataset.email || '';
-        }
+            /*
+            |--------------------------------------------------------------------------
+            | FILL CONTACT + SNAPSHOT
+            |--------------------------------------------------------------------------
+            */
 
-        if (phoneInput) {
-            phoneInput.value =
-                button.dataset.phone || '';
-        }
+            sellerInput.value =
+                button.dataset.name || '';
 
-        if (streetInput) {
-            streetInput.value =
-                button.dataset.street || '';
-        }
+            contactIdInput.value =
+                button.dataset.contactId || '';
 
-        if (cityInput) {
-            cityInput.value =
-                button.dataset.city || '';
-        }
+            if (emailInput) {
+                emailInput.value =
+                    button.dataset.email || '';
+            }
 
-        if (stateInput) {
-            stateInput.value =
-                button.dataset.state || '';
-        }
+            if (phoneInput) {
+                phoneInput.value =
+                    button.dataset.phone || '';
+            }
 
-        if (zipInput) {
-            zipInput.value =
-                button.dataset.zip || '';
-        }
+            if (streetInput) {
+                streetInput.value =
+                    button.dataset.street || '';
+            }
+
+            if (cityInput) {
+                cityInput.value =
+                    button.dataset.city || '';
+            }
+
+            if (stateInput) {
+                stateInput.value =
+                    button.dataset.state || '';
+            }
+
+            if (zipInput) {
+                zipInput.value =
+                    button.dataset.zip || '';
+            }
 
 
-        /*
-        |--------------------------------------------------------------------------
-        | CLOSE PICKER
-        |--------------------------------------------------------------------------
-        */
+            panel.hidden = true;
+            activeSeller = null;
 
-        panel.hidden = true;
-
-        activeSeller = null;
+        });
 
     });
-
-    /*
-|--------------------------------------------------------------------------
-| COMPENSATION TYPE SWITCHING
-|--------------------------------------------------------------------------
-|
-| Percentage selected  -> show %
-| Dollar amount        -> show $
-|
-| Applies to both:
-| - Brokerage service fee
-| - Buyer-broker compensation
-|
-*/
-
-function setupCompensationTypeSwitch(
-    radioName,
-    wrapId
-) {
-
-    const wrap =
-        document.getElementById(wrapId);
-
-    const radios =
-        document.querySelectorAll(
-            'input[name="' + radioName + '"]'
-        );
-
-
-    if (!wrap || radios.length === 0) {
-        return;
-    }
-
-
-    function updateCompensationSymbol() {
-
-        const selected =
-            document.querySelector(
-                'input[name="' + radioName + '"]:checked'
-            );
-
-
-        if (!selected) {
-            return;
-        }
-
-
-        if (selected.value === 'amount') {
-
-            wrap.classList.add(
-                'has-prefix'
-            );
-
-        } else {
-
-            wrap.classList.remove(
-                'has-prefix'
-            );
-
-        }
-
-    }
-
-
-    /*
-    |--------------------------------------------------------------------------
-    | INITIAL STATE
-    |--------------------------------------------------------------------------
-    */
-
-    updateCompensationSymbol();
-
-
-    /*
-    |--------------------------------------------------------------------------
-    | CHANGE STATE
-    |--------------------------------------------------------------------------
-    */
-
-    radios.forEach(function (radio) {
-
-        radio.addEventListener(
-            'change',
-            updateCompensationSymbol
-        );
-
-    });
-
-}
-
-
-/*
-|--------------------------------------------------------------------------
-| BROKERAGE SERVICE FEE
-|--------------------------------------------------------------------------
-*/
-
-setupCompensationTypeSwitch(
-    'service_fee_type',
-    'service-fee-wrap'
-);
-
-
-/*
-|--------------------------------------------------------------------------
-| BUYER-BROKER FEE
-|--------------------------------------------------------------------------
-*/
-
-setupCompensationTypeSwitch(
-    'buyer_broker_fee_type',
-    'buyer-fee-wrap'
-);
-
-});
 
 
     /*
@@ -3923,13 +3781,11 @@ setupCompensationTypeSwitch(
                     .trim()
                     .toLowerCase();
 
-
             contactOptions.forEach(function (button) {
 
                 const text =
                     button.textContent
                         .toLowerCase();
-
 
                 button.hidden =
                     query !== ''
@@ -3947,10 +3803,6 @@ setupCompensationTypeSwitch(
     |--------------------------------------------------------------------------
     | MANUAL SELLER EDIT
     |--------------------------------------------------------------------------
-    |
-    | If Realtor manually changes a seller after choosing
-    | a saved contact, remove the saved contact connection.
-    |
     */
 
     ['1', '2'].forEach(function (sellerNumber) {
@@ -3965,29 +3817,97 @@ setupCompensationTypeSwitch(
                 'seller_' + sellerNumber + '_contact_id'
             );
 
-
         if (!sellerInput || !contactIdInput) {
             return;
         }
 
-
         sellerInput.addEventListener('input', function () {
 
-            if (contactIdInput.value !== '') {
-
-                contactIdInput.value = '';
-
-            }
+            contactIdInput.value = '';
 
         });
 
     });
 
-   /*
-|--------------------------------------------------------------------------
-| QUICK DATE PICKS
-|--------------------------------------------------------------------------
-*/
+}
+
+
+/* =========================================================
+   COMPENSATION SYMBOL SWITCHING
+========================================================= */
+
+function setupCompensationTypeSwitch(
+    radioName,
+    wrapId
+) {
+
+    const wrap =
+        document.getElementById(wrapId);
+
+    const radios =
+        document.querySelectorAll(
+            'input[name="' + radioName + '"]'
+        );
+
+    if (!wrap || radios.length === 0) {
+        return;
+    }
+
+
+    function updateSymbol() {
+
+        const selected =
+            document.querySelector(
+                'input[name="' + radioName + '"]:checked'
+            );
+
+        if (!selected) {
+            return;
+        }
+
+
+        if (selected.value === 'amount') {
+
+            wrap.classList.add('has-prefix');
+
+        } else {
+
+            wrap.classList.remove('has-prefix');
+
+        }
+
+    }
+
+
+    updateSymbol();
+
+
+    radios.forEach(function (radio) {
+
+        radio.addEventListener(
+            'change',
+            updateSymbol
+        );
+
+    });
+
+}
+
+
+setupCompensationTypeSwitch(
+    'service_fee_type',
+    'service-fee-wrap'
+);
+
+setupCompensationTypeSwitch(
+    'buyer_broker_fee_type',
+    'buyer-fee-wrap'
+);
+
+
+/* =========================================================
+   QUICK DATE PICKS
+========================================================= */
 
 const startDateInput =
     document.getElementById('start_date');
@@ -4004,19 +3924,6 @@ const expirationButtons =
     );
 
 
-/*
-|--------------------------------------------------------------------------
-| FORMAT DATE FOR HTML DATE INPUT
-|--------------------------------------------------------------------------
-|
-| HTML date inputs store:
-|
-| YYYY-MM-DD
-|
-| The browser displays it in the user's normal local format.
-|
-*/
-
 function formatDateForInput(date) {
 
     const year =
@@ -4032,22 +3939,9 @@ function formatDateForInput(date) {
             date.getDate()
         ).padStart(2, '0');
 
-
-    return (
-        year
-        + '-'
-        + month
-        + '-'
-        + day
-    );
+    return year + '-' + month + '-' + day;
 }
 
-
-/*
-|--------------------------------------------------------------------------
-| READ HTML DATE WITHOUT TIMEZONE SHIFT
-|--------------------------------------------------------------------------
-*/
 
 function dateFromInput(value) {
 
@@ -4055,15 +3949,12 @@ function dateFromInput(value) {
         return null;
     }
 
-
     const parts =
         value.split('-');
-
 
     if (parts.length !== 3) {
         return null;
     }
-
 
     return new Date(
         Number(parts[0]),
@@ -4073,27 +3964,6 @@ function dateFromInput(value) {
 }
 
 
-/*
-|--------------------------------------------------------------------------
-| ADD MONTHS SAFELY
-|--------------------------------------------------------------------------
-|
-| Example:
-|
-| 8/30/26 + 3 months
-| becomes
-| 11/30/26
-|
-| If starting on a month-end date that doesn't exist later,
-| Nemi uses the final valid day of that month.
-|
-| Example:
-|
-| 8/31 + 6 months
-| becomes the final day of February.
-|
-*/
-
 function addMonthsClamped(
     originalDate,
     months
@@ -4102,14 +3972,12 @@ function addMonthsClamped(
     const originalDay =
         originalDate.getDate();
 
-
     const target =
         new Date(
             originalDate.getFullYear(),
             originalDate.getMonth() + months,
             1
         );
-
 
     const lastDayOfTargetMonth =
         new Date(
@@ -4118,14 +3986,12 @@ function addMonthsClamped(
             0
         ).getDate();
 
-
     target.setDate(
         Math.min(
             originalDay,
             lastDayOfTargetMonth
         )
     );
-
 
     return target;
 }
@@ -4137,29 +4003,16 @@ function addMonthsClamped(
 |--------------------------------------------------------------------------
 */
 
-if (
-    todayButton
-    &&
-    startDateInput
-) {
+if (todayButton && startDateInput) {
 
     todayButton.addEventListener(
         'click',
         function () {
 
-            const today =
-                new Date();
-
-
             startDateInput.value =
-                formatDateForInput(today);
-
-
-            /*
-            |--------------------------------------------------------------
-            | Notify anything else listening to the field.
-            |--------------------------------------------------------------
-            */
+                formatDateForInput(
+                    new Date()
+                );
 
             startDateInput.dispatchEvent(
                 new Event(
@@ -4178,134 +4031,103 @@ if (
 
 /*
 |--------------------------------------------------------------------------
-| 3 / 6 / 12 MONTH EXPIRATION
+| 3 / 6 / 12 MONTHS
 |--------------------------------------------------------------------------
 */
 
-expirationButtons.forEach(
-    function (button) {
+expirationButtons.forEach(function (button) {
 
-        button.addEventListener(
-            'click',
-            function () {
+    button.addEventListener(
+        'click',
+        function () {
 
-                if (
-                    !startDateInput
-                    ||
-                    !expirationDateInput
-                ) {
-                    return;
-                }
-
-
-                /*
-                |----------------------------------------------------------
-                | Need a start date first.
-                |
-                | If Realtor hasn't chosen one yet,
-                | use today automatically.
-                |----------------------------------------------------------
-                */
-
-                if (
-                    startDateInput.value === ''
-                ) {
-
-                    startDateInput.value =
-                        formatDateForInput(
-                            new Date()
-                        );
-
-                }
+            if (
+                !startDateInput
+                ||
+                !expirationDateInput
+            ) {
+                return;
+            }
 
 
-                const startDate =
-                    dateFromInput(
-                        startDateInput.value
-                    );
+            if (startDateInput.value === '') {
 
-
-                if (!startDate) {
-                    return;
-                }
-
-
-                const months =
-                    Number(
-                        button.dataset
-                            .expirationMonths
-                    );
-
-
-                if (!months) {
-                    return;
-                }
-
-
-                const expirationDate =
-                    addMonthsClamped(
-                        startDate,
-                        months
-                    );
-
-
-                expirationDateInput.value =
+                startDateInput.value =
                     formatDateForInput(
-                        expirationDate
-                    );
-
-
-                expirationDateInput
-                    .dispatchEvent(
-                        new Event(
-                            'change',
-                            {
-                                bubbles: true
-                            }
-                        )
-                    );
-
-
-                /*
-                |----------------------------------------------------------
-                | Visual selection
-                |----------------------------------------------------------
-                */
-
-                expirationButtons.forEach(
-                    function (otherButton) {
-
-                        otherButton
-                            .classList
-                            .remove(
-                                'is-selected'
-                            );
-
-                    }
-                );
-
-
-                button
-                    .classList
-                    .add(
-                        'is-selected'
+                        new Date()
                     );
 
             }
-        );
 
-    }
-);
+
+            const startDate =
+                dateFromInput(
+                    startDateInput.value
+                );
+
+            if (!startDate) {
+                return;
+            }
+
+
+            const months =
+                Number(
+                    button.dataset.expirationMonths
+                );
+
+            if (!months) {
+                return;
+            }
+
+
+            const expirationDate =
+                addMonthsClamped(
+                    startDate,
+                    months
+                );
+
+
+            expirationDateInput.value =
+                formatDateForInput(
+                    expirationDate
+                );
+
+
+            expirationDateInput.dispatchEvent(
+                new Event(
+                    'change',
+                    {
+                        bubbles: true
+                    }
+                )
+            );
+
+
+            expirationButtons.forEach(
+                function (otherButton) {
+
+                    otherButton.classList.remove(
+                        'is-selected'
+                    );
+
+                }
+            );
+
+
+            button.classList.add(
+                'is-selected'
+            );
+
+        }
+    );
+
+});
 
 
 /*
 |--------------------------------------------------------------------------
-| CUSTOM EXPIRATION DATE
+| MANUAL EXPIRATION DATE
 |--------------------------------------------------------------------------
-|
-| If Realtor manually chooses another date from the calendar,
-| remove the highlighted 3mo / 6mo / 12mo shortcut.
-|
 */
 
 if (expirationDateInput) {
@@ -4318,15 +4140,12 @@ if (expirationDateInput) {
                 return;
             }
 
-
             expirationButtons.forEach(
                 function (button) {
 
-                    button
-                        .classList
-                        .remove(
-                            'is-selected'
-                        );
+                    button.classList.remove(
+                        'is-selected'
+                    );
 
                 }
             );
@@ -4335,6 +4154,7 @@ if (expirationDateInput) {
     );
 
 }
+
 
 });
 </script>
