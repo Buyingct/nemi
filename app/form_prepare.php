@@ -1731,7 +1731,47 @@ body{
         name="seller_1_contact_id"
         value="<?= h($draft['seller_1_contact_id']) ?>"
     >
+   <input
+    type="hidden"
+    id="seller_1_email"
+    name="seller_1_email"
+    value="<?= h($draft['seller_1_email']) ?>"
+>
 
+<input
+    type="hidden"
+    id="seller_1_phone"
+    name="seller_1_phone"
+    value="<?= h($draft['seller_1_phone']) ?>"
+>
+
+<input
+    type="hidden"
+    id="seller_1_street"
+    name="seller_1_street"
+    value="<?= h($draft['seller_1_street']) ?>"
+>
+
+<input
+    type="hidden"
+    id="seller_1_city"
+    name="seller_1_city"
+    value="<?= h($draft['seller_1_city']) ?>"
+>
+
+<input
+    type="hidden"
+    id="seller_1_state"
+    name="seller_1_state"
+    value="<?= h($draft['seller_1_state']) ?>"
+>
+
+<input
+    type="hidden"
+    id="seller_1_zip"
+    name="seller_1_zip"
+    value="<?= h($draft['seller_1_zip']) ?>"
+>
     <?php if (isset($errors['seller_1'])): ?>
 
         <div class="form-field-error">
@@ -1779,7 +1819,47 @@ body{
         name="seller_2_contact_id"
         value="<?= h($draft['seller_2_contact_id'] ?? '') ?>"
     >
+    <input
+    type="hidden"
+    id="seller_2_email"
+    name="seller_2_email"
+    value="<?= h($draft['seller_2_email']) ?>"
+>
 
+<input
+    type="hidden"
+    id="seller_2_phone"
+    name="seller_2_phone"
+    value="<?= h($draft['seller_2_phone']) ?>"
+>
+
+<input
+    type="hidden"
+    id="seller_2_street"
+    name="seller_2_street"
+    value="<?= h($draft['seller_2_street']) ?>"
+>
+
+<input
+    type="hidden"
+    id="seller_2_city"
+    name="seller_2_city"
+    value="<?= h($draft['seller_2_city']) ?>"
+>
+
+<input
+    type="hidden"
+    id="seller_2_state"
+    name="seller_2_state"
+    value="<?= h($draft['seller_2_state']) ?>"
+>
+
+<input
+    type="hidden"
+    id="seller_2_zip"
+    name="seller_2_zip"
+    value="<?= h($draft['seller_2_zip']) ?>"
+>
     <div class="form-field-help">
         Leave blank if there is only one seller.
     </div>
@@ -1844,12 +1924,20 @@ body{
                 ?>
 
                 <button
-                    type="button"
-                    class="seller-contact-option"
+    type="button"
+    class="seller-contact-option"
 
-                    data-contact-id="<?= h($contact['id']) ?>"
-                    data-name="<?= h($contactName) ?>"
-                >
+    data-contact-id="<?= h($contact['id']) ?>"
+    data-name="<?= h($contactName) ?>"
+
+    data-email="<?= h($contact['email'] ?? '') ?>"
+    data-phone="<?= h($contact['phone'] ?? '') ?>"
+
+    data-street="<?= h($contact['street'] ?? '') ?>"
+    data-city="<?= h($contact['city'] ?? '') ?>"
+    data-state="<?= h($contact['state'] ?? '') ?>"
+    data-zip="<?= h($contact['zip'] ?? '') ?>"
+>
 
                     <strong>
                         <?= h($contactName) ?>
@@ -3589,43 +3677,122 @@ document.addEventListener('DOMContentLoaded', function () {
 
     contactOptions.forEach(function (button) {
 
-        button.addEventListener('click', function () {
+    button.addEventListener('click', function () {
 
-            if (!activeSeller) {
-                return;
-            }
-
-
-            const sellerInput =
-                document.getElementById(
-                    'seller_' + activeSeller
-                );
-
-            const contactIdInput =
-                document.getElementById(
-                    'seller_' + activeSeller + '_contact_id'
-                );
+        if (!activeSeller) {
+            return;
+        }
 
 
-            if (!sellerInput || !contactIdInput) {
-                return;
-            }
+        /*
+        |--------------------------------------------------------------------------
+        | FIND THIS SELLER'S FIELDS
+        |--------------------------------------------------------------------------
+        */
+
+        const sellerInput =
+            document.getElementById(
+                'seller_' + activeSeller
+            );
+
+        const contactIdInput =
+            document.getElementById(
+                'seller_' + activeSeller + '_contact_id'
+            );
+
+        const emailInput =
+            document.getElementById(
+                'seller_' + activeSeller + '_email'
+            );
+
+        const phoneInput =
+            document.getElementById(
+                'seller_' + activeSeller + '_phone'
+            );
+
+        const streetInput =
+            document.getElementById(
+                'seller_' + activeSeller + '_street'
+            );
+
+        const cityInput =
+            document.getElementById(
+                'seller_' + activeSeller + '_city'
+            );
+
+        const stateInput =
+            document.getElementById(
+                'seller_' + activeSeller + '_state'
+            );
+
+        const zipInput =
+            document.getElementById(
+                'seller_' + activeSeller + '_zip'
+            );
 
 
-            sellerInput.value =
-                button.dataset.name || '';
-
-            contactIdInput.value =
-                button.dataset.contactId || '';
+        if (!sellerInput || !contactIdInput) {
+            return;
+        }
 
 
-            panel.hidden = true;
+        /*
+        |--------------------------------------------------------------------------
+        | FILL CONTACT SNAPSHOT IMMEDIATELY
+        |--------------------------------------------------------------------------
+        */
 
-            activeSeller = null;
+        sellerInput.value =
+            button.dataset.name || '';
 
-        });
+        contactIdInput.value =
+            button.dataset.contactId || '';
+
+
+        if (emailInput) {
+            emailInput.value =
+                button.dataset.email || '';
+        }
+
+        if (phoneInput) {
+            phoneInput.value =
+                button.dataset.phone || '';
+        }
+
+        if (streetInput) {
+            streetInput.value =
+                button.dataset.street || '';
+        }
+
+        if (cityInput) {
+            cityInput.value =
+                button.dataset.city || '';
+        }
+
+        if (stateInput) {
+            stateInput.value =
+                button.dataset.state || '';
+        }
+
+        if (zipInput) {
+            zipInput.value =
+                button.dataset.zip || '';
+        }
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | CLOSE PICKER
+        |--------------------------------------------------------------------------
+        */
+
+        panel.hidden = true;
+
+        activeSeller = null;
 
     });
+
+});
 
 
     /*
