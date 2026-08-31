@@ -3943,6 +3943,7 @@ function setupCompensationTypeSwitch(
 
     });
 
+    
 }
 
 
