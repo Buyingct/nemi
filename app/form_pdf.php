@@ -295,381 +295,375 @@ if ($debugGrid) {
     | PAGE 1
     |--------------------------------------------------------------------------
     */
+/*
+|--------------------------------------------------------------------------
+| PAGE 1
+|--------------------------------------------------------------------------
+*/
 
-    if ($pageNumber === 1) {
+if ($pageNumber === 1) {
 
-        /*
-        |--------------------------------------------------------------------------
-        | SELLER(S)
-        |--------------------------------------------------------------------------
-        */
+    /*
+    |--------------------------------------------------------------------------
+    | SELLER(S)
+    |--------------------------------------------------------------------------
+    */
 
-        $sellerNames =
-            trim(
-                (string)($draft['seller_1'] ?? '')
+    $sellerNames =
+        trim(
+            (string)($draft['seller_1'] ?? '')
+        );
+
+    if (!empty($draft['seller_2'])) {
+
+        $sellerNames .=
+            ' & '
+            . trim(
+                (string)$draft['seller_2']
             );
+    }
 
-        if (
-            !empty($draft['seller_2'])
-        ) {
+    $pdf->SetFont(
+        'Helvetica',
+        '',
+        8
+    );
 
-            $sellerNames .=
-                ' & '
-                . trim(
-                    (string)$draft['seller_2']
-                );
-        }
+    $pdf->SetXY(
+        55,
+        31.5
+    );
+
+    $pdf->Cell(
+        110,
+        4,
+        $sellerNames,
+        0,
+        0
+    );
 
 
-        $pdf->SetXY(
-            53,
-            35.1
+    /*
+    |--------------------------------------------------------------------------
+    | BROKERAGE
+    |--------------------------------------------------------------------------
+    */
+
+    $pdf->SetXY(
+        18,
+        37.5
+    );
+
+    $pdf->Cell(
+        94,
+        4,
+        (string)($draft['broker'] ?? ''),
+        0,
+        0
+    );
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | PROPERTY ADDRESS
+    |--------------------------------------------------------------------------
+    */
+
+    $pdf->SetXY(
+        18,
+        44
+    );
+
+    $pdf->Cell(
+        112,
+        4,
+        (string)($draft['property_address'] ?? ''),
+        0,
+        0
+    );
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | LIST PRICE
+    |--------------------------------------------------------------------------
+    */
+
+    $listPrice =
+        trim(
+            (string)($draft['list_price'] ?? '')
         );
 
-        $pdf->Cell(
-            118,
-            5,
-            $sellerNames,
-            0,
-            0
-        );
-
-
-        /*
-        |--------------------------------------------------------------------------
-        | BROKERAGE
-        |--------------------------------------------------------------------------
-        */
-
-        $pdf->SetXY(
-            13,
-            43.2
-        );
-
-        $pdf->Cell(
-            102,
-            5,
-            (string)($draft['broker'] ?? ''),
-            0,
-            0
-        );
-
-
-        /*
-        |--------------------------------------------------------------------------
-        | PROPERTY ADDRESS
-        |--------------------------------------------------------------------------
-        */
-
-        $pdf->SetXY(
-            17,
-            51.2
-        );
-
-        $pdf->Cell(
-            118,
-            5,
-            (string)($draft['property_address'] ?? ''),
-            0,
-            0
-        );
-
-
-        /*
-        |--------------------------------------------------------------------------
-        | LIST PRICE
-        |--------------------------------------------------------------------------
-        */
+    if ($listPrice !== '') {
 
         $listPrice =
+            '$'
+            . number_format(
+                (float)str_replace(
+                    [',', '$'],
+                    '',
+                    $listPrice
+                ),
+                0
+            );
+    }
+
+    $pdf->SetXY(
+        96,
+        50
+    );
+
+    $pdf->Cell(
+        43,
+        4,
+        $listPrice,
+        0,
+        0
+    );
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | START DATE
+    |--------------------------------------------------------------------------
+    */
+
+    $startDate =
+        (string)($draft['start_date'] ?? '');
+
+    if ($startDate !== '') {
+
+        $timestamp =
+            strtotime($startDate);
+
+        if ($timestamp !== false) {
+
+            $startDate =
+                date(
+                    'm/d/Y',
+                    $timestamp
+                );
+        }
+    }
+
+    $pdf->SetXY(
+        72,
+        56
+    );
+
+    $pdf->Cell(
+        34,
+        4,
+        $startDate,
+        0,
+        0
+    );
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | EXPIRATION DATE
+    |--------------------------------------------------------------------------
+    */
+
+    $expirationDate =
+        (string)(
+            $draft['expiration_date']
+            ?? ''
+        );
+
+    if ($expirationDate !== '') {
+
+        $timestamp =
+            strtotime($expirationDate);
+
+        if ($timestamp !== false) {
+
+            $expirationDate =
+                date(
+                    'm/d/Y',
+                    $timestamp
+                );
+        }
+    }
+
+    $pdf->SetXY(
+        22,
+        62
+    );
+
+    $pdf->Cell(
+        39,
+        4,
+        $expirationDate,
+        0,
+        0
+    );
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | BROKERAGE SERVICE FEE
+    |--------------------------------------------------------------------------
+    */
+
+    $serviceFeeValue =
+        trim(
+            (string)(
+                $draft['service_fee_value']
+                ?? ''
+            )
+        );
+
+    if (
+        ($draft['service_fee_type'] ?? '')
+        === 'percent'
+    ) {
+
+        $pdf->SetXY(
+            139,
+            89
+        );
+
+        $pdf->Cell(
+            22,
+            4,
+            $serviceFeeValue,
+            0,
+            0
+        );
+
+    } elseif ($serviceFeeValue !== '') {
+
+        $pdf->SetXY(
+            31,
+            94
+        );
+
+        $pdf->Cell(
+            45,
+            4,
+            '$'
+            . number_format(
+                (float)str_replace(
+                    [',', '$'],
+                    '',
+                    $serviceFeeValue
+                ),
+                0
+            ),
+            0,
+            0
+        );
+    }
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | BUYER-BROKER AUTHORIZATION
+    |--------------------------------------------------------------------------
+    */
+
+    $buyerAuthorized =
+        ($draft['buyer_broker_authorized'] ?? 'yes')
+        === 'yes';
+
+    $pdf->SetFont(
+        'Helvetica',
+        'B',
+        9
+    );
+
+    if ($buyerAuthorized) {
+
+        $pdf->SetXY(
+            50,
+            155
+        );
+
+    } else {
+
+        $pdf->SetXY(
+            62,
+            155
+        );
+    }
+
+    $pdf->Cell(
+        4,
+        4,
+        'X',
+        0,
+        0
+    );
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | BUYER-BROKER COMPENSATION
+    |--------------------------------------------------------------------------
+    */
+
+    if ($buyerAuthorized) {
+
+        $buyerFeeValue =
             trim(
                 (string)(
-                    $draft['list_price']
+                    $draft['buyer_broker_fee_value']
                     ?? ''
                 )
             );
 
-        if ($listPrice !== '') {
+        $pdf->SetFont(
+            'Helvetica',
+            '',
+            8
+        );
 
-            $listPrice =
+        if (
+            ($draft['buyer_broker_fee_type'] ?? '')
+            === 'percent'
+        ) {
+
+            $pdf->SetXY(
+                139,
+                166
+            );
+
+            $pdf->Cell(
+                18,
+                4,
+                $buyerFeeValue,
+                0,
+                0
+            );
+
+        } elseif ($buyerFeeValue !== '') {
+
+            $pdf->SetXY(
+                34,
+                172
+            );
+
+            $pdf->Cell(
+                34,
+                4,
                 '$'
                 . number_format(
                     (float)str_replace(
                         [',', '$'],
                         '',
-                        $listPrice
+                        $buyerFeeValue
                     ),
                     0
-                );
-        }
-
-
-        $pdf->SetXY(
-            95,
-            59.3
-        );
-
-        $pdf->Cell(
-            43,
-            5,
-            $listPrice,
-            0,
-            0
-        );
-
-
-        /*
-        |--------------------------------------------------------------------------
-        | START DATE
-        |--------------------------------------------------------------------------
-        */
-
-        $startDate =
-            (string)(
-                $draft['start_date']
-                ?? ''
-            );
-
-        if ($startDate !== '') {
-
-            $timestamp =
-                strtotime(
-                    $startDate
-                );
-
-            if ($timestamp !== false) {
-
-                $startDate =
-                    date(
-                        'm/d/Y',
-                        $timestamp
-                    );
-            }
-        }
-
-
-        $pdf->SetXY(
-            68,
-            67.3
-        );
-
-        $pdf->Cell(
-            38,
-            5,
-            $startDate,
-            0,
-            0
-        );
-
-
-        /*
-        |--------------------------------------------------------------------------
-        | EXPIRATION DATE
-        |--------------------------------------------------------------------------
-        */
-
-        $expirationDate =
-            (string)(
-                $draft['expiration_date']
-                ?? ''
-            );
-
-        if ($expirationDate !== '') {
-
-            $timestamp =
-                strtotime(
-                    $expirationDate
-                );
-
-            if ($timestamp !== false) {
-
-                $expirationDate =
-                    date(
-                        'm/d/Y',
-                        $timestamp
-                    );
-            }
-        }
-
-
-        $pdf->SetXY(
-            22,
-            75.2
-        );
-
-        $pdf->Cell(
-            42,
-            5,
-            $expirationDate,
-            0,
-            0
-        );
-
-
-        /*
-        |--------------------------------------------------------------------------
-        | SERVICE FEE
-        |--------------------------------------------------------------------------
-        */
-
-        $serviceFeeValue =
-            trim(
-                (string)(
-                    $draft['service_fee_value']
-                    ?? ''
-                )
-            );
-
-
-        if (
-            ($draft['service_fee_type'] ?? '')
-            === 'percent'
-        ) {
-
-            $pdf->SetXY(
-                136,
-                109.4
-            );
-
-            $pdf->Cell(
-                27,
-                5,
-                $serviceFeeValue,
+                ),
                 0,
                 0
             );
-
-        } else {
-
-            $pdf->SetXY(
-                57,
-                117.1
-            );
-
-            $pdf->Cell(
-                42,
-                5,
-                '$' . $serviceFeeValue,
-                0,
-                0
-            );
-        }
-
-
-        /*
-        |--------------------------------------------------------------------------
-        | BUYER BROKER AUTHORIZATION
-        |--------------------------------------------------------------------------
-        */
-
-        $buyerAuthorized =
-            ($draft['buyer_broker_authorized'] ?? 'yes')
-            === 'yes';
-
-
-        if ($buyerAuthorized) {
-
-            $pdf->SetXY(
-                44.5,
-                183.1
-            );
-
-            $pdf->SetFont(
-                'Helvetica',
-                'B',
-                11
-            );
-
-            $pdf->Cell(
-                5,
-                5,
-                'X',
-                0,
-                0
-            );
-
-        } else {
-
-            $pdf->SetXY(
-                57,
-                183.1
-            );
-
-            $pdf->SetFont(
-                'Helvetica',
-                'B',
-                11
-            );
-
-            $pdf->Cell(
-                5,
-                5,
-                'X',
-                0,
-                0
-            );
-        }
-
-
-        /*
-        |--------------------------------------------------------------------------
-        | BUYER BROKER COMPENSATION
-        |--------------------------------------------------------------------------
-        */
-
-        if ($buyerAuthorized) {
-
-            $pdf->SetFont(
-                'Helvetica',
-                '',
-                9
-            );
-
-
-            $buyerFeeValue =
-                trim(
-                    (string)(
-                        $draft['buyer_broker_fee_value']
-                        ?? ''
-                    )
-                );
-
-
-            if (
-                ($draft['buyer_broker_fee_type'] ?? '')
-                === 'percent'
-            ) {
-
-                $pdf->SetXY(
-                    143,
-                    197.0
-                );
-
-                $pdf->Cell(
-                    18,
-                    5,
-                    $buyerFeeValue,
-                    0,
-                    0
-                );
-
-            } else {
-
-                $pdf->SetXY(
-                    30,
-                    204.8
-                );
-
-                $pdf->Cell(
-                    30,
-                    5,
-                    '$' . $buyerFeeValue,
-                    0,
-                    0
-                );
-            }
         }
     }
+}
+
 }
 
 $fileName =
