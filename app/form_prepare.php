@@ -311,7 +311,37 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     if ($step === 1) {
 
-        /*
+    /*
+|--------------------------------------------------------------------------
+| SELLERS + PROPERTY
+|--------------------------------------------------------------------------
+*/
+
+$draft['seller_1'] =
+    trim(
+        (string)(
+            $_POST['seller_1']
+            ?? ''
+        )
+    );
+
+$draft['seller_2'] =
+    trim(
+        (string)(
+            $_POST['seller_2']
+            ?? ''
+        )
+    );
+
+$draft['property_address'] =
+    trim(
+        (string)(
+            $_POST['property_address']
+            ?? ''
+        )
+    );  
+    
+    /*
 |--------------------------------------------------------------------------
 | LIST PRICE
 |--------------------------------------------------------------------------
@@ -370,17 +400,7 @@ $draft['expiration_date'] =
             )
         );
 
-        $draft['list_price'] = trim(
-            (string)($_POST['list_price'] ?? '')
-        );
-
-        $draft['start_date'] = trim(
-            (string)($_POST['start_date'] ?? '')
-        );
-
-        $draft['expiration_date'] = trim(
-            (string)($_POST['expiration_date'] ?? '')
-        );
+    
 
         $draft['broker'] = $form['brokerage'];
 
@@ -2341,63 +2361,7 @@ body{
                 
 
 
-                <!-- EXPIRATION DATE -->
-
-<div class="form-field">
-
-    <div class="date-label-row">
-
-        <label for="expiration_date">
-            Listing expires
-        </label>
-
-        <div class="date-quick-options">
-
-            <button
-                type="button"
-                class="date-quick-button"
-                data-expiration-months="3"
-            >
-                3mo
-            </button>
-
-            <button
-                type="button"
-                class="date-quick-button"
-                data-expiration-months="6"
-            >
-                6mo
-            </button>
-
-            <button
-                type="button"
-                class="date-quick-button"
-                data-expiration-months="12"
-            >
-                12mo
-            </button>
-
-        </div>
-
-    </div>
-
-    <input
-        id="expiration_date"
-        name="expiration_date"
-        type="date"
-        value="<?= h($draft['expiration_date']) ?>"
-    >
-
-    <?php if (isset($errors['expiration_date'])): ?>
-
-        <div class="form-field-error">
-            <?= h($errors['expiration_date']) ?>
-        </div>
-
-    <?php endif; ?>
-
-</div>
-
+               
                 <!-- BROKERAGE -->
 
                 <div class="form-field full">
