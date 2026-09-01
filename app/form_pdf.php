@@ -51,11 +51,10 @@ $draftKey =
     'form_draft_' . $formId;
 
 $draft =
-    $_SESSION[$draftKey] ?? null;
+    $_SESSION[$draftKey] ?? [];
 
-if (!is_array($draft) || empty($draft)) {
-    http_response_code(400);
-    exit('No prepared agreement was found.');
+if (!is_array($draft)) {
+    $draft = [];
 }
 
 $pdf = new Fpdi();
