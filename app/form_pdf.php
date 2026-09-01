@@ -664,7 +664,7 @@ if ($pageNumber === 1) {
     }
 }
 
-}
+
 
 /*
 |--------------------------------------------------------------------------
@@ -681,12 +681,12 @@ if ($pageNumber === 2) {
     */
 
     $specialShowingInstructions =
-        trim(
-            (string)(
-                $draft['special_showing_instructions']
-                ?? ''
-            )
-        );
+    trim(
+        (string)(
+            $draft['showing_instructions']
+            ?? ''
+        )
+    );
 
     if ($specialShowingInstructions !== '') {
 
@@ -1186,6 +1186,8 @@ if ($pageNumber === 3) {
     | the Realtor signs the agreement.
     |--------------------------------------------------------------------------
     */
+}
+
 }
 
 $fileName =
