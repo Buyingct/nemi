@@ -521,7 +521,7 @@ if ($pageNumber === 1) {
     ) {
 
         $pdf->SetXY(
-            139,
+            136,
             89
         );
 
@@ -577,7 +577,7 @@ if ($pageNumber === 1) {
     if ($buyerAuthorized) {
 
         $pdf->SetXY(
-            50,
+            45.8,
             155
         );
 
@@ -626,7 +626,7 @@ if ($pageNumber === 1) {
         ) {
 
             $pdf->SetXY(
-                139,
+                136,
                 166
             );
 
@@ -664,6 +664,528 @@ if ($pageNumber === 1) {
     }
 }
 
+}
+
+/*
+|--------------------------------------------------------------------------
+| PAGE 2
+|--------------------------------------------------------------------------
+*/
+
+if ($pageNumber === 2) {
+
+    /*
+    |--------------------------------------------------------------------------
+    | SPECIAL SHOWING INSTRUCTIONS
+    |--------------------------------------------------------------------------
+    */
+
+    $specialShowingInstructions =
+        trim(
+            (string)(
+                $draft['special_showing_instructions']
+                ?? ''
+            )
+        );
+
+    if ($specialShowingInstructions !== '') {
+
+        $pdf->SetFont(
+            'Helvetica',
+            '',
+            8
+        );
+
+        $pdf->SetTextColor(
+            0,
+            0,
+            0
+        );
+
+        $pdf->SetXY(
+            57,
+            21
+        );
+
+        $pdf->Cell(
+            102,
+            4,
+            $specialShowingInstructions,
+            0,
+            0
+        );
+    }
+}
+
+/*
+|--------------------------------------------------------------------------
+| PAGE 3
+|--------------------------------------------------------------------------
+*/
+
+if ($pageNumber === 3) {
+
+    $pdf->SetFont(
+        'Helvetica',
+        '',
+        8
+    );
+
+    $pdf->SetTextColor(
+        0,
+        0,
+        0
+    );
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | OTHER TERMS / SPECIAL INSTRUCTIONS
+    |--------------------------------------------------------------------------
+    */
+
+    $otherTerms =
+        trim(
+            (string)(
+                $draft['other_terms']
+                ?? ''
+            )
+        );
+
+    if ($otherTerms !== '') {
+
+        $pdf->SetXY(
+            105,
+            39
+        );
+
+        $pdf->Cell(
+            98,
+            4,
+            $otherTerms,
+            0,
+            0
+        );
+    }
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | SELLER INFORMATION
+    |--------------------------------------------------------------------------
+    */
+
+    $seller1 =
+        trim(
+            (string)(
+                $draft['seller_1']
+                ?? ''
+            )
+        );
+
+    $seller2 =
+        trim(
+            (string)(
+                $draft['seller_2']
+                ?? ''
+            )
+        );
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | AGREEMENT-LEVEL SELLER CONTACT DETAILS
+    |
+    | Seller 1 first.
+    | If Seller 1 does not have the information,
+    | use Seller 2's information.
+    |--------------------------------------------------------------------------
+    */
+
+    $sellerEmail =
+        trim(
+            (string)(
+                $draft['seller_1_email']
+                ?? ''
+            )
+        );
+
+    if ($sellerEmail === '') {
+
+        $sellerEmail =
+            trim(
+                (string)(
+                    $draft['seller_2_email']
+                    ?? ''
+                )
+            );
+    }
+
+
+    $sellerStreet =
+        trim(
+            (string)(
+                $draft['seller_1_street']
+                ?? ''
+            )
+        );
+
+    if ($sellerStreet === '') {
+
+        $sellerStreet =
+            trim(
+                (string)(
+                    $draft['seller_2_street']
+                    ?? ''
+                )
+            );
+    }
+
+
+    $sellerCity =
+        trim(
+            (string)(
+                $draft['seller_1_city']
+                ?? ''
+            )
+        );
+
+    if ($sellerCity === '') {
+
+        $sellerCity =
+            trim(
+                (string)(
+                    $draft['seller_2_city']
+                    ?? ''
+                )
+            );
+    }
+
+
+    $sellerState =
+        trim(
+            (string)(
+                $draft['seller_1_state']
+                ?? ''
+            )
+        );
+
+    if ($sellerState === '') {
+
+        $sellerState =
+            trim(
+                (string)(
+                    $draft['seller_2_state']
+                    ?? ''
+                )
+            );
+    }
+
+
+    $sellerZip =
+        trim(
+            (string)(
+                $draft['seller_1_zip']
+                ?? ''
+            )
+        );
+
+    if ($sellerZip === '') {
+
+        $sellerZip =
+            trim(
+                (string)(
+                    $draft['seller_2_zip']
+                    ?? ''
+                )
+            );
+    }
+
+
+    $sellerCityStateZip =
+        trim(
+            $sellerCity
+            . (
+                $sellerCity !== ''
+                && $sellerState !== ''
+                    ? ', '
+                    : ''
+            )
+            . $sellerState
+            . (
+                $sellerZip !== ''
+                    ? ' ' . $sellerZip
+                    : ''
+            )
+        );
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | SELLER 1
+    |--------------------------------------------------------------------------
+    */
+
+    if ($seller1 !== '') {
+
+        $pdf->SetXY(
+            14,
+            201
+        );
+
+        $pdf->Cell(
+            67,
+            4,
+            $seller1,
+            0,
+            0
+        );
+    }
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | SELLER 2
+    |--------------------------------------------------------------------------
+    */
+
+    if ($seller2 !== '') {
+
+        $pdf->SetXY(
+            14,
+            211
+        );
+
+        $pdf->Cell(
+            67,
+            4,
+            $seller2,
+            0,
+            0
+        );
+    }
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | SELLER MAILING ADDRESS
+    |--------------------------------------------------------------------------
+    */
+
+    if ($sellerStreet !== '') {
+
+        $pdf->SetXY(
+            14,
+            221
+        );
+
+        $pdf->Cell(
+            67,
+            4,
+            $sellerStreet,
+            0,
+            0
+        );
+    }
+
+
+    if ($sellerCityStateZip !== '') {
+
+        $pdf->SetXY(
+            14,
+            231
+        );
+
+        $pdf->Cell(
+            67,
+            4,
+            $sellerCityStateZip,
+            0,
+            0
+        );
+    }
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | SELLER EMAIL
+    |--------------------------------------------------------------------------
+    */
+
+    if ($sellerEmail !== '') {
+
+        $pdf->SetXY(
+            14,
+            241
+        );
+
+        $pdf->Cell(
+            67,
+            4,
+            $sellerEmail,
+            0,
+            0
+        );
+    }
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | BROKERAGE
+    |--------------------------------------------------------------------------
+    */
+
+    $brokerageName =
+        trim(
+            (string)(
+                $draft['broker']
+                ?? ''
+            )
+        );
+
+    if ($brokerageName !== '') {
+
+        $pdf->SetXY(
+            102,
+            201
+        );
+
+        $pdf->Cell(
+            66,
+            4,
+            $brokerageName,
+            0,
+            0
+        );
+    }
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | BROKERAGE ADDRESS
+    |--------------------------------------------------------------------------
+    |
+    | Temporary Fercodini values.
+    | Later these come from the brokerage profile.
+    |--------------------------------------------------------------------------
+    */
+
+    $brokerageStreet =
+        '484 Wolcott Road';
+
+    $brokerageCityStateZip =
+        'Wolcott, CT 06716';
+
+
+    $pdf->SetXY(
+        102,
+        211
+    );
+
+    $pdf->Cell(
+        66,
+        4,
+        $brokerageStreet,
+        0,
+        0
+    );
+
+
+    $pdf->SetXY(
+        102,
+        221
+    );
+
+    $pdf->Cell(
+        66,
+        4,
+        $brokerageCityStateZip,
+        0,
+        0
+    );
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | AUTHORIZED AGENT
+    |--------------------------------------------------------------------------
+    */
+
+    $agentName =
+        trim(
+            (string)(
+                $_SESSION['name']
+                ?? ''
+            )
+        );
+
+    if ($agentName === '') {
+
+        $agentName =
+            trim(
+                (string)(
+                    $_SESSION['email']
+                    ?? ''
+                )
+            );
+    }
+
+
+    $pdf->SetXY(
+        102,
+        231
+    );
+
+    $pdf->Cell(
+        53,
+        4,
+        $agentName,
+        0,
+        0
+    );
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | AGENT EMAIL
+    |--------------------------------------------------------------------------
+    */
+
+    $agentEmail =
+        trim(
+            (string)(
+                $_SESSION['email']
+                ?? ''
+            )
+        );
+
+    if ($agentEmail !== '') {
+
+        $pdf->SetXY(
+            102,
+            241
+        );
+
+        $pdf->Cell(
+            66,
+            4,
+            $agentEmail,
+            0,
+            0
+        );
+    }
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | AGENT DATE
+    |--------------------------------------------------------------------------
+    |
+    | For now this is intentionally blank.
+    | The actual signing date will be written when
+    | the Realtor signs the agreement.
+    |--------------------------------------------------------------------------
+    */
 }
 
 $fileName =
