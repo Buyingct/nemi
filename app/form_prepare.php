@@ -21,6 +21,87 @@ function h($value): string {
     return htmlspecialchars((string)$value, ENT_QUOTES, 'UTF-8');
 }
 
+/*
+|--------------------------------------------------------------------------
+| FIND SELLER CONTACT
+|--------------------------------------------------------------------------
+|
+| First use the selected contact ID.
+|
+| If the browser did not preserve the ID for some reason,
+| fall back to an exact name match in this Realtor's Contacts.
+|
+*/
+
+function findSellerContact(
+    string $contactId,
+    string $sellerName,
+    string $userId,
+    array $contacts
+): ?array {
+
+    /*
+    |--------------------------------------------------------------------------
+    | CONTACT ID — PREFERRED
+    |--------------------------------------------------------------------------
+    */
+
+    if (
+        $contactId !== ''
+        &&
+        ctype_digit($contactId)
+    ) {
+
+        $contact =
+            getPersonalContact(
+                (int)$contactId,
+                $userId
+            );
+
+        if ($contact) {
+            return $contact;
+        }
+    }
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | EXACT NAME FALLBACK
+    |--------------------------------------------------------------------------
+    */
+
+    $sellerName =
+        mb_strtolower(
+            trim($sellerName)
+        );
+
+
+    if ($sellerName === '') {
+        return null;
+    }
+
+
+    foreach ($contacts as $contact) {
+
+        $contactName =
+            mb_strtolower(
+                trim(
+                    (string)($contact['first_name'] ?? '')
+                    . ' '
+                    . (string)($contact['last_name'] ?? '')
+                )
+            );
+
+
+        if ($contactName === $sellerName) {
+            return $contact;
+        }
+    }
+
+
+    return null;
+}
+
 if ($meName === '') {
     $meName = $meEmail !== ''
         ? preg_replace('/@.*$/', '', $meEmail)
@@ -255,183 +336,153 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         /*
 |--------------------------------------------------------------------------
-| SELLER 1 CONTACT
+| SELLER CONTACT SNAPSHOTS
 |--------------------------------------------------------------------------
+|
+| Choosing a Contact should be enough.
+|
+| Nemi retrieves the authoritative contact record and stores
+| a snapshot for this agreement.
+|
 */
 
-$seller1ContactId =
-    trim(
-        (string)(
-            $_POST['seller_1_contact_id']
-            ?? ''
-        )
-    );
+foreach ([1, 2] as $sellerNumber) {
+
+    $nameKey =
+        'seller_' . $sellerNumber;
+
+    $idKey =
+        'seller_' . $sellerNumber . '_contact_id';
 
 
-$draft['seller_1_contact_id'] =
-    $seller1ContactId;
-
-
-if (
-    $seller1ContactId !== ''
-    &&
-    ctype_digit($seller1ContactId)
-) {
-
-    $seller1Contact =
-        getPersonalContact(
-            (int)$seller1ContactId,
-            $uid
+    $postedContactId =
+        trim(
+            (string)(
+                $_POST[$idKey]
+                ?? ''
+            )
         );
 
 
-    if ($seller1Contact) {
+    $sellerName =
+        trim(
+            (string)(
+                $draft[$nameKey]
+                ?? ''
+            )
+        );
 
-        /*
-        |--------------------------------------------------------------------------
-        | SNAPSHOT THE CONTACT AS IT EXISTS NOW
-        |--------------------------------------------------------------------------
-        */
-
-        $draft['seller_1'] =
-            trim(
-                $seller1Contact['first_name']
-                . ' '
-                . $seller1Contact['last_name']
-            );
-
-        $draft['seller_1_email'] =
-            (string)($seller1Contact['email'] ?? '');
-
-        $draft['seller_1_phone'] =
-            (string)($seller1Contact['phone'] ?? '');
-
-        $draft['seller_1_street'] =
-            (string)($seller1Contact['street'] ?? '');
-
-        $draft['seller_1_city'] =
-            (string)($seller1Contact['city'] ?? '');
-
-        $draft['seller_1_state'] =
-            (string)($seller1Contact['state'] ?? '');
-
-        $draft['seller_1_zip'] =
-            (string)($seller1Contact['zip'] ?? '');
-
-    } else {
-
-        $draft['seller_1_contact_id'] = '';
-
-    }
-
-}
-else {
 
     /*
     |--------------------------------------------------------------------------
-    | MANUAL SELLER
+    | FIND CONTACT
     |--------------------------------------------------------------------------
-    |
-    | Important:
-    | Clear any old contact snapshot so a previously selected
-    | person's email/address does not remain attached to a
-    | manually typed seller.
-    |
     */
 
-    $draft['seller_1_contact_id'] = '';
-
-    $draft['seller_1_email'] = '';
-    $draft['seller_1_phone'] = '';
-    $draft['seller_1_street'] = '';
-    $draft['seller_1_city'] = '';
-    $draft['seller_1_state'] = '';
-    $draft['seller_1_zip'] = '';
-}
-
-
-/*
-|--------------------------------------------------------------------------
-| SELLER 2 CONTACT
-|--------------------------------------------------------------------------
-*/
-
-$seller2ContactId =
-    trim(
-        (string)(
-            $_POST['seller_2_contact_id']
-            ?? ''
-        )
-    );
-
-
-$draft['seller_2_contact_id'] =
-    $seller2ContactId;
-
-
-if (
-    $seller2ContactId !== ''
-    &&
-    ctype_digit($seller2ContactId)
-) {
-
-    $seller2Contact =
-        getPersonalContact(
-            (int)$seller2ContactId,
-            $uid
+    $selectedContact =
+        findSellerContact(
+            $postedContactId,
+            $sellerName,
+            $uid,
+            $myContacts
         );
 
 
-    if ($seller2Contact) {
+    if ($selectedContact) {
 
         /*
         |--------------------------------------------------------------------------
-        | SNAPSHOT SELLER 2
+        | KEEP REAL CONTACT ID
         |--------------------------------------------------------------------------
         */
 
-        $draft['seller_2'] =
-            trim(
-                $seller2Contact['first_name']
-                . ' '
-                . $seller2Contact['last_name']
+        $draft[$idKey] =
+            (string)(
+                $selectedContact['id']
+                ?? ''
             );
 
-        $draft['seller_2_email'] =
-            (string)($seller2Contact['email'] ?? '');
 
-        $draft['seller_2_phone'] =
-            (string)($seller2Contact['phone'] ?? '');
+        /*
+        |--------------------------------------------------------------------------
+        | CONTACT NAME
+        |--------------------------------------------------------------------------
+        */
 
-        $draft['seller_2_street'] =
-            (string)($seller2Contact['street'] ?? '');
+        $draft[$nameKey] =
+            trim(
+                (string)($selectedContact['first_name'] ?? '')
+                . ' '
+                . (string)($selectedContact['last_name'] ?? '')
+            );
 
-        $draft['seller_2_city'] =
-            (string)($seller2Contact['city'] ?? '');
 
-        $draft['seller_2_state'] =
-            (string)($seller2Contact['state'] ?? '');
+        /*
+        |--------------------------------------------------------------------------
+        | SNAPSHOT
+        |--------------------------------------------------------------------------
+        */
 
-        $draft['seller_2_zip'] =
-            (string)($seller2Contact['zip'] ?? '');
+        foreach (
+            [
+                'email',
+                'phone',
+                'street',
+                'city',
+                'state',
+                'zip'
+            ]
+            as $field
+        ) {
+
+            $draft[
+                'seller_'
+                . $sellerNumber
+                . '_'
+                . $field
+            ] =
+                trim(
+                    (string)(
+                        $selectedContact[$field]
+                        ?? ''
+                    )
+                );
+        }
 
     } else {
 
-        $draft['seller_2_contact_id'] = '';
+        /*
+        |--------------------------------------------------------------------------
+        | MANUALLY ENTERED SELLER
+        |--------------------------------------------------------------------------
+        |
+        | Keep the typed name, but do not attach stale contact data.
+        |
+        */
 
+        $draft[$idKey] = '';
+
+
+        foreach (
+            [
+                'email',
+                'phone',
+                'street',
+                'city',
+                'state',
+                'zip'
+            ]
+            as $field
+        ) {
+
+            $draft[
+                'seller_'
+                . $sellerNumber
+                . '_'
+                . $field
+            ] = '';
+        }
     }
-
-}
-else {
-
-    $draft['seller_2_contact_id'] = '';
-
-    $draft['seller_2_email'] = '';
-    $draft['seller_2_phone'] = '';
-    $draft['seller_2_street'] = '';
-    $draft['seller_2_city'] = '';
-    $draft['seller_2_state'] = '';
-    $draft['seller_2_zip'] = '';
 }
 
         if ($draft['seller_1'] === '') {
@@ -792,19 +843,13 @@ elseif ($step === 4) {
 | AGREEMENT SELLER CONTACT INFORMATION
 |--------------------------------------------------------------------------
 |
-| The CAR agreement has shared Seller contact fields.
+| Use Seller 1 first for each individual contract field.
 |
-| We keep each seller's contact information separate internally,
-| then choose available information for the agreement itself.
+| If Seller 1 is missing that specific field,
+| use Seller 2.
 |
 */
 
-
-/*
-|--------------------------------------------------------------------------
-| EMAIL
-|--------------------------------------------------------------------------
-*/
 
 $agreementSellerEmail =
     $draft['seller_1_email'] !== ''
@@ -812,59 +857,34 @@ $agreementSellerEmail =
         : $draft['seller_2_email'];
 
 
-/*
-|--------------------------------------------------------------------------
-| PHONE
-|--------------------------------------------------------------------------
-*/
-
 $agreementSellerPhone =
     $draft['seller_1_phone'] !== ''
         ? $draft['seller_1_phone']
         : $draft['seller_2_phone'];
 
 
-/*
-|--------------------------------------------------------------------------
-| MAILING ADDRESS
-|--------------------------------------------------------------------------
-|
-| Do not combine half of one person's address with half
-| of another person's address.
-|
-| If Seller 1 has a street address, use Seller 1's complete
-| address snapshot. Otherwise use Seller 2's.
-|
-*/
+$agreementSellerStreet =
+    $draft['seller_1_street'] !== ''
+        ? $draft['seller_1_street']
+        : $draft['seller_2_street'];
 
-if ($draft['seller_1_street'] !== '') {
 
-    $agreementSellerStreet =
-        $draft['seller_1_street'];
+$agreementSellerCity =
+    $draft['seller_1_city'] !== ''
+        ? $draft['seller_1_city']
+        : $draft['seller_2_city'];
 
-    $agreementSellerCity =
-        $draft['seller_1_city'];
 
-    $agreementSellerState =
-        $draft['seller_1_state'];
+$agreementSellerState =
+    $draft['seller_1_state'] !== ''
+        ? $draft['seller_1_state']
+        : $draft['seller_2_state'];
 
-    $agreementSellerZip =
-        $draft['seller_1_zip'];
 
-} else {
-
-    $agreementSellerStreet =
-        $draft['seller_2_street'];
-
-    $agreementSellerCity =
-        $draft['seller_2_city'];
-
-    $agreementSellerState =
-        $draft['seller_2_state'];
-
-    $agreementSellerZip =
-        $draft['seller_2_zip'];
-}
+$agreementSellerZip =
+    $draft['seller_1_zip'] !== ''
+        ? $draft['seller_1_zip']
+        : $draft['seller_2_zip'];
 
 
 ?>
@@ -3943,7 +3963,7 @@ function setupCompensationTypeSwitch(
 
     });
 
-    
+
 }
 
 
