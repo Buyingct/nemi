@@ -940,7 +940,7 @@ if ($pageNumber === 3) {
 
         $pdf->SetXY(
             14,
-            201
+            198
         );
 
         $pdf->Cell(
@@ -963,7 +963,7 @@ if ($pageNumber === 3) {
 
         $pdf->SetXY(
             14,
-            211
+            208
         );
 
         $pdf->Cell(
@@ -986,7 +986,7 @@ if ($pageNumber === 3) {
 
         $pdf->SetXY(
             14,
-            221
+            218
         );
 
         $pdf->Cell(
@@ -1003,7 +1003,7 @@ if ($pageNumber === 3) {
 
         $pdf->SetXY(
             14,
-            231
+            228
         );
 
         $pdf->Cell(
@@ -1026,7 +1026,7 @@ if ($pageNumber === 3) {
 
         $pdf->SetXY(
             14,
-            241
+            238
         );
 
         $pdf->Cell(
