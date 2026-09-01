@@ -209,12 +209,15 @@ $draftDefaults = [
 'property_address' => '',
 
     'list_price' => '',
+'list_price_decide_later' => false,
 
-    'start_date' => '',
-    'expiration_date' => '',
+'start_date' => '',
+'start_date_decide_later' => false,
 
-    'broker' => $form['brokerage'],
+'expiration_date' => '',
+'expiration_date_decide_later' => false,
 
+'broker' => $form['brokerage'],
 
     /*
     |--------------------------------------------------------------------------
@@ -308,16 +311,63 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     if ($step === 1) {
 
-        $draft['seller_1'] = trim(
-            (string)($_POST['seller_1'] ?? '')
+        /*
+|--------------------------------------------------------------------------
+| LIST PRICE
+|--------------------------------------------------------------------------
+*/
+
+$draft['list_price_decide_later'] =
+    isset($_POST['list_price_decide_later']);
+
+$draft['list_price'] =
+    $draft['list_price_decide_later']
+        ? ''
+        : trim(
+            (string)(
+                $_POST['list_price']
+                ?? ''
+            )
         );
 
-        $draft['seller_2'] = trim(
-            (string)($_POST['seller_2'] ?? '')
+
+/*
+|--------------------------------------------------------------------------
+| START DATE
+|--------------------------------------------------------------------------
+*/
+
+$draft['start_date_decide_later'] =
+    isset($_POST['start_date_decide_later']);
+
+$draft['start_date'] =
+    $draft['start_date_decide_later']
+        ? ''
+        : trim(
+            (string)(
+                $_POST['start_date']
+                ?? ''
+            )
         );
 
-        $draft['property_address'] = trim(
-            (string)($_POST['property_address'] ?? '')
+
+/*
+|--------------------------------------------------------------------------
+| EXPIRATION DATE
+|--------------------------------------------------------------------------
+*/
+
+$draft['expiration_date_decide_later'] =
+    isset($_POST['expiration_date_decide_later']);
+
+$draft['expiration_date'] =
+    $draft['expiration_date_decide_later']
+        ? ''
+        : trim(
+            (string)(
+                $_POST['expiration_date']
+                ?? ''
+            )
         );
 
         $draft['list_price'] = trim(
@@ -495,20 +545,34 @@ foreach ([1, 2] as $sellerNumber) {
                 'Enter the property address.';
         }
 
-        if ($draft['list_price'] === '') {
-            $errors['list_price'] =
-                'Enter the listing price.';
-        }
+        if (
+    $draft['list_price'] === ''
+    &&
+    !$draft['list_price_decide_later']
+) {
+    $errors['list_price'] =
+        'Enter the listing price or choose Decide later.';
+}
 
-        if ($draft['start_date'] === '') {
-            $errors['start_date'] =
-                'Choose the start date.';
-        }
 
-        if ($draft['expiration_date'] === '') {
-            $errors['expiration_date'] =
-                'Choose the expiration date.';
-        }
+if (
+    $draft['start_date'] === ''
+    &&
+    !$draft['start_date_decide_later']
+) {
+    $errors['start_date'] =
+        'Choose the start date or choose Decide later.';
+}
+
+
+if (
+    $draft['expiration_date'] === ''
+    &&
+    !$draft['expiration_date_decide_later']
+) {
+    $errors['expiration_date'] =
+        'Choose the expiration date or choose Decide later.';
+}
 
 
         $_SESSION[$draftKey] = $draft;
