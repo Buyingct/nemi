@@ -2079,43 +2079,93 @@ body{
 
                 <!-- LIST PRICE -->
 
-                <div class="form-field full">
+<div
+    class="form-field full nemi-decidable-field
+        <?= !empty($draft['list_price_decide_later'])
+            ? 'is-decided-later'
+            : '' ?>"
+    id="list-price-field"
+>
 
-                    <label for="list_price">
-                        Listing price
-                    </label>
+    <div class="date-label-row">
 
-                    <div class="form-money">
+        <label for="list_price">
+            Listing price
+        </label>
 
-                        <span class="form-money-symbol">
-                            $
-                        </span>
+        <label class="nemi-decide-later">
 
-                        <input
-                            id="list_price"
-                            name="list_price"
-                            type="text"
-                            inputmode="decimal"
-                            value="<?= h($draft['list_price']) ?>"
-                            placeholder="650,000"
-                        >
+            <input
+                type="checkbox"
+                name="list_price_decide_later"
+                id="list_price_decide_later"
+                value="1"
+                <?= !empty($draft['list_price_decide_later'])
+                    ? 'checked'
+                    : '' ?>
+            >
 
-                    </div>
+            <span>
+                Decide later
+            </span>
 
-                    <?php if (isset($errors['list_price'])): ?>
+        </label>
 
-                        <div class="form-field-error">
-                            <?= h($errors['list_price']) ?>
-                        </div>
-
-                    <?php endif; ?>
-
-                </div>
+    </div>
 
 
-                <!-- START DATE -->
+    <div class="form-money">
 
-<div class="form-field">
+        <span class="form-money-symbol">
+            $
+        </span>
+
+        <input
+            id="list_price"
+            name="list_price"
+            type="text"
+            inputmode="decimal"
+            value="<?= h($draft['list_price']) ?>"
+            placeholder="650,000"
+            <?= !empty($draft['list_price_decide_later'])
+                ? 'disabled'
+                : '' ?>
+        >
+
+    </div>
+
+
+    <div
+        class="nemi-decide-later-note"
+        <?= empty($draft['list_price_decide_later'])
+            ? 'hidden'
+            : '' ?>
+    >
+        To be finalized before the listing goes live.
+    </div>
+
+
+    <?php if (isset($errors['list_price'])): ?>
+
+        <div class="form-field-error">
+            <?= h($errors['list_price']) ?>
+        </div>
+
+    <?php endif; ?>
+
+</div>
+
+
+
+<!-- START DATE -->
+
+<div
+    class="form-field nemi-decidable-field
+        <?= !empty($draft['start_date_decide_later'])
+            ? 'is-decided-later'
+            : '' ?>"
+    id="start-date-field"
+>
 
     <div class="date-label-row">
 
@@ -2123,22 +2173,61 @@ body{
             Listing starts
         </label>
 
-        <button
-            type="button"
-            class="date-quick-button"
-            id="start-date-today"
-        >
-            Today
-        </button>
+
+        <div class="date-quick-options">
+
+            <button
+                type="button"
+                class="date-quick-button"
+                id="start-date-today"
+            >
+                Today
+            </button>
+
+
+            <label class="nemi-decide-later">
+
+                <input
+                    type="checkbox"
+                    name="start_date_decide_later"
+                    id="start_date_decide_later"
+                    value="1"
+                    <?= !empty($draft['start_date_decide_later'])
+                        ? 'checked'
+                        : '' ?>
+                >
+
+                <span>
+                    Decide later
+                </span>
+
+            </label>
+
+        </div>
 
     </div>
+
 
     <input
         id="start_date"
         name="start_date"
         type="date"
         value="<?= h($draft['start_date']) ?>"
+        <?= !empty($draft['start_date_decide_later'])
+            ? 'disabled'
+            : '' ?>
     >
+
+
+    <div
+        class="nemi-decide-later-note"
+        <?= empty($draft['start_date_decide_later'])
+            ? 'hidden'
+            : '' ?>
+    >
+        To be finalized before the listing goes live.
+    </div>
+
 
     <?php if (isset($errors['start_date'])): ?>
 
@@ -2149,6 +2238,107 @@ body{
     <?php endif; ?>
 
 </div>
+
+
+
+<!-- EXPIRATION DATE -->
+
+<div
+    class="form-field nemi-decidable-field
+        <?= !empty($draft['expiration_date_decide_later'])
+            ? 'is-decided-later'
+            : '' ?>"
+    id="expiration-date-field"
+>
+
+    <div class="date-label-row">
+
+        <label for="expiration_date">
+            Listing expires
+        </label>
+
+
+        <div class="date-quick-options">
+
+            <button
+                type="button"
+                class="date-quick-button"
+                data-expiration-months="3"
+            >
+                3mo
+            </button>
+
+            <button
+                type="button"
+                class="date-quick-button"
+                data-expiration-months="6"
+            >
+                6mo
+            </button>
+
+            <button
+                type="button"
+                class="date-quick-button"
+                data-expiration-months="12"
+            >
+                12mo
+            </button>
+
+
+            <label class="nemi-decide-later">
+
+                <input
+                    type="checkbox"
+                    name="expiration_date_decide_later"
+                    id="expiration_date_decide_later"
+                    value="1"
+                    <?= !empty($draft['expiration_date_decide_later'])
+                        ? 'checked'
+                        : '' ?>
+                >
+
+                <span>
+                    Decide later
+                </span>
+
+            </label>
+
+        </div>
+
+    </div>
+
+
+    <input
+        id="expiration_date"
+        name="expiration_date"
+        type="date"
+        value="<?= h($draft['expiration_date']) ?>"
+        <?= !empty($draft['expiration_date_decide_later'])
+            ? 'disabled'
+            : '' ?>
+    >
+
+
+    <div
+        class="nemi-decide-later-note"
+        <?= empty($draft['expiration_date_decide_later'])
+            ? 'hidden'
+            : '' ?>
+    >
+        To be finalized before the listing goes live.
+    </div>
+
+
+    <?php if (isset($errors['expiration_date'])): ?>
+
+        <div class="form-field-error">
+            <?= h($errors['expiration_date']) ?>
+        </div>
+
+    <?php endif; ?>
+
+</div>
+                
 
 
                 <!-- EXPIRATION DATE -->
@@ -4060,6 +4250,150 @@ const expirationButtons =
         '[data-expiration-months]'
     );
 
+    /*
+|--------------------------------------------------------------------------
+| DECIDE LATER
+|--------------------------------------------------------------------------
+*/
+
+const listPriceInput =
+    document.getElementById('list_price');
+
+const listPriceDecideLater =
+    document.getElementById(
+        'list_price_decide_later'
+    );
+
+const startDateDecideLater =
+    document.getElementById(
+        'start_date_decide_later'
+    );
+
+const expirationDateDecideLater =
+    document.getElementById(
+        'expiration_date_decide_later'
+    );
+
+
+function setupDecideLater(
+    checkbox,
+    input,
+    field
+) {
+
+    if (!checkbox || !input || !field) {
+        return;
+    }
+
+
+    const note =
+        field.querySelector(
+            '.nemi-decide-later-note'
+        );
+
+
+    function updateState() {
+
+        const decidingLater =
+            checkbox.checked;
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | DISABLE / ENABLE FIELD
+        |--------------------------------------------------------------------------
+        */
+
+        input.disabled =
+            decidingLater;
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | CLEAR VALUE WHEN INTENTIONALLY UNRESOLVED
+        |--------------------------------------------------------------------------
+        */
+
+        if (decidingLater) {
+            input.value = '';
+        }
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | VISUAL STATE
+        |--------------------------------------------------------------------------
+        */
+
+        field.classList.toggle(
+            'is-decided-later',
+            decidingLater
+        );
+
+
+        if (note) {
+            note.hidden =
+                !decidingLater;
+        }
+    }
+
+
+    checkbox.addEventListener(
+        'change',
+        updateState
+    );
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | MANUAL ENTRY MEANS WE NOW HAVE AN ANSWER
+    |--------------------------------------------------------------------------
+    */
+
+    input.addEventListener(
+        'input',
+        function () {
+
+            if (input.value !== '') {
+
+                checkbox.checked = false;
+
+                updateState();
+            }
+
+        }
+    );
+
+
+    updateState();
+}
+
+
+setupDecideLater(
+    listPriceDecideLater,
+    listPriceInput,
+    document.getElementById(
+        'list-price-field'
+    )
+);
+
+
+setupDecideLater(
+    startDateDecideLater,
+    startDateInput,
+    document.getElementById(
+        'start-date-field'
+    )
+);
+
+
+setupDecideLater(
+    expirationDateDecideLater,
+    expirationDateInput,
+    document.getElementById(
+        'expiration-date-field'
+    )
+);
 
 function formatDateForInput(date) {
 
@@ -4189,12 +4523,47 @@ expirationButtons.forEach(function (button) {
 
             if (startDateInput.value === '') {
 
-                startDateInput.value =
-                    formatDateForInput(
-                        new Date()
-                    );
+    startDateInput.value =
+        formatDateForInput(
+            new Date()
+        );
 
-            }
+}
+
+
+/*
+|--------------------------------------------------------------------------
+| TODAY OVERRIDES DECIDE LATER
+|--------------------------------------------------------------------------
+*/
+
+if (startDateDecideLater) {
+
+    startDateDecideLater.checked = false;
+
+    startDateInput.disabled = false;
+
+    const startField =
+        document.getElementById(
+            'start-date-field'
+        );
+
+    if (startField) {
+
+        startField.classList.remove(
+            'is-decided-later'
+        );
+
+        const note =
+            startField.querySelector(
+                '.nemi-decide-later-note'
+            );
+
+        if (note) {
+            note.hidden = true;
+        }
+    }
+}
 
 
             const startDate =
@@ -4229,6 +4598,34 @@ expirationButtons.forEach(function (button) {
                     expirationDate
                 );
 
+
+                 if (expirationDateDecideLater) {
+
+    expirationDateDecideLater.checked = false;
+
+    expirationDateInput.disabled = false;
+
+    const expirationField =
+        document.getElementById(
+            'expiration-date-field'
+        );
+
+    if (expirationField) {
+
+        expirationField.classList.remove(
+            'is-decided-later'
+        );
+
+        const note =
+            expirationField.querySelector(
+                '.nemi-decide-later-note'
+            );
+
+        if (note) {
+            note.hidden = true;
+        }
+    }
+}
 
             expirationDateInput.dispatchEvent(
                 new Event(
