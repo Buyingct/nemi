@@ -33,6 +33,10 @@ $formId =
 $version =
     (string)($_GET['version'] ?? 'prepared');
 
+$debugGrid =
+    (string)($_GET['debug'] ?? '')
+    === 'grid';
+
 if ($formId !== 'exclusive_right_to_sell') {
     http_response_code(404);
     exit('Form not found.');
@@ -55,6 +59,174 @@ $draft =
 
 if (!is_array($draft)) {
     $draft = [];
+}
+
+/*
+|--------------------------------------------------------------------------
+| PDF COORDINATE GRID
+|--------------------------------------------------------------------------
+|
+| Temporary development tool.
+|
+| Every major line = 10 mm
+| Every minor line = 5 mm
+|
+| Use:
+| &debug=grid
+|
+*/
+
+function drawCoordinateGrid(
+    Fpdi $pdf,
+    float $pageWidth,
+    float $pageHeight
+): void {
+
+    /*
+    |--------------------------------------------------------------------------
+    | MINOR GRID — 5 MM
+    |--------------------------------------------------------------------------
+    */
+
+    $pdf->SetDrawColor(
+        210,
+        220,
+        225
+    );
+
+    $pdf->SetLineWidth(
+        0.1
+    );
+
+
+    for (
+        $x = 5;
+        $x < $pageWidth;
+        $x += 5
+    ) {
+
+        $pdf->Line(
+            $x,
+            0,
+            $x,
+            $pageHeight
+        );
+    }
+
+
+    for (
+        $y = 5;
+        $y < $pageHeight;
+        $y += 5
+    ) {
+
+        $pdf->Line(
+            0,
+            $y,
+            $pageWidth,
+            $y
+        );
+    }
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | MAJOR GRID — 10 MM
+    |--------------------------------------------------------------------------
+    */
+
+    $pdf->SetDrawColor(
+        120,
+        145,
+        155
+    );
+
+    $pdf->SetTextColor(
+        80,
+        100,
+        110
+    );
+
+    $pdf->SetFont(
+        'Helvetica',
+        '',
+        6
+    );
+
+
+    for (
+        $x = 10;
+        $x < $pageWidth;
+        $x += 10
+    ) {
+
+        $pdf->Line(
+            $x,
+            0,
+            $x,
+            $pageHeight
+        );
+
+        $pdf->SetXY(
+            $x + 0.5,
+            1
+        );
+
+        $pdf->Cell(
+            9,
+            3,
+            (string)$x,
+            0,
+            0
+        );
+    }
+
+
+    for (
+        $y = 10;
+        $y < $pageHeight;
+        $y += 10
+    ) {
+
+        $pdf->Line(
+            0,
+            $y,
+            $pageWidth,
+            $y
+        );
+
+        $pdf->SetXY(
+            1,
+            $y + 0.5
+        );
+
+        $pdf->Cell(
+            8,
+            3,
+            (string)$y,
+            0,
+            0
+        );
+    }
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | RESTORE NORMAL COLOR
+    |--------------------------------------------------------------------------
+    */
+
+    $pdf->SetDrawColor(
+        0,
+        0,
+        0
+    );
+
+    $pdf->SetTextColor(
+        0,
+        0,
+        0
+    );
 }
 
 $pdf = new Fpdi();
@@ -84,6 +256,20 @@ for (
 
     $pdf->useTemplate($templateId);
 
+    /*
+|--------------------------------------------------------------------------
+| DEVELOPMENT COORDINATE GRID
+|--------------------------------------------------------------------------
+*/
+
+if ($debugGrid) {
+
+    drawCoordinateGrid(
+        $pdf,
+        (float)$size['width'],
+        (float)$size['height']
+    );
+}
 
     /*
     |--------------------------------------------------------------------------
