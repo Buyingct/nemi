@@ -55,10 +55,20 @@ $draftKey =
     'form_draft_' . $formId;
 
 $draft =
-    $_SESSION[$draftKey] ?? [];
+    $_SESSION[$draftKey]
+    ?? null;
 
-if (!is_array($draft)) {
-    $draft = [];
+if (
+    !is_array($draft)
+    ||
+    empty($draft)
+) {
+
+    http_response_code(400);
+
+    exit(
+        'No prepared agreement was found. Please prepare the form first.'
+    );
 }
 
 /*
