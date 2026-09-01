@@ -585,11 +585,39 @@ if (
 }
 
 
+/*
+|--------------------------------------------------------------------------
+| EXPIRATION DATE
+|--------------------------------------------------------------------------
+|
+| If the listing start date is known,
+| the expiration date must also be known.
+|
+| Expiration may only remain "Decide later"
+| while the start date is also "Decide later".
+|
+*/
+
 if (
+    !$draft['start_date_decide_later']
+    &&
+    $draft['start_date'] !== ''
+) {
+
+    if ($draft['expiration_date'] === '') {
+
+        $errors['expiration_date'] =
+            'Choose the expiration date.';
+    }
+
+    $draft['expiration_date_decide_later'] = false;
+
+} elseif (
     $draft['expiration_date'] === ''
     &&
     !$draft['expiration_date_decide_later']
 ) {
+
     $errors['expiration_date'] =
         'Choose the expiration date or choose Decide later.';
 }
@@ -3187,30 +3215,68 @@ body{
 
             <div class="form-review-row">
 
-                <div>
-                    <small>Listing price</small>
+    <div>
+        <small>Listing price</small>
 
-                    <strong>
-                        $<?= h($draft['list_price']) ?>
-                    </strong>
-                </div>
+        <strong>
 
-            </div>
+            <?php if (!empty($draft['list_price_decide_later'])): ?>
+
+                To be finalized
+
+            <?php else: ?>
+
+                $<?= h($draft['list_price']) ?>
+
+            <?php endif; ?>
+
+        </strong>
+
+    </div>
+
+</div>
 
 
             <div class="form-review-row">
 
-                <div>
-                    <small>Listing period</small>
+    <div>
+        <small>Listing period</small>
 
-                    <strong>
-                        <?= h($draft['start_date']) ?>
-                        –
-                        <?= h($draft['expiration_date']) ?>
-                    </strong>
-                </div>
+        <strong>
 
-            </div>
+            <?php if (
+                !empty($draft['start_date_decide_later'])
+                &&
+                !empty($draft['expiration_date_decide_later'])
+            ): ?>
+
+                To be finalized
+
+            <?php else: ?>
+
+                <span>
+                    Start:
+                    <?= !empty($draft['start_date_decide_later'])
+                        ? 'To be finalized'
+                        : h($draft['start_date']) ?>
+                </span>
+
+                <br>
+
+                <span>
+                    Expires:
+                    <?= !empty($draft['expiration_date_decide_later'])
+                        ? 'To be finalized'
+                        : h($draft['expiration_date']) ?>
+                </span>
+
+            <?php endif; ?>
+
+        </strong>
+
+    </div>
+
+</div>
 
 
         </div>
