@@ -1949,16 +1949,16 @@ input:checked
     color: #ffffff;
 
     background: linear-gradient(
-        135deg,
-        var(--nemi-primary, #327d7c),
-        var(--nemi-secondary, #315b9a)
-    );
+    135deg,
+    #327d7c,
+    #3f6f78
+);
 
     border-color: transparent;
 
     box-shadow:
-        0 4px 12px rgba(49, 91, 154, 0.18),
-        inset 0 1px 0 rgba(255, 255, 255, 0.20);
+    0 4px 12px rgba(50, 125, 124, 0.20),
+    inset 0 1px 0 rgba(255, 255, 255, 0.20);
 }
 
 .nemi-decide-later input:focus-visible + span {
