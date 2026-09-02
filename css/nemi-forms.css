@@ -1886,5 +1886,101 @@ input:checked
 
         font-size: 11px;
     }
-    
+
+}
+
+/* ==========================================================================
+   DECIDE LATER
+   ========================================================================== */
+
+.nemi-decide-later {
+    display: inline-flex;
+    align-items: center;
+    cursor: pointer;
+    user-select: none;
+}
+
+.nemi-decide-later input {
+    position: absolute;
+    opacity: 0;
+    pointer-events: none;
+}
+
+.nemi-decide-later span {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    min-height: 34px;
+    padding: 0 13px;
+
+    border: 1px solid rgba(50, 125, 124, 0.20);
+    border-radius: 999px;
+
+    background: rgba(255, 255, 255, 0.72);
+
+    color: #52606a;
+
+    font-size: 12px;
+    font-weight: 700;
+    line-height: 1;
+
+    box-shadow:
+        0 1px 2px rgba(18, 34, 49, 0.04),
+        inset 0 1px 0 rgba(255, 255, 255, 0.75);
+
+    transition:
+        background 0.18s ease,
+        color 0.18s ease,
+        border-color 0.18s ease,
+        box-shadow 0.18s ease,
+        transform 0.18s ease;
+}
+
+.nemi-decide-later:hover span {
+    border-color: rgba(50, 125, 124, 0.34);
+
+    box-shadow:
+        0 3px 8px rgba(18, 34, 49, 0.06),
+        inset 0 1px 0 rgba(255, 255, 255, 0.80);
+}
+
+.nemi-decide-later input:checked + span {
+    color: #ffffff;
+
+    background: linear-gradient(
+        135deg,
+        var(--nemi-primary, #327d7c),
+        var(--nemi-secondary, #315b9a)
+    );
+
+    border-color: transparent;
+
+    box-shadow:
+        0 4px 12px rgba(49, 91, 154, 0.18),
+        inset 0 1px 0 rgba(255, 255, 255, 0.20);
+}
+
+.nemi-decide-later input:focus-visible + span {
+    outline: 3px solid rgba(50, 125, 124, 0.18);
+    outline-offset: 2px;
+}
+
+
+/* Softens fields while "Decide later" is active */
+
+.nemi-decidable-field.is-decided-later input[type="date"],
+.nemi-decidable-field.is-decided-later input[type="text"],
+.nemi-decidable-field.is-decided-later input[type="number"] {
+    opacity: 0.52;
+}
+
+.nemi-decide-later-note {
+    margin-top: 10px;
+
+    color: #6b7780;
+
+    font-size: 12px;
+    font-weight: 600;
+    line-height: 1.45;
 }
