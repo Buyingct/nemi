@@ -2112,153 +2112,8 @@ body{
             <?= h($errors['seller_1']) ?>
         </div>
 
-        <?php elseif ($step === 'client'): ?>
+        <?php endif; ?>
 
-
-<div class="form-panel">
-
-    <div class="form-section-heading">
-
-        <h2>
-            Ready for your client
-        </h2>
-
-        <p>
-            Choose how you want to review or deliver this agreement.
-        </p>
-
-    </div>
-
-
-    <section class="form-block">
-
-        <div class="form-choice-grid">
-
-
-            <a
-                class="form-choice"
-                href="#"
-            >
-
-                <span class="form-choice-card">
-
-                    <strong>
-                        Review it together
-                    </strong>
-
-                    <small>
-                        Present the agreement with your client in Guided View.
-                    </small>
-
-                </span>
-
-            </a>
-
-
-          <?php if ($agreementSellerEmail !== ''): ?>
-
-    <form
-        method="post"
-        action="/app/form_prepare.php?form=<?= h($formId) ?>&step=client"
-        class="form-choice"
-    >
-
-        <input
-            type="hidden"
-            name="action"
-            value="send_to_client"
-        >
-
-        <button
-            type="submit"
-            class="form-choice-card"
-            style="
-                width:100%;
-                height:100%;
-                text-align:left;
-                cursor:pointer;
-                font:inherit;
-            "
-        >
-
-            <strong>
-                Send to my client
-            </strong>
-
-            <small>
-                <?= h($agreementSellerEmail) ?>
-            </small>
-
-        </button>
-
-    </form>
-
-<?php else: ?>
-
-    <a
-        class="form-choice"
-        href="/app/form_prepare.php?form=<?= h($formId) ?>&step=1"
-    >
-
-        <span class="form-choice-card">
-
-            <strong>
-                Add seller email
-            </strong>
-
-            <small>
-                Nemi needs an email before this agreement can be sent.
-            </small>
-
-        </span>
-
-    </a>
-
-<?php endif; ?>  
-
-
-
-        </div>
-
-    </section>
-
-
-    <section class="form-block">
-
-        <div class="form-block-title">
-            Signed Realtor copy
-        </div>
-
-        <p class="form-block-copy">
-            Your signature has been added to the agreement.
-        </p>
-
-
-        <a
-            class="form-button-secondary"
-            href="/app/form_pdf.php?form=exclusive_right_to_sell&version=signed"
-            target="_blank"
-        >
-            View signed PDF
-        </a>
-
-    </section>
-
-
-    <div class="form-actions">
-
-        <a
-            class="form-button-secondary"
-            href="/app/form_prepare.php?form=<?= h($formId) ?>&step=review"
-        >
-            ← Back to review
-        </a>
-
-    </div>
-
-</div>
-
-    <?php endif; ?>
 
 </div>
 
@@ -2736,742 +2591,804 @@ body{
 
             </div>
 
-
-            <div class="form-actions">
-
-                <a
-                    class="form-button-secondary"
-                    href="/app/forms.php"
-                >
-                    Cancel
-                </a>
-
-                <button
-                    class="form-button-primary"
-                    type="submit"
-                >
-                    Continue →
-                </button>
-
-            </div>
-
-        </form>
-
-
-    <?php elseif ($step === 2): ?>
-
-<form
-    class="form-panel"
-    method="post"
-    action="/app/form_prepare.php?form=<?= h($formId) ?>&step=2"
->
-
-    <div class="form-section-heading">
-
-        <h2>
-            Compensation
-        </h2>
-
-        <p>
-            Set the compensation terms that will appear in the agreement.
-        </p>
-
-    </div>
-
-
-    <div class="form-compensation-stack">
-
-
-        <!-- BROKERAGE SERVICE FEE -->
-
-        <section class="form-block">
-
-            <div class="form-block-title">
-                Brokerage service fee
-            </div>
-
-            <p class="form-block-copy">
-                What service fee did you agree on with the seller?
-            </p>
-
-
-            <div class="form-segmented">
-
-                <label class="form-segment-option">
-
-                    <input
-                        type="radio"
-                        name="service_fee_type"
-                        value="percent"
-                        <?= $draft['service_fee_type'] === 'percent'
-                            ? 'checked'
-                            : '' ?>
-                    >
-
-                    <span>
-                        Percentage
-                    </span>
-
-                </label>
-
-
-                <label class="form-segment-option">
-
-                    <input
-                        type="radio"
-                        name="service_fee_type"
-                        value="amount"
-                        <?= $draft['service_fee_type'] === 'amount'
-                            ? 'checked'
-                            : '' ?>
-                    >
-
-                    <span>
-                        Dollar amount
-                    </span>
-
-                </label>
-
-            </div>
-
-
-            <div class="form-value-row">
-
-                <div
-                    class="form-value"
-                    id="service-fee-wrap"
-                >
-
-                    <span
-                        class="form-value-prefix"
-                        id="service-dollar"
-                    >
-                        $
-                    </span>
-
-                    <input
-                        id="service_fee_value"
-                        name="service_fee_value"
-                        type="text"
-                        inputmode="decimal"
-                        value="<?= h($draft['service_fee_value']) ?>"
-                        autocomplete="off"
-                    >
-
-                    <span
-                        class="form-value-unit"
-                        id="service-percent"
-                    >
-                        %
-                    </span>
-
-                </div>
-
-            </div>
-
-
-            <?php if (isset($errors['service_fee_value'])): ?>
-
-                <div class="form-field-error">
-                    <?= h($errors['service_fee_value']) ?>
-                </div>
-
-            <?php endif; ?>
-
-        </section>
-
-
-
-        <!-- BUYER-BROKER COMPENSATION -->
-
-        <section class="form-block">
-
-            <div class="form-block-title">
-                Buyer-broker compensation
-            </div>
-
-            <p class="form-block-copy">
-                Will your recommendation include offering compensation
-                to a buyer’s brokerage?
-            </p>
-
-
-            <div class="form-choice-grid">
-
-
-                <label class="form-choice">
-
-                    <input
-                        type="radio"
-                        name="buyer_broker_authorized"
-                        value="yes"
-                        <?= $draft['buyer_broker_authorized'] === 'yes'
-                            ? 'checked'
-                            : '' ?>
-                    >
-
-                    <span class="form-choice-card">
-
-                        <strong>
-                            Yes
-                        </strong>
-
-                        <small>
-                            Include a buyer-broker compensation amount.
-                        </small>
-
-                    </span>
-
-                </label>
-
-
-                <label class="form-choice">
-
-                    <input
-                        type="radio"
-                        name="buyer_broker_authorized"
-                        value="no"
-                        <?= $draft['buyer_broker_authorized'] === 'no'
-                            ? 'checked'
-                            : '' ?>
-                    >
-
-                    <span class="form-choice-card">
-
-                        <strong>
-                            No
-                        </strong>
-
-                        <small>
-                            Do not include buyer-broker compensation.
-                        </small>
-
-                    </span>
-
-                </label>
-
-
-            </div>
-
-
-            <div
-                class="buyer-comp-details"
-                id="buyer-comp-details"
-            >
-
-                <div
-                    class="form-field"
-                    style="margin-top:24px;"
-                >
-
-                    <label>
-                        Amount to offer
-                    </label>
-
-                </div>
-
-
-                <div
-                    class="form-segmented"
-                    style="margin-top:10px;"
-                >
-
-                    <label class="form-segment-option">
-
-                        <input
-                            type="radio"
-                            name="buyer_broker_fee_type"
-                            value="percent"
-                            <?= $draft['buyer_broker_fee_type'] === 'percent'
-                                ? 'checked'
-                                : '' ?>
-                        >
-
-                        <span>
-                            Percentage
-                        </span>
-
-                    </label>
-
-
-                    <label class="form-segment-option">
-
-                        <input
-                            type="radio"
-                            name="buyer_broker_fee_type"
-                            value="amount"
-                            <?= $draft['buyer_broker_fee_type'] === 'amount'
-                                ? 'checked'
-                                : '' ?>
-                        >
-
-                        <span>
-                            Dollar amount
-                        </span>
-
-                    </label>
-
-                </div>
-
-
-                <div class="form-value-row">
-
-                    <div
-                        class="form-value"
-                        id="buyer-fee-wrap"
-                    >
-
-                        <span
-                            class="form-value-prefix"
-                            id="buyer-dollar"
-                        >
-                            $
-                        </span>
-
-                        <input
-                            id="buyer_broker_fee_value"
-                            name="buyer_broker_fee_value"
-                            type="text"
-                            inputmode="decimal"
-                            value="<?= h($draft['buyer_broker_fee_value']) ?>"
-                            autocomplete="off"
-                        >
-
-                        <span
-                            class="form-value-unit"
-                            id="buyer-percent"
-                        >
-                            %
-                        </span>
-
-                    </div>
-
-                </div>
-
-
-                <?php if (isset($errors['buyer_broker_fee_value'])): ?>
-
-                    <div class="form-field-error">
-                        <?= h($errors['buyer_broker_fee_value']) ?>
-                    </div>
-
-                <?php endif; ?>
-
-            </div>
-
-        </section>
-
-    </div>
-
-
-    <div class="form-actions">
-
-        <a
-            class="form-button-secondary"
-            href="/app/form_prepare.php?form=<?= h($formId) ?>&step=1"
-        >
-            ← Back
-        </a>
-
-
-        <button
-            class="form-button-primary"
-            type="submit"
-        >
-            Continue →
-        </button>
-
-    </div>
-
-</form>
-
-<?php elseif ($step === 3): ?>
-
-<form
-    class="form-panel"
-    method="post"
-    action="/app/form_prepare.php?form=<?= h($formId) ?>&step=3"
->
-
-    <div class="form-section-heading">
-
-        <h2>
-            Protection period
-        </h2>
-
-        <p>
-            How long is the protection period after the listing ends?
-        </p>
-
-    </div>
-
-
-    <section class="form-block">
-
-        <div class="form-block-title">
-            Choose the period
-        </div>
-
-        <p class="form-block-copy">
-            Select the number of days that will appear in the agreement.
-        </p>
-
-
-        <div class="form-choice-grid form-choice-grid-three">
-
-
-            <!-- 30 DAYS -->
-
-            <label class="form-choice">
-
-                <input
-                    type="radio"
-                    name="protection_period_choice"
-                    value="30"
-                    <?= $draft['protection_period_choice'] === '30'
-                        ? 'checked'
-                        : '' ?>
-                >
-
-                <span class="form-choice-card form-choice-card-compact">
-
-                    <strong>
-                        30 days
-                    </strong>
-
-                    <small>
-                        Thirty days after the listing ends.
-                    </small>
-
-                </span>
-
-            </label>
-
-
-            <!-- 60 DAYS -->
-
-            <label class="form-choice">
-
-                <input
-                    type="radio"
-                    name="protection_period_choice"
-                    value="60"
-                    <?= $draft['protection_period_choice'] === '60'
-                        ? 'checked'
-                        : '' ?>
-                >
-
-                <span class="form-choice-card form-choice-card-compact">
-
-                    <strong>
-                        60 days
-                    </strong>
-
-                    <small>
-                        Sixty days after the listing ends.
-                    </small>
-
-                </span>
-
-            </label>
-
-
-            <!-- CUSTOM -->
-
-            <label class="form-choice">
-
-                <input
-                    type="radio"
-                    name="protection_period_choice"
-                    value="custom"
-                    <?= $draft['protection_period_choice'] === 'custom'
-                        ? 'checked'
-                        : '' ?>
-                >
-
-                <span class="form-choice-card form-choice-card-compact">
-
-                    <strong>
-                        Custom
-                    </strong>
-
-                    <small>
-                        Enter a different number of days.
-                    </small>
-
-                </span>
-
-            </label>
-
-
-        </div>
-
-
-        <div
-            class="form-conditional protection-custom"
-            id="protection-custom"
-        >
-
-            <div class="form-field">
-
-                <label for="protection_period_custom">
-                    Number of days
-                </label>
-
-                <div class="form-value">
-
-                    <input
-                        id="protection_period_custom"
-                        name="protection_period_custom"
-                        type="text"
-                        inputmode="numeric"
-                        value="<?= h(
-                            $draft['protection_period_choice'] === 'custom'
-                                ? $draft['protection_period_days']
-                                : ''
-                        ) ?>"
-                        autocomplete="off"
-                    >
-
-                    <span class="form-value-unit">
-                        days
-                    </span>
-
-                </div>
-
-
-                <?php if (
-                    isset(
-                        $errors[
-                            'protection_period_custom'
-                        ]
-                    )
-                ): ?>
-
-                    <div class="form-field-error">
-
-                        <?= h(
-                            $errors[
-                                'protection_period_custom'
-                            ]
-                        ) ?>
-
-                    </div>
-
-                <?php endif; ?>
-
-            </div>
-
-        </div>
-
-    </section>
-
-
-    <div class="form-actions">
-
-        <a
-            class="form-button-secondary"
-            href="/app/form_prepare.php?form=<?= h($formId) ?>&step=2"
-        >
-            ← Back
-        </a>
-
-
-        <button
-            class="form-button-primary"
-            type="submit"
-        >
-            Continue →
-        </button>
-
-    </div>
-
-</form>
-
-<?php elseif ($step === 4): ?>
-
-
-<form
-    class="form-panel"
-    method="post"
-    action="/app/form_prepare.php?form=<?= h($formId) ?>&step=4"
->
-
-    <div class="form-section-heading">
-
-        <h2>
-            Final Details
-        </h2>
-
-        <p>
-            Add anything else that needs to appear in the agreement.
-        </p>
-
-    </div>
-
-
-    <!-- =====================================================
-         SHOWING INSTRUCTIONS
-    ====================================================== -->
-
-    <section class="form-block">
-
-        <div class="form-block-title">
-            Showing instructions
-        </div>
-
-        <p class="form-block-copy">
-            Are there any special instructions for showing the property?
-        </p>
-
-
-        <div class="form-choice-grid">
-
-
-            <label class="form-choice">
-
-                <input
-                    type="radio"
-                    name="showing_instruction_choice"
-                    value="standard"
-                    <?= $draft['showing_instruction_choice'] === 'standard'
-                        ? 'checked'
-                        : '' ?>
-                >
-
-                <span class="form-choice-card">
-
-                    <strong>
-                        No special instructions
-                    </strong>
-
-                    <small>
-                        Use the normal showing and access process.
-                    </small>
-
-                </span>
-
-            </label>
-
-
-            <label class="form-choice">
-
-                <input
-                    type="radio"
-                    name="showing_instruction_choice"
-                    value="custom"
-                    <?= $draft['showing_instruction_choice'] === 'custom'
-                        ? 'checked'
-                        : '' ?>
-                >
-
-                <span class="form-choice-card">
-
-                    <strong>
-                        Add instructions
-                    </strong>
-
-                    <small>
-                        Include special instructions for access or showings.
-                    </small>
-
-                </span>
-
-            </label>
-
-
-        </div>
-
-
-        <div
-            class="form-conditional showing-custom"
-            id="showing-custom"
-        >
-
-            <div class="form-field">
-
-                <label for="showing_instructions">
-                    Special showing instructions
-                </label>
-
-                <textarea
-                    id="showing_instructions"
-                    name="showing_instructions"
-                    placeholder="Example: Please give seller at least 2 hours notice before showings."
-                ><?= h($draft['showing_instructions']) ?></textarea>
-
-            </div>
-
-        </div>
-
-    </section>
-
-
-
-    <!-- =====================================================
-         OTHER TERMS
-    ====================================================== -->
-
-    <section class="form-block">
-
-        <div class="form-block-title">
-            Other Terms, Conditions, or Special Instructions
-        </div>
-
-        <p class="form-block-copy">
-            Leave this blank if there are no additional terms.
-        </p>
-
-
-        <div class="form-field">
-
-            <label for="other_terms">
-                Other terms
-            </label>
-
-            <textarea
-                id="other_terms"
-                name="other_terms"
-                placeholder="Enter any additional terms, conditions, or special instructions."
-            ><?= h($draft['other_terms']) ?></textarea>
-
-        </div>
-
-    </section>
-
-
-    <div class="form-actions">
+        <div class="form-actions">
 
     <a
         class="form-button-secondary"
-        href="/app/form_prepare.php?form=<?= h($formId) ?>&step=4"
+        href="/app/form_prepare.php?form=<?= h($formId) ?>&step=3"
     >
         ← Back
     </a>
 
-
-    <?php if ($draft['agent_signature'] === ''): ?>
-
-        <button
-            class="form-button-primary"
-            type="button"
-            disabled
-        >
-            Sign before sending
-        </button>
-
-    <?php else: ?>
-
-        <a
-            class="form-button-primary"
-            href="/app/form_prepare.php?form=<?= h($formId) ?>&step=client"
-        >
-            Continue to Client →
-        </a>
-
-    <?php endif; ?>
+    <button
+        class="form-button-primary"
+        type="submit"
+    >
+        Done — Review & Sign →
+    </button>
 
 </div>
+
+</form>
+
+
+<?php elseif ($step === 'review'): ?>
+
+
+<div class="form-panel">
+
+
+    <div class="form-section-heading">
+
+        <h2>
+            Exclusive Right to Sell Agreement
+        </h2>
+
+        <p>
+            Review the agreement details, then sign and send it to your client.
+        </p>
+
+    </div>
+
+
+    <!-- =====================================================
+         AGREEMENT DETAILS
+    ====================================================== -->
+
+    <section class="form-block">
+
+        <div class="form-block-title">
+            Agreement Details
+        </div>
+
+
+        <div class="form-review-list">
+
+
+            <div class="form-review-row">
+
+                <div>
+
+                    <small>
+                        Seller
+                    </small>
+
+                    <strong>
+
+                        <?= h($draft['seller_1']) ?>
+
+                        <?php if ($draft['seller_2'] !== ''): ?>
+
+                            &amp; <?= h($draft['seller_2']) ?>
+
+                        <?php endif; ?>
+
+                    </strong>
+
+                </div>
+
+
+                <a
+                    href="/app/form_prepare.php?form=<?= h($formId) ?>&step=1"
+                    class="form-review-edit"
+                >
+                    Edit
+                </a>
+
+            </div>
+
+
+            <div class="form-review-row">
+
+                <div>
+
+                    <small>
+                        Property
+                    </small>
+
+                    <strong>
+                        <?= h($draft['property_address']) ?>
+                    </strong>
+
+                </div>
+
+            </div>
+
+
+            <div class="form-review-row">
+
+                <div>
+
+                    <small>
+                        Listing price
+                    </small>
+
+                    <strong>
+
+                        <?php if (!empty($draft['list_price_decide_later'])): ?>
+
+                            To be finalized
+
+                        <?php else: ?>
+
+                            $<?= h($draft['list_price']) ?>
+
+                        <?php endif; ?>
+
+                    </strong>
+
+                </div>
+
+            </div>
+
+
+            <div class="form-review-row">
+
+                <div>
+
+                    <small>
+                        Listing period
+                    </small>
+
+                    <strong>
+
+                        <?php if (!empty($draft['listing_period_decide_later'])): ?>
+
+                            To be finalized
+
+                        <?php else: ?>
+
+                            <span>
+                                Start:
+                                <?= h($draft['start_date']) ?>
+                            </span>
+
+                            <br>
+
+                            <span>
+                                Expires:
+                                <?= h($draft['expiration_date']) ?>
+                            </span>
+
+                        <?php endif; ?>
+
+                    </strong>
+
+                </div>
+
+            </div>
+
+
+        </div>
+
+    </section>
+
+
+    <!-- =====================================================
+         SELLER CONTACT DETAILS
+    ====================================================== -->
+
+    <section class="form-block">
+
+        <div class="form-review-title-row">
+
+            <div class="form-block-title">
+                Seller Contact Details
+            </div>
+
+            <a
+                href="/app/form_prepare.php?form=<?= h($formId) ?>&step=1"
+                class="form-review-edit"
+            >
+                Edit
+            </a>
+
+        </div>
+
+
+        <div class="form-review-list">
+
+
+            <div class="form-review-row">
+
+                <div>
+
+                    <small>
+                        Seller email
+                    </small>
+
+                    <strong>
+
+                        <?= $agreementSellerEmail !== ''
+                            ? h($agreementSellerEmail)
+                            : 'Not provided' ?>
+
+                    </strong>
+
+                </div>
+
+            </div>
+
+
+            <div class="form-review-row">
+
+                <div>
+
+                    <small>
+                        Seller phone
+                    </small>
+
+                    <strong>
+
+                        <?= $agreementSellerPhone !== ''
+                            ? h($agreementSellerPhone)
+                            : 'Not provided' ?>
+
+                    </strong>
+
+                </div>
+
+            </div>
+
+
+            <div class="form-review-row">
+
+                <div>
+
+                    <small>
+                        Seller mailing address
+                    </small>
+
+                    <strong>
+
+                        <?php if ($agreementSellerStreet !== ''): ?>
+
+                            <?= h($agreementSellerStreet) ?>
+
+                            <?php if (
+                                $agreementSellerCity !== ''
+                                ||
+                                $agreementSellerState !== ''
+                                ||
+                                $agreementSellerZip !== ''
+                            ): ?>
+
+                                <br>
+
+                                <?= h($agreementSellerCity) ?>
+
+                                <?php if (
+                                    $agreementSellerCity !== ''
+                                    &&
+                                    $agreementSellerState !== ''
+                                ): ?>
+                                    ,
+                                <?php endif; ?>
+
+                                <?= h($agreementSellerState) ?>
+                                <?= h($agreementSellerZip) ?>
+
+                            <?php endif; ?>
+
+                        <?php else: ?>
+
+                            Not provided
+
+                        <?php endif; ?>
+
+                    </strong>
+
+                </div>
+
+            </div>
+
+
+        </div>
+
+    </section>
+
+
+    <!-- =====================================================
+         FEES
+    ====================================================== -->
+
+    <section class="form-block">
+
+        <div class="form-review-title-row">
+
+            <div class="form-block-title">
+                Fees
+            </div>
+
+            <a
+                href="/app/form_prepare.php?form=<?= h($formId) ?>&step=2"
+                class="form-review-edit"
+            >
+                Edit
+            </a>
+
+        </div>
+
+
+        <?php
+
+        $serviceFeeIsPercent =
+            $draft['service_fee_type'] === 'percent';
+
+        $buyerFeeIsPercent =
+            $draft['buyer_broker_authorized'] === 'yes'
+            &&
+            $draft['buyer_broker_fee_type'] === 'percent';
+
+        $canShowFeeSplit =
+            $serviceFeeIsPercent
+            &&
+            $buyerFeeIsPercent
+            &&
+            is_numeric($draft['service_fee_value'])
+            &&
+            is_numeric($draft['buyer_broker_fee_value']);
+
+        $listingBrokeragePercent = null;
+
+        if ($canShowFeeSplit) {
+
+            $listingBrokeragePercent =
+                (float)$draft['service_fee_value']
+                -
+                (float)$draft['buyer_broker_fee_value'];
+        }
+
+        ?>
+
+
+        <?php if ($canShowFeeSplit): ?>
+
+            <div class="form-fee-total">
+
+                <small>
+                    Total service fee
+                </small>
+
+                <strong>
+                    <?= h($draft['service_fee_value']) ?>%
+                </strong>
+
+                <span>
+                    TOTAL
+                </span>
+
+            </div>
+
+
+            <div class="form-fee-breakdown">
+
+
+                <div class="form-fee-part">
+
+                    <strong>
+                        <?= h(
+                            rtrim(
+                                rtrim(
+                                    number_format(
+                                        $listingBrokeragePercent,
+                                        2,
+                                        '.',
+                                        ''
+                                    ),
+                                    '0'
+                                ),
+                                '.'
+                            )
+                        ) ?>%
+                    </strong>
+
+                    <div>
+
+                        <b>
+                            <?= h($draft['broker']) ?>
+                        </b>
+
+                        <small>
+                            Represents the seller
+                        </small>
+
+                    </div>
+
+                </div>
+
+
+                <div class="form-fee-plus">
+                    +
+                </div>
+
+
+                <div class="form-fee-part">
+
+                    <strong>
+                        <?= h($draft['buyer_broker_fee_value']) ?>%
+                    </strong>
+
+                    <div>
+
+                        <b>
+                            Buyer’s Brokerage
+                        </b>
+
+                        <small>
+                            Represents the buyer
+                        </small>
+
+                    </div>
+
+                </div>
+
+
+            </div>
+
+
+            <div class="form-fee-confirmation">
+
+                <?= h($draft['service_fee_value']) ?>% total =
+                <?= h(
+                    rtrim(
+                        rtrim(
+                            number_format(
+                                $listingBrokeragePercent,
+                                2,
+                                '.',
+                                ''
+                            ),
+                            '0'
+                        ),
+                        '.'
+                    )
+                ) ?>% listing brokerage
+                +
+                <?= h($draft['buyer_broker_fee_value']) ?>% buyer’s brokerage
+
+            </div>
+
+
+        <?php else: ?>
+
+
+            <div class="form-review-list">
+
+
+                <div class="form-review-row">
+
+                    <div>
+
+                        <small>
+                            Total service fee
+                        </small>
+
+                        <strong>
+
+                            <?php if ($draft['service_fee_type'] === 'percent'): ?>
+
+                                <?= h($draft['service_fee_value']) ?>%
+
+                            <?php else: ?>
+
+                                $<?= h($draft['service_fee_value']) ?>
+
+                            <?php endif; ?>
+
+                        </strong>
+
+                    </div>
+
+                </div>
+
+
+                <div class="form-review-row">
+
+                    <div>
+
+                        <small>
+                            Buyer’s brokerage
+                        </small>
+
+                        <strong>
+
+                            <?php if ($draft['buyer_broker_authorized'] === 'no'): ?>
+
+                                No compensation offered
+
+                            <?php elseif ($draft['buyer_broker_fee_type'] === 'percent'): ?>
+
+                                <?= h($draft['buyer_broker_fee_value']) ?>%
+
+                            <?php else: ?>
+
+                                $<?= h($draft['buyer_broker_fee_value']) ?>
+
+                            <?php endif; ?>
+
+                        </strong>
+
+                    </div>
+
+                </div>
+
+
+            </div>
+
+
+        <?php endif; ?>
+
+    </section>
+
+
+    <!-- =====================================================
+         PROTECTION PERIOD
+    ====================================================== -->
+
+    <section class="form-block">
+
+        <div class="form-review-title-row">
+
+            <div class="form-block-title">
+                Protection Period
+            </div>
+
+            <a
+                href="/app/form_prepare.php?form=<?= h($formId) ?>&step=3"
+                class="form-review-edit"
+            >
+                Edit
+            </a>
+
+        </div>
+
+        <strong class="form-review-value">
+            <?= h($draft['protection_period_days']) ?> days
+        </strong>
+
+    </section>
+
+
+    <!-- =====================================================
+         FINAL DETAILS
+    ====================================================== -->
+
+    <section class="form-block">
+
+        <div class="form-review-title-row">
+
+            <div class="form-block-title">
+                Final Details
+            </div>
+
+            <a
+                href="/app/form_prepare.php?form=<?= h($formId) ?>&step=4"
+                class="form-review-edit"
+            >
+                Edit
+            </a>
+
+        </div>
+
+
+        <div class="form-review-list">
+
+
+            <div class="form-review-row">
+
+                <div>
+
+                    <small>
+                        Special showing instructions
+                    </small>
+
+                    <strong>
+
+                        <?= $draft['showing_instructions'] !== ''
+                            ? nl2br(h($draft['showing_instructions']))
+                            : 'None' ?>
+
+                    </strong>
+
+                </div>
+
+            </div>
+
+
+            <div class="form-review-row">
+
+                <div>
+
+                    <small>
+                        Other terms
+                    </small>
+
+                    <strong>
+
+                        <?= $draft['other_terms'] !== ''
+                            ? nl2br(h($draft['other_terms']))
+                            : 'None' ?>
+
+                    </strong>
+
+                </div>
+
+            </div>
+
+
+        </div>
+
+    </section>
+
+
+    <!-- =====================================================
+         REALTOR / BROKERAGE
+    ====================================================== -->
+
+    <section class="form-block">
+
+        <div class="form-block-title">
+            Prepared by
+        </div>
+
+
+        <div class="form-review-list">
+
+
+            <div class="form-review-row">
+
+                <div>
+
+                    <small>
+                        Authorized agent
+                    </small>
+
+                    <strong>
+                        <?= h($meName) ?>
+                    </strong>
+
+                </div>
+
+            </div>
+
+
+            <div class="form-review-row">
+
+                <div>
+
+                    <small>
+                        Brokerage
+                    </small>
+
+                    <strong>
+                        <?= h($draft['broker']) ?>
+                    </strong>
+
+                </div>
+
+            </div>
+
+
+            <div class="form-review-row">
+
+                <div>
+
+                    <small>
+                        Email
+                    </small>
+
+                    <strong>
+                        <?= h($meEmail) ?>
+                    </strong>
+
+                </div>
+
+            </div>
+
+
+        </div>
+
+    </section>
+
+
+    <!-- =====================================================
+         REALTOR SIGNATURE
+    ====================================================== -->
+
+    <section class="form-sign-block">
+
+        <div>
+
+            <div class="form-block-title">
+                Realtor Signature
+            </div>
+
+            <p>
+                Sign the prepared agreement before sending it
+                to your client for Guided View.
+            </p>
+
+        </div>
+
+
+        <?php if ($draft['agent_signature'] === ''): ?>
+
+
+            <form
+                method="post"
+                action="/app/form_prepare.php?form=<?= h($formId) ?>&step=review"
+            >
+
+                <input
+                    type="hidden"
+                    name="action"
+                    value="sign_agreement"
+                >
+
+                <button
+                    type="submit"
+                    class="form-sign-button"
+                >
+                    Sign Agreement
+                </button>
+
+            </form>
+
+
+        <?php else: ?>
+
+
+            <div class="form-sign-complete">
+
+                <strong>
+                    ✓ Signed by <?= h($draft['agent_signature']) ?>
+                </strong>
+
+                <small>
+                    <?= h($draft['agent_signature_date']) ?>
+                </small>
+
+            </div>
+
+
+        <?php endif; ?>
+
+    </section>
+
+
+    <div class="form-actions">
+
+        <a
+            class="form-button-secondary"
+            href="/app/form_prepare.php?form=<?= h($formId) ?>&step=4"
+        >
+            ← Back
+        </a>
+
+
+        <?php if ($draft['agent_signature'] === ''): ?>
+
+            <button
+                class="form-button-primary"
+                type="button"
+                disabled
+            >
+                Sign before sending
+            </button>
+
+        <?php else: ?>
+
+            <a
+                class="form-button-primary"
+                href="/app/form_prepare.php?form=<?= h($formId) ?>&step=client"
+            >
+                Continue to Client →
+            </a>
+
+        <?php endif; ?>
+
+    </div>
 
 
 </div>
@@ -3481,6 +3398,7 @@ body{
 
 
 <div class="form-panel">
+
 
     <div class="form-section-heading">
 
@@ -3499,10 +3417,12 @@ body{
 
         <div class="form-choice-grid">
 
+
             <a
                 class="form-choice"
                 href="#"
             >
+
                 <span class="form-choice-card">
 
                     <strong>
@@ -3514,25 +3434,75 @@ body{
                     </small>
 
                 </span>
+
             </a>
 
 
-            <a
-                class="form-choice"
-                href="#"
-            >
-                <span class="form-choice-card">
+            <?php if ($agreementSellerEmail !== ''): ?>
 
-                    <strong>
-                        Send to my client
-                    </strong>
 
-                    <small>
-                        Send the agreement for your client to review and sign.
-                    </small>
+                <form
+                    method="post"
+                    action="/app/form_prepare.php?form=<?= h($formId) ?>&step=client"
+                    class="form-choice"
+                >
 
-                </span>
-            </a>
+                    <input
+                        type="hidden"
+                        name="action"
+                        value="send_to_client"
+                    >
+
+                    <button
+                        type="submit"
+                        class="form-choice-card"
+                        style="
+                            width:100%;
+                            height:100%;
+                            text-align:left;
+                            cursor:pointer;
+                            font:inherit;
+                        "
+                    >
+
+                        <strong>
+                            Send to my client
+                        </strong>
+
+                        <small>
+                            <?= h($agreementSellerEmail) ?>
+                        </small>
+
+                    </button>
+
+                </form>
+
+
+            <?php else: ?>
+
+
+                <a
+                    class="form-choice"
+                    href="/app/form_prepare.php?form=<?= h($formId) ?>&step=1"
+                >
+
+                    <span class="form-choice-card">
+
+                        <strong>
+                            Add seller email
+                        </strong>
+
+                        <small>
+                            Nemi needs an email before this agreement can be sent.
+                        </small>
+
+                    </span>
+
+                </a>
+
+
+            <?php endif; ?>
+
 
         </div>
 
@@ -3571,10 +3541,12 @@ body{
 
     </div>
 
+
 </div>
 
 
 <?php endif; ?>
+            
 
 </main>
    
