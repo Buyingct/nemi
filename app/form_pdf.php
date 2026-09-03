@@ -20,12 +20,17 @@ if (
     $role !== 'admin'
 ) {
     http_response_code(403);
-    exit('You do not have permission to access this document.');
+    exit(
+        'You do not have permission to access this document.'
+    );
 }
 
-require_once dirname(__DIR__) . '/vendor/autoload.php';
 
-use setasign\Fpdi\Fpdi;
+/*
+|--------------------------------------------------------------------------
+| FORM
+|--------------------------------------------------------------------------
+*/
 
 $formId =
     (string)($_GET['form'] ?? '');
@@ -33,23 +38,36 @@ $formId =
 $version =
     (string)($_GET['version'] ?? 'prepared');
 
-$debugGrid =
-    (string)($_GET['debug'] ?? '')
-    === 'grid';
-
 if ($formId !== 'exclusive_right_to_sell') {
     http_response_code(404);
     exit('Form not found.');
 }
 
+
+/*
+|--------------------------------------------------------------------------
+| NAMED-FIELD PDF TEMPLATE
+|--------------------------------------------------------------------------
+*/
+
 $templatePath =
     dirname(__DIR__)
-    . '/forms/templates/exclusive_right_to_sell_10_25.pdf';
+    . '/forms/templates/'
+    . 'exclusive_right_to_sell_10_25_nemi.pdf';
 
 if (!is_file($templatePath)) {
     http_response_code(500);
-    exit('PDF template could not be found.');
+    exit(
+        'PDF template could not be found.'
+    );
 }
+
+
+/*
+|--------------------------------------------------------------------------
+| CURRENT FORM DRAFT
+|--------------------------------------------------------------------------
+*/
 
 $draftKey =
     'form_draft_' . $formId;
@@ -63,617 +81,699 @@ if (
     ||
     empty($draft)
 ) {
-
     http_response_code(400);
 
     exit(
-        'No prepared agreement was found. Please prepare the form first.'
+        'No prepared agreement was found. '
+        . 'Please prepare the form first.'
     );
 }
+
 
 /*
 |--------------------------------------------------------------------------
-| PDF COORDINATE GRID
+| HELPERS
 |--------------------------------------------------------------------------
-|
-| Temporary development tool.
-|
-| Every major line = 10 mm
-| Every minor line = 5 mm
-|
-| Use:
-| &debug=grid
-|
 */
 
-function drawCoordinateGrid(
-    Fpdi $pdf,
-    float $pageWidth,
-    float $pageHeight
-): void {
+function pdfFieldText(
+    mixed $value
+): string {
 
-    /*
-    |--------------------------------------------------------------------------
-    | MINOR GRID — 5 MM
-    |--------------------------------------------------------------------------
-    */
-
-    $pdf->SetDrawColor(
-        210,
-        220,
-        225
-    );
-
-    $pdf->SetLineWidth(
-        0.1
-    );
-
-
-    for (
-        $x = 5;
-        $x < $pageWidth;
-        $x += 5
-    ) {
-
-        $pdf->Line(
-            $x,
-            0,
-            $x,
-            $pageHeight
-        );
-    }
-
-
-    for (
-        $y = 5;
-        $y < $pageHeight;
-        $y += 5
-    ) {
-
-        $pdf->Line(
-            0,
-            $y,
-            $pageWidth,
-            $y
-        );
-    }
-
-
-    /*
-    |--------------------------------------------------------------------------
-    | MAJOR GRID — 10 MM
-    |--------------------------------------------------------------------------
-    */
-
-    $pdf->SetDrawColor(
-        120,
-        145,
-        155
-    );
-
-    $pdf->SetTextColor(
-        80,
-        100,
-        110
-    );
-
-    $pdf->SetFont(
-        'Helvetica',
-        '',
-        6
-    );
-
-
-    for (
-        $x = 10;
-        $x < $pageWidth;
-        $x += 10
-    ) {
-
-        $pdf->Line(
-            $x,
-            0,
-            $x,
-            $pageHeight
-        );
-
-        $pdf->SetXY(
-            $x + 0.5,
-            1
-        );
-
-        $pdf->Cell(
-            9,
-            3,
-            (string)$x,
-            0,
-            0
-        );
-    }
-
-
-    for (
-        $y = 10;
-        $y < $pageHeight;
-        $y += 10
-    ) {
-
-        $pdf->Line(
-            0,
-            $y,
-            $pageWidth,
-            $y
-        );
-
-        $pdf->SetXY(
-            1,
-            $y + 0.5
-        );
-
-        $pdf->Cell(
-            8,
-            3,
-            (string)$y,
-            0,
-            0
-        );
-    }
-
-
-    /*
-    |--------------------------------------------------------------------------
-    | RESTORE NORMAL COLOR
-    |--------------------------------------------------------------------------
-    */
-
-    $pdf->SetDrawColor(
-        0,
-        0,
-        0
-    );
-
-    $pdf->SetTextColor(
-        0,
-        0,
-        0
+    return trim(
+        (string)$value
     );
 }
 
-$pdf = new Fpdi();
 
-$pageCount =
-    $pdf->setSourceFile($templatePath);
+function pdfDate(
+    mixed $value
+): string {
 
-for (
-    $pageNumber = 1;
-    $pageNumber <= $pageCount;
-    $pageNumber++
+    $value =
+        trim(
+            (string)$value
+        );
+
+    if ($value === '') {
+        return '';
+    }
+
+    $timestamp =
+        strtotime($value);
+
+    if ($timestamp === false) {
+        return $value;
+    }
+
+    return date(
+        'm/d/Y',
+        $timestamp
+    );
+}
+
+
+function pdfMoney(
+    mixed $value,
+    bool $includeDollarSign = false
+): string {
+
+    $value =
+        trim(
+            (string)$value
+        );
+
+    if ($value === '') {
+        return '';
+    }
+
+    $numeric =
+        str_replace(
+            [
+                '$',
+                ','
+            ],
+            '',
+            $value
+        );
+
+    if (!is_numeric($numeric)) {
+        return $value;
+    }
+
+    $formatted =
+        number_format(
+            (float)$numeric,
+            0,
+            '.',
+            ','
+        );
+
+    return
+        $includeDollarSign
+            ? '$' . $formatted
+            : $formatted;
+}
+
+
+/*
+|--------------------------------------------------------------------------
+| FDF ESCAPING
+|--------------------------------------------------------------------------
+*/
+
+function fdfEscape(
+    string $value
+): string {
+
+    $value =
+        str_replace(
+            '\\',
+            '\\\\',
+            $value
+        );
+
+    $value =
+        str_replace(
+            '(',
+            '\\(',
+            $value
+        );
+
+    $value =
+        str_replace(
+            ')',
+            '\\)',
+            $value
+        );
+
+    $value =
+        str_replace(
+            [
+                "\r\n",
+                "\r"
+            ],
+            "\n",
+            $value
+        );
+
+    return $value;
+}
+
+
+function fdfTextField(
+    string $name,
+    string $value
+): string {
+
+    return
+        '<< /T ('
+        . fdfEscape($name)
+        . ') /V ('
+        . fdfEscape($value)
+        . ') >>';
+}
+
+
+function fdfCheckboxField(
+    string $name,
+    bool $checked
+): string {
+
+    return
+        '<< /T ('
+        . fdfEscape($name)
+        . ') /V /'
+        . (
+            $checked
+                ? 'Yes'
+                : 'Off'
+        )
+        . ' >>';
+}
+
+
+/*
+|--------------------------------------------------------------------------
+| SELLER NAMES
+|--------------------------------------------------------------------------
+*/
+
+$seller1 =
+    pdfFieldText(
+        $draft['seller_1']
+        ?? ''
+    );
+
+$seller2 =
+    pdfFieldText(
+        $draft['seller_2']
+        ?? ''
+    );
+
+$sellerNames =
+    $seller1;
+
+if ($seller2 !== '') {
+
+    $sellerNames .=
+        (
+            $sellerNames !== ''
+                ? ' & '
+                : ''
+        )
+        . $seller2;
+}
+
+
+/*
+|--------------------------------------------------------------------------
+| LIST PRICE
+|--------------------------------------------------------------------------
+|
+| If Realtor selected Decide later,
+| the actual PDF field remains blank.
+|--------------------------------------------------------------------------
+*/
+
+$listPrice = '';
+
+if (
+    empty(
+        $draft['list_price_decide_later']
+    )
 ) {
 
-    $templateId =
-        $pdf->importPage($pageNumber);
+    $listPrice =
+        pdfMoney(
+            $draft['list_price']
+            ?? ''
+        );
+}
 
-    $size =
-        $pdf->getTemplateSize($templateId);
 
-    $pdf->AddPage(
-        $size['orientation'],
-        [
-            $size['width'],
-            $size['height']
-        ]
-    );
-
-    $pdf->useTemplate($templateId);
-
-    /*
+/*
 |--------------------------------------------------------------------------
-| DEVELOPMENT COORDINATE GRID
+| LISTING PERIOD
+|--------------------------------------------------------------------------
+|
+| One shared Decide Later state controls
+| both start and expiration.
 |--------------------------------------------------------------------------
 */
 
-if ($debugGrid) {
+$startDate = '';
+$expirationDate = '';
 
-    drawCoordinateGrid(
-        $pdf,
-        (float)$size['width'],
-        (float)$size['height']
-    );
+if (
+    empty(
+        $draft['listing_period_decide_later']
+    )
+) {
+
+    $startDate =
+        pdfDate(
+            $draft['start_date']
+            ?? ''
+        );
+
+    $expirationDate =
+        pdfDate(
+            $draft['expiration_date']
+            ?? ''
+        );
 }
 
-    /*
-    |--------------------------------------------------------------------------
-    | DEFAULT FIELD FONT
-    |--------------------------------------------------------------------------
-    */
 
-    $pdf->SetFont(
-        'Helvetica',
-        '',
-        9
+/*
+|--------------------------------------------------------------------------
+| BROKER COMPENSATION
+|--------------------------------------------------------------------------
+*/
+
+$commissionPercentage = '';
+$commissionDollar = '';
+
+$serviceFeeValue =
+    pdfFieldText(
+        $draft['service_fee_value']
+        ?? ''
     );
 
-    $pdf->SetTextColor(
-        0,
-        0,
-        0
+$serviceFeeType =
+    pdfFieldText(
+        $draft['service_fee_type']
+        ?? ''
+    );
+
+if (
+    $serviceFeeType === 'percent'
+) {
+
+    $commissionPercentage =
+        $serviceFeeValue;
+
+} elseif (
+    $serviceFeeValue !== ''
+) {
+
+    $commissionDollar =
+        pdfMoney(
+            $serviceFeeValue
+        );
+}
+
+
+/*
+|--------------------------------------------------------------------------
+| BUYER BROKER AUTHORIZATION
+|--------------------------------------------------------------------------
+*/
+
+$buyerBrokerAuthorized =
+    (
+        $draft['buyer_broker_authorized']
+        ?? 'yes'
+    ) === 'yes';
+
+
+/*
+|--------------------------------------------------------------------------
+| BUYER BROKER COMPENSATION
+|--------------------------------------------------------------------------
+*/
+
+$buyerBrokerPercentage = '';
+$buyerBrokerDollar = '';
+
+if ($buyerBrokerAuthorized) {
+
+    $buyerBrokerFeeValue =
+        pdfFieldText(
+            $draft['buyer_broker_fee_value']
+            ?? ''
+        );
+
+    $buyerBrokerFeeType =
+        pdfFieldText(
+            $draft['buyer_broker_fee_type']
+            ?? ''
+        );
+
+    if (
+        $buyerBrokerFeeType === 'percent'
+    ) {
+
+        $buyerBrokerPercentage =
+            $buyerBrokerFeeValue;
+
+    } elseif (
+        $buyerBrokerFeeValue !== ''
+    ) {
+
+        $buyerBrokerDollar =
+            pdfMoney(
+                $buyerBrokerFeeValue
+            );
+    }
+}
+
+
+/*
+|--------------------------------------------------------------------------
+| PROTECTION PERIOD
+|--------------------------------------------------------------------------
+|
+| Supports either current or older draft key.
+|--------------------------------------------------------------------------
+*/
+
+$protectionPeriodDays =
+    pdfFieldText(
+        $draft['protection_period_days']
+        ?? $draft['protection_period']
+        ?? ''
     );
 
 
-    /*
-    |--------------------------------------------------------------------------
-    | PAGE 1
-    |--------------------------------------------------------------------------
-    */
+/*
+|--------------------------------------------------------------------------
+| SHOWING / SURVEILLANCE
+|--------------------------------------------------------------------------
+*/
+
+$showingInstructions =
+    pdfFieldText(
+        $draft['showing_instructions']
+        ?? ''
+    );
+
+$audioSurveillance =
+    !empty(
+        $draft['audio_surveillance']
+    );
+
+$videoSurveillance =
+    !empty(
+        $draft['video_surveillance']
+    );
+
+
+/*
+|--------------------------------------------------------------------------
+| OTHER TERMS
+|--------------------------------------------------------------------------
+*/
+
+$specialInstructions =
+    pdfFieldText(
+        $draft['other_terms']
+        ?? $draft['special_instructions']
+        ?? ''
+    );
+
+
+/*
+|--------------------------------------------------------------------------
+| FAIR HOUSING INITIALS
+|--------------------------------------------------------------------------
+|
+| Blank until seller initials are captured.
+|--------------------------------------------------------------------------
+*/
+
+$sellerInitialsFairHousing =
+    pdfFieldText(
+        $draft['seller_initials_fair_housing']
+        ?? ''
+    );
+
+
+/*
+|--------------------------------------------------------------------------
+| AGREEMENT-LEVEL SELLER CONTACT DETAILS
+|--------------------------------------------------------------------------
+|
+| Seller 1 first.
+| Seller 2 is fallback when Seller 1 lacks
+| a particular contact value.
+|--------------------------------------------------------------------------
+*/
+
+$sellerEmail =
+    pdfFieldText(
+        $draft['seller_1_email']
+        ?? ''
+    );
+
+if ($sellerEmail === '') {
+
+    $sellerEmail =
+        pdfFieldText(
+            $draft['seller_2_email']
+            ?? ''
+        );
+}
+
+
+$sellerStreet =
+    pdfFieldText(
+        $draft['seller_1_street']
+        ?? ''
+    );
+
+if ($sellerStreet === '') {
+
+    $sellerStreet =
+        pdfFieldText(
+            $draft['seller_2_street']
+            ?? ''
+        );
+}
+
+
+$sellerCity =
+    pdfFieldText(
+        $draft['seller_1_city']
+        ?? ''
+    );
+
+if ($sellerCity === '') {
+
+    $sellerCity =
+        pdfFieldText(
+            $draft['seller_2_city']
+            ?? ''
+        );
+}
+
+
+$sellerState =
+    pdfFieldText(
+        $draft['seller_1_state']
+        ?? ''
+    );
+
+if ($sellerState === '') {
+
+    $sellerState =
+        pdfFieldText(
+            $draft['seller_2_state']
+            ?? ''
+        );
+}
+
+
+$sellerZip =
+    pdfFieldText(
+        $draft['seller_1_zip']
+        ?? ''
+    );
+
+if ($sellerZip === '') {
+
+    $sellerZip =
+        pdfFieldText(
+            $draft['seller_2_zip']
+            ?? ''
+        );
+}
+
+
+$sellerCityStateZip =
+    trim(
+        $sellerCity
+        . (
+            $sellerCity !== ''
+            &&
+            $sellerState !== ''
+                ? ', '
+                : ''
+        )
+        . $sellerState
+        . (
+            $sellerZip !== ''
+                ? ' ' . $sellerZip
+                : ''
+        )
+    );
+
+
+/*
+|--------------------------------------------------------------------------
+| BROKERAGE
+|--------------------------------------------------------------------------
+|
+| Name currently comes from the draft.
+| Address remains temporary Fercodini data
+| until brokerage profiles own these values.
+|--------------------------------------------------------------------------
+*/
+
+$brokerageName =
+    pdfFieldText(
+        $draft['broker']
+        ?? ''
+    );
+
+$brokerageAddress =
+    '484 Wolcott Road';
+
+$brokerageCityStateZip =
+    'Wolcott, CT 06716';
+
+
+/*
+|--------------------------------------------------------------------------
+| AGENT
+|--------------------------------------------------------------------------
+*/
+
+$agentEmail =
+    pdfFieldText(
+        $_SESSION['email']
+        ?? ''
+    );
+
+
+/*
+|--------------------------------------------------------------------------
+| SIGNATURE FIELDS
+|--------------------------------------------------------------------------
+|
+| Prepared version intentionally leaves
+| signatures and dates blank.
+|
+| Later the Nemi signing workflow will populate
+| these fields from the signed-version data.
+|--------------------------------------------------------------------------
+*/
+
+$seller1Signature = '';
+$seller1SignatureDate = '';
+
+$seller2Signature = '';
+$seller2SignatureDate = '';
+
+$agentSignature = '';
+$agentSignatureDate = '';
+
+
+/*
+|--------------------------------------------------------------------------
+| BUILD FDF
+|--------------------------------------------------------------------------
+*/
+
+$fields = [];
+
+
 /*
 |--------------------------------------------------------------------------
 | PAGE 1
 |--------------------------------------------------------------------------
 */
 
-if ($pageNumber === 1) {
-
-    /*
-    |--------------------------------------------------------------------------
-    | SELLER(S)
-    |--------------------------------------------------------------------------
-    */
-
-    $sellerNames =
-        trim(
-            (string)($draft['seller_1'] ?? '')
-        );
-
-    if (!empty($draft['seller_2'])) {
-
-        $sellerNames .=
-            ' & '
-            . trim(
-                (string)$draft['seller_2']
-            );
-    }
-
-    $pdf->SetFont(
-        'Helvetica',
-        '',
-        8
+$fields[] =
+    fdfTextField(
+        'seller_names',
+        $sellerNames
     );
 
-    $pdf->SetXY(
-        55,
-        31.5
+$fields[] =
+    fdfTextField(
+        'brokerage_name',
+        $brokerageName
     );
 
-    $pdf->Cell(
-        110,
-        4,
-        $sellerNames,
-        0,
-        0
-    );
-
-
-    /*
-    |--------------------------------------------------------------------------
-    | BROKERAGE
-    |--------------------------------------------------------------------------
-    */
-
-    $pdf->SetXY(
-        18,
-        37.5
-    );
-
-    $pdf->Cell(
-        94,
-        4,
-        (string)($draft['broker'] ?? ''),
-        0,
-        0
-    );
-
-
-    /*
-    |--------------------------------------------------------------------------
-    | PROPERTY ADDRESS
-    |--------------------------------------------------------------------------
-    */
-
-    $pdf->SetXY(
-        18,
-        44
-    );
-
-    $pdf->Cell(
-        112,
-        4,
-        (string)($draft['property_address'] ?? ''),
-        0,
-        0
-    );
-
-
-    /*
-    |--------------------------------------------------------------------------
-    | LIST PRICE
-    |--------------------------------------------------------------------------
-    */
-
-    $listPrice =
-        trim(
-            (string)($draft['list_price'] ?? '')
-        );
-
-    if ($listPrice !== '') {
-
-        $listPrice =
-            '$'
-            . number_format(
-                (float)str_replace(
-                    [',', '$'],
-                    '',
-                    $listPrice
-                ),
-                0
-            );
-    }
-
-    $pdf->SetXY(
-        96,
-        50
-    );
-
-    $pdf->Cell(
-        43,
-        4,
-        $listPrice,
-        0,
-        0
-    );
-
-
-    /*
-    |--------------------------------------------------------------------------
-    | START DATE
-    |--------------------------------------------------------------------------
-    */
-
-    $startDate =
-        (string)($draft['start_date'] ?? '');
-
-    if ($startDate !== '') {
-
-        $timestamp =
-            strtotime($startDate);
-
-        if ($timestamp !== false) {
-
-            $startDate =
-                date(
-                    'm/d/Y',
-                    $timestamp
-                );
-        }
-    }
-
-    $pdf->SetXY(
-        72,
-        56
-    );
-
-    $pdf->Cell(
-        34,
-        4,
-        $startDate,
-        0,
-        0
-    );
-
-
-    /*
-    |--------------------------------------------------------------------------
-    | EXPIRATION DATE
-    |--------------------------------------------------------------------------
-    */
-
-    $expirationDate =
-        (string)(
-            $draft['expiration_date']
+$fields[] =
+    fdfTextField(
+        'property_address',
+        pdfFieldText(
+            $draft['property_address']
             ?? ''
-        );
-
-    if ($expirationDate !== '') {
-
-        $timestamp =
-            strtotime($expirationDate);
-
-        if ($timestamp !== false) {
-
-            $expirationDate =
-                date(
-                    'm/d/Y',
-                    $timestamp
-                );
-        }
-    }
-
-    $pdf->SetXY(
-        22,
-        62
+        )
     );
 
-    $pdf->Cell(
-        39,
-        4,
-        $expirationDate,
-        0,
-        0
+$fields[] =
+    fdfTextField(
+        'list_price',
+        $listPrice
     );
 
-
-    /*
-    |--------------------------------------------------------------------------
-    | BROKERAGE SERVICE FEE
-    |--------------------------------------------------------------------------
-    */
-
-    $serviceFeeValue =
-        trim(
-            (string)(
-                $draft['service_fee_value']
-                ?? ''
-            )
-        );
-
-    if (
-        ($draft['service_fee_type'] ?? '')
-        === 'percent'
-    ) {
-
-        $pdf->SetXY(
-            136,
-            89
-        );
-
-        $pdf->Cell(
-            22,
-            4,
-            $serviceFeeValue,
-            0,
-            0
-        );
-
-    } elseif ($serviceFeeValue !== '') {
-
-        $pdf->SetXY(
-            31,
-            94
-        );
-
-        $pdf->Cell(
-            45,
-            4,
-            '$'
-            . number_format(
-                (float)str_replace(
-                    [',', '$'],
-                    '',
-                    $serviceFeeValue
-                ),
-                0
-            ),
-            0,
-            0
-        );
-    }
-
-
-    /*
-    |--------------------------------------------------------------------------
-    | BUYER-BROKER AUTHORIZATION
-    |--------------------------------------------------------------------------
-    */
-
-    $buyerAuthorized =
-        ($draft['buyer_broker_authorized'] ?? 'yes')
-        === 'yes';
-
-    $pdf->SetFont(
-        'Helvetica',
-        'B',
-        9
+$fields[] =
+    fdfTextField(
+        'start_date',
+        $startDate
     );
 
-    if ($buyerAuthorized) {
-
-        $pdf->SetXY(
-            45.8,
-            155
-        );
-
-    } else {
-
-        $pdf->SetXY(
-            62,
-            155
-        );
-    }
-
-    $pdf->Cell(
-        4,
-        4,
-        'X',
-        0,
-        0
+$fields[] =
+    fdfTextField(
+        'expiration_date',
+        $expirationDate
     );
 
+$fields[] =
+    fdfTextField(
+        'commission_percentage',
+        $commissionPercentage
+    );
 
-    /*
-    |--------------------------------------------------------------------------
-    | BUYER-BROKER COMPENSATION
-    |--------------------------------------------------------------------------
-    */
+$fields[] =
+    fdfTextField(
+        'commission_dollar',
+        $commissionDollar
+    );
 
-    if ($buyerAuthorized) {
+$fields[] =
+    fdfCheckboxField(
+        'buyer_broker_authorized_yes',
+        $buyerBrokerAuthorized
+    );
 
-        $buyerFeeValue =
-            trim(
-                (string)(
-                    $draft['buyer_broker_fee_value']
-                    ?? ''
-                )
-            );
+$fields[] =
+    fdfCheckboxField(
+        'buyer_broker_authorized_no',
+        !$buyerBrokerAuthorized
+    );
 
-        $pdf->SetFont(
-            'Helvetica',
-            '',
-            8
-        );
+$fields[] =
+    fdfTextField(
+        'buyer_broker_compensation_percentage',
+        $buyerBrokerPercentage
+    );
 
-        if (
-            ($draft['buyer_broker_fee_type'] ?? '')
-            === 'percent'
-        ) {
+$fields[] =
+    fdfTextField(
+        'buyer_broker_compensation_dollar',
+        $buyerBrokerDollar
+    );
 
-            $pdf->SetXY(
-                136,
-                166
-            );
-
-            $pdf->Cell(
-                18,
-                4,
-                $buyerFeeValue,
-                0,
-                0
-            );
-
-        } elseif ($buyerFeeValue !== '') {
-
-            $pdf->SetXY(
-                34,
-                172
-            );
-
-            $pdf->Cell(
-                34,
-                4,
-                '$'
-                . number_format(
-                    (float)str_replace(
-                        [',', '$'],
-                        '',
-                        $buyerFeeValue
-                    ),
-                    0
-                ),
-                0,
-                0
-            );
-        }
-    }
-}
-
+$fields[] =
+    fdfTextField(
+        'protection_period_days',
+        $protectionPeriodDays
+    );
 
 
 /*
@@ -682,50 +782,24 @@ if ($pageNumber === 1) {
 |--------------------------------------------------------------------------
 */
 
-if ($pageNumber === 2) {
-
-    /*
-    |--------------------------------------------------------------------------
-    | SPECIAL SHOWING INSTRUCTIONS
-    |--------------------------------------------------------------------------
-    */
-
-    $specialShowingInstructions =
-    trim(
-        (string)(
-            $draft['showing_instructions']
-            ?? ''
-        )
+$fields[] =
+    fdfTextField(
+        'showing_instructions',
+        $showingInstructions
     );
 
-    if ($specialShowingInstructions !== '') {
+$fields[] =
+    fdfCheckboxField(
+        'audio_surveillance',
+        $audioSurveillance
+    );
 
-        $pdf->SetFont(
-            'Helvetica',
-            '',
-            8
-        );
+$fields[] =
+    fdfCheckboxField(
+        'video_surveillance',
+        $videoSurveillance
+    );
 
-        $pdf->SetTextColor(
-            0,
-            0,
-            0
-        );
-
-        $pdf->SetXY(
-            57,
-            21
-        );
-
-        $pdf->Cell(
-            102,
-            4,
-            $specialShowingInstructions,
-            0,
-            0
-        );
-    }
-}
 
 /*
 |--------------------------------------------------------------------------
@@ -733,481 +807,249 @@ if ($pageNumber === 2) {
 |--------------------------------------------------------------------------
 */
 
-if ($pageNumber === 3) {
-
-    $pdf->SetFont(
-        'Helvetica',
-        '',
-        8
+$fields[] =
+    fdfTextField(
+        'special_instructions',
+        $specialInstructions
     );
 
-    $pdf->SetTextColor(
-        0,
-        0,
-        0
+$fields[] =
+    fdfTextField(
+        'seller_initials_fair_housing',
+        $sellerInitialsFairHousing
     );
 
-
-    /*
-    |--------------------------------------------------------------------------
-    | OTHER TERMS / SPECIAL INSTRUCTIONS
-    |--------------------------------------------------------------------------
-    */
-
-    $otherTerms =
-        trim(
-            (string)(
-                $draft['other_terms']
-                ?? ''
-            )
-        );
-
-    if ($otherTerms !== '') {
-
-        $pdf->SetXY(
-            105,
-            39
-        );
-
-        $pdf->Cell(
-            98,
-            4,
-            $otherTerms,
-            0,
-            0
-        );
-    }
-
-
-    /*
-    |--------------------------------------------------------------------------
-    | SELLER INFORMATION
-    |--------------------------------------------------------------------------
-    */
-
-    $seller1 =
-        trim(
-            (string)(
-                $draft['seller_1']
-                ?? ''
-            )
-        );
-
-    $seller2 =
-        trim(
-            (string)(
-                $draft['seller_2']
-                ?? ''
-            )
-        );
-
-
-    /*
-    |--------------------------------------------------------------------------
-    | AGREEMENT-LEVEL SELLER CONTACT DETAILS
-    |
-    | Seller 1 first.
-    | If Seller 1 does not have the information,
-    | use Seller 2's information.
-    |--------------------------------------------------------------------------
-    */
-
-    $sellerEmail =
-        trim(
-            (string)(
-                $draft['seller_1_email']
-                ?? ''
-            )
-        );
-
-    if ($sellerEmail === '') {
-
-        $sellerEmail =
-            trim(
-                (string)(
-                    $draft['seller_2_email']
-                    ?? ''
-                )
-            );
-    }
-
-
-    $sellerStreet =
-        trim(
-            (string)(
-                $draft['seller_1_street']
-                ?? ''
-            )
-        );
-
-    if ($sellerStreet === '') {
-
-        $sellerStreet =
-            trim(
-                (string)(
-                    $draft['seller_2_street']
-                    ?? ''
-                )
-            );
-    }
-
-
-    $sellerCity =
-        trim(
-            (string)(
-                $draft['seller_1_city']
-                ?? ''
-            )
-        );
-
-    if ($sellerCity === '') {
-
-        $sellerCity =
-            trim(
-                (string)(
-                    $draft['seller_2_city']
-                    ?? ''
-                )
-            );
-    }
-
-
-    $sellerState =
-        trim(
-            (string)(
-                $draft['seller_1_state']
-                ?? ''
-            )
-        );
-
-    if ($sellerState === '') {
-
-        $sellerState =
-            trim(
-                (string)(
-                    $draft['seller_2_state']
-                    ?? ''
-                )
-            );
-    }
-
-
-    $sellerZip =
-        trim(
-            (string)(
-                $draft['seller_1_zip']
-                ?? ''
-            )
-        );
-
-    if ($sellerZip === '') {
-
-        $sellerZip =
-            trim(
-                (string)(
-                    $draft['seller_2_zip']
-                    ?? ''
-                )
-            );
-    }
-
-
-    $sellerCityStateZip =
-        trim(
-            $sellerCity
-            . (
-                $sellerCity !== ''
-                && $sellerState !== ''
-                    ? ', '
-                    : ''
-            )
-            . $sellerState
-            . (
-                $sellerZip !== ''
-                    ? ' ' . $sellerZip
-                    : ''
-            )
-        );
-
-
-    /*
-    |--------------------------------------------------------------------------
-    | SELLER 1
-    |--------------------------------------------------------------------------
-    */
-
-    if ($seller1 !== '') {
-
-        $pdf->SetXY(
-            14,
-            198
-        );
-
-        $pdf->Cell(
-            67,
-            4,
-            $seller1,
-            0,
-            0
-        );
-    }
-
-
-    /*
-    |--------------------------------------------------------------------------
-    | SELLER 2
-    |--------------------------------------------------------------------------
-    */
-
-    if ($seller2 !== '') {
-
-        $pdf->SetXY(
-            14,
-            208
-        );
-
-        $pdf->Cell(
-            67,
-            4,
-            $seller2,
-            0,
-            0
-        );
-    }
-
-
-    /*
-    |--------------------------------------------------------------------------
-    | SELLER MAILING ADDRESS
-    |--------------------------------------------------------------------------
-    */
-
-    if ($sellerStreet !== '') {
-
-        $pdf->SetXY(
-            14,
-            218
-        );
-
-        $pdf->Cell(
-            67,
-            4,
-            $sellerStreet,
-            0,
-            0
-        );
-    }
-
-
-    if ($sellerCityStateZip !== '') {
-
-        $pdf->SetXY(
-            14,
-            228
-        );
-
-        $pdf->Cell(
-            67,
-            4,
-            $sellerCityStateZip,
-            0,
-            0
-        );
-    }
-
-
-    /*
-    |--------------------------------------------------------------------------
-    | SELLER EMAIL
-    |--------------------------------------------------------------------------
-    */
-
-    if ($sellerEmail !== '') {
-
-        $pdf->SetXY(
-            14,
-            238
-        );
-
-        $pdf->Cell(
-            67,
-            4,
-            $sellerEmail,
-            0,
-            0
-        );
-    }
-
-
-    /*
-    |--------------------------------------------------------------------------
-    | BROKERAGE
-    |--------------------------------------------------------------------------
-    */
-
-    $brokerageName =
-        trim(
-            (string)(
-                $draft['broker']
-                ?? ''
-            )
-        );
-
-    if ($brokerageName !== '') {
-
-        $pdf->SetXY(
-            102,
-            201
-        );
-
-        $pdf->Cell(
-            66,
-            4,
-            $brokerageName,
-            0,
-            0
-        );
-    }
-
-
-    /*
-    |--------------------------------------------------------------------------
-    | BROKERAGE ADDRESS
-    |--------------------------------------------------------------------------
-    |
-    | Temporary Fercodini values.
-    | Later these come from the brokerage profile.
-    |--------------------------------------------------------------------------
-    */
-
-    $brokerageStreet =
-        '484 Wolcott Road';
-
-    $brokerageCityStateZip =
-        'Wolcott, CT 06716';
-
-
-    $pdf->SetXY(
-        102,
-        211
+$fields[] =
+    fdfTextField(
+        'seller_1_signature',
+        $seller1Signature
     );
 
-    $pdf->Cell(
-        66,
-        4,
-        $brokerageStreet,
-        0,
-        0
+$fields[] =
+    fdfTextField(
+        'seller_1_signature_date',
+        $seller1SignatureDate
+    );
+
+$fields[] =
+    fdfTextField(
+        'seller_2_signature',
+        $seller2Signature
+    );
+
+$fields[] =
+    fdfTextField(
+        'seller_2_signature_date',
+        $seller2SignatureDate
+    );
+
+$fields[] =
+    fdfTextField(
+        'seller_address',
+        $sellerStreet
+    );
+
+$fields[] =
+    fdfTextField(
+        'seller_city_state_zip',
+        $sellerCityStateZip
+    );
+
+$fields[] =
+    fdfTextField(
+        'seller_email_address',
+        $sellerEmail
+    );
+
+$fields[] =
+    fdfTextField(
+        'brokerage_address',
+        $brokerageAddress
+    );
+
+$fields[] =
+    fdfTextField(
+        'brokerage_city_state_zip',
+        $brokerageCityStateZip
+    );
+
+$fields[] =
+    fdfTextField(
+        'agent_signature',
+        $agentSignature
+    );
+
+$fields[] =
+    fdfTextField(
+        'agent_signature_date',
+        $agentSignatureDate
+    );
+
+$fields[] =
+    fdfTextField(
+        'agent_email',
+        $agentEmail
     );
 
 
-    $pdf->SetXY(
-        102,
-        221
+$fdf =
+    "%FDF-1.2\n"
+    . "1 0 obj\n"
+    . "<<\n"
+    . "/FDF\n"
+    . "<<\n"
+    . "/Fields [\n"
+    . implode(
+        "\n",
+        $fields
+    )
+    . "\n]\n"
+    . ">>\n"
+    . ">>\n"
+    . "endobj\n"
+    . "trailer\n"
+    . "<< /Root 1 0 R >>\n"
+    . "%%EOF\n";
+
+
+/*
+|--------------------------------------------------------------------------
+| TEMP FILES
+|--------------------------------------------------------------------------
+*/
+
+$tempBase =
+    tempnam(
+        sys_get_temp_dir(),
+        'nemi_pdf_'
     );
 
-    $pdf->Cell(
-        66,
-        4,
-        $brokerageCityStateZip,
-        0,
-        0
+if ($tempBase === false) {
+    http_response_code(500);
+    exit(
+        'Could not create temporary PDF files.'
     );
-
-
-    /*
-    |--------------------------------------------------------------------------
-    | AUTHORIZED AGENT
-    |--------------------------------------------------------------------------
-    */
-
-    $agentName =
-        trim(
-            (string)(
-                $_SESSION['name']
-                ?? ''
-            )
-        );
-
-    if ($agentName === '') {
-
-        $agentName =
-            trim(
-                (string)(
-                    $_SESSION['email']
-                    ?? ''
-                )
-            );
-    }
-
-
-    $pdf->SetXY(
-        102,
-        231
-    );
-
-    $pdf->Cell(
-        53,
-        4,
-        $agentName,
-        0,
-        0
-    );
-
-
-    /*
-    |--------------------------------------------------------------------------
-    | AGENT EMAIL
-    |--------------------------------------------------------------------------
-    */
-
-    $agentEmail =
-        trim(
-            (string)(
-                $_SESSION['email']
-                ?? ''
-            )
-        );
-
-    if ($agentEmail !== '') {
-
-        $pdf->SetXY(
-            102,
-            241
-        );
-
-        $pdf->Cell(
-            66,
-            4,
-            $agentEmail,
-            0,
-            0
-        );
-    }
-
-
-    /*
-    |--------------------------------------------------------------------------
-    | AGENT DATE
-    |--------------------------------------------------------------------------
-    |
-    | For now this is intentionally blank.
-    | The actual signing date will be written when
-    | the Realtor signs the agreement.
-    |--------------------------------------------------------------------------
-    */
 }
 
+$fdfPath =
+    $tempBase . '.fdf';
+
+$outputPath =
+    $tempBase . '.pdf';
+
+@unlink($tempBase);
+
+
+if (
+    file_put_contents(
+        $fdfPath,
+        $fdf
+    ) === false
+) {
+
+    http_response_code(500);
+
+    exit(
+        'Could not prepare PDF field data.'
+    );
 }
+
+
+/*
+|--------------------------------------------------------------------------
+| FILL PDF BY FIELD NAME
+|--------------------------------------------------------------------------
+*/
+
+$pdftk =
+    '/usr/bin/pdftk';
+
+if (!is_executable($pdftk)) {
+
+    @unlink($fdfPath);
+
+    http_response_code(500);
+
+    exit(
+        'PDF form engine is not available.'
+    );
+}
+
+
+$command =
+    escapeshellarg($pdftk)
+    . ' '
+    . escapeshellarg($templatePath)
+    . ' fill_form '
+    . escapeshellarg($fdfPath)
+    . ' output '
+    . escapeshellarg($outputPath)
+    . ' need_appearances';
+
+
+$output = [];
+$returnCode = 0;
+
+exec(
+    $command . ' 2>&1',
+    $output,
+    $returnCode
+);
+
+
+@unlink($fdfPath);
+
+
+if (
+    $returnCode !== 0
+    ||
+    !is_file($outputPath)
+) {
+
+    @unlink($outputPath);
+
+    http_response_code(500);
+
+    exit(
+        'The prepared PDF could not be generated.'
+    );
+}
+
+
+/*
+|--------------------------------------------------------------------------
+| SEND PDF TO BROWSER
+|--------------------------------------------------------------------------
+*/
 
 $fileName =
     $version === 'signed'
         ? 'Exclusive-Right-to-Sell-Signed.pdf'
         : 'Exclusive-Right-to-Sell-Prepared.pdf';
 
-$pdf->Output(
-    'I',
-    $fileName
+
+header(
+    'Content-Type: application/pdf'
 );
+
+header(
+    'Content-Disposition: inline; filename="'
+    . $fileName
+    . '"'
+);
+
+header(
+    'Content-Length: '
+    . filesize($outputPath)
+);
+
+header(
+    'Cache-Control: private, no-store, max-age=0'
+);
+
+
+readfile($outputPath);
+
+@unlink($outputPath);
 
 exit;
