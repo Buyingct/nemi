@@ -257,6 +257,17 @@ $draftDefaults = [
 
 'other_terms' => '',
 
+
+/*
+|--------------------------------------------------------------------------
+| REALTOR SIGNATURE
+|--------------------------------------------------------------------------
+*/
+
+'agent_signature' => '',
+'agent_signature_date' => '',
+'agent_signed_at' => '',
+
 ];
 
 /*
@@ -296,6 +307,87 @@ $step = $stepParam === 'review'
 
 $errors = [];
 
+
+/*
+|--------------------------------------------------------------------------
+| REALTOR SIGN AGREEMENT
+|--------------------------------------------------------------------------
+*/
+
+if (
+    $_SERVER['REQUEST_METHOD'] === 'POST'
+    &&
+    $step === 'review'
+    &&
+    (
+        $_POST['action']
+        ?? ''
+    ) === 'sign_agreement'
+) {
+
+    /*
+    |--------------------------------------------------------------------------
+    | USE LOGGED-IN REALTOR
+    |--------------------------------------------------------------------------
+    */
+
+    $signatureName =
+        trim($meName);
+
+    if ($signatureName === '') {
+
+        http_response_code(400);
+
+        exit(
+            'Your Realtor name could not be found.'
+        );
+    }
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | RECORD SIGNATURE
+    |--------------------------------------------------------------------------
+    */
+
+    $signedAt =
+        new DateTimeImmutable(
+            'now',
+            new DateTimeZone(
+                'America/New_York'
+            )
+        );
+
+
+    $draft['agent_signature'] =
+        $signatureName;
+
+    $draft['agent_signature_date'] =
+        $signedAt->format('m/d/Y');
+
+    $draft['agent_signed_at'] =
+        $signedAt->format(DateTimeInterface::ATOM);
+
+
+    $_SESSION[$draftKey] =
+        $draft;
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | RETURN TO REVIEW
+    |--------------------------------------------------------------------------
+    */
+
+    header(
+        'Location: /app/form_prepare.php'
+        . '?form=exclusive_right_to_sell'
+        . '&step=review'
+        . '&signed=1'
+    );
+
+    exit;
+}
 
 /*
 |--------------------------------------------------------------------------
@@ -3777,12 +3869,43 @@ body{
         </div>
 
 
+        <?php if ($draft['agent_signature'] === ''): ?>
+
+    <form
+        method="post"
+        action="/app/form_prepare.php?form=<?= h($formId) ?>&step=review"
+    >
+
+        <input
+            type="hidden"
+            name="action"
+            value="sign_agreement"
+        >
+
         <button
-            type="button"
+            type="submit"
             class="form-sign-button"
         >
             Sign Agreement
         </button>
+
+    </form>
+
+<?php else: ?>
+
+    <div class="form-sign-complete">
+
+        <strong>
+            ✓ Signed by <?= h($draft['agent_signature']) ?>
+        </strong>
+
+        <small>
+            <?= h($draft['agent_signature_date']) ?>
+        </small>
+
+    </div>
+
+<?php endif; ?>
 
     </section>
 

@@ -675,8 +675,17 @@ $seller1SignatureDate = '';
 $seller2Signature = '';
 $seller2SignatureDate = '';
 
-$agentSignature = '';
-$agentSignatureDate = '';
+$agentSignature =
+    pdfFieldText(
+        $draft['agent_signature']
+        ?? ''
+    );
+
+$agentSignatureDate =
+    pdfFieldText(
+        $draft['agent_signature_date']
+        ?? ''
+    );
 
 
 /*
