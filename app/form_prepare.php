@@ -2595,19 +2595,683 @@ body{
 
     <a
         class="form-button-secondary"
-        href="/app/form_prepare.php?form=<?= h($formId) ?>&step=3"
+        href="/app/forms.php"
     >
-        ← Back
+        Cancel
     </a>
 
     <button
         class="form-button-primary"
         type="submit"
     >
-        Done — Review & Sign →
+        Continue →
     </button>
 
 </div>
+
+</form>
+
+
+<?php elseif ($step === 2): ?>
+
+<form
+    class="form-panel"
+    method="post"
+    action="/app/form_prepare.php?form=<?= h($formId) ?>&step=2"
+>
+
+    <div class="form-section-heading">
+
+        <h2>
+            Compensation
+        </h2>
+
+        <p>
+            Set the compensation terms that will appear in the agreement.
+        </p>
+
+    </div>
+
+
+    <div class="form-compensation-stack">
+
+
+        <section class="form-block">
+
+            <div class="form-block-title">
+                Brokerage service fee
+            </div>
+
+            <p class="form-block-copy">
+                What service fee did you agree on with the seller?
+            </p>
+
+
+            <div class="form-segmented">
+
+                <label class="form-segment-option">
+
+                    <input
+                        type="radio"
+                        name="service_fee_type"
+                        value="percent"
+                        <?= $draft['service_fee_type'] === 'percent'
+                            ? 'checked'
+                            : '' ?>
+                    >
+
+                    <span>
+                        Percentage
+                    </span>
+
+                </label>
+
+
+                <label class="form-segment-option">
+
+                    <input
+                        type="radio"
+                        name="service_fee_type"
+                        value="amount"
+                        <?= $draft['service_fee_type'] === 'amount'
+                            ? 'checked'
+                            : '' ?>
+                    >
+
+                    <span>
+                        Dollar amount
+                    </span>
+
+                </label>
+
+            </div>
+
+
+            <div class="form-value-row">
+
+                <div
+                    class="form-value"
+                    id="service-fee-wrap"
+                >
+
+                    <span
+                        class="form-value-prefix"
+                        id="service-dollar"
+                    >
+                        $
+                    </span>
+
+                    <input
+                        id="service_fee_value"
+                        name="service_fee_value"
+                        type="text"
+                        inputmode="decimal"
+                        value="<?= h($draft['service_fee_value']) ?>"
+                        autocomplete="off"
+                    >
+
+                    <span
+                        class="form-value-unit"
+                        id="service-percent"
+                    >
+                        %
+                    </span>
+
+                </div>
+
+            </div>
+
+
+            <?php if (isset($errors['service_fee_value'])): ?>
+
+                <div class="form-field-error">
+                    <?= h($errors['service_fee_value']) ?>
+                </div>
+
+            <?php endif; ?>
+
+        </section>
+
+
+        <section class="form-block">
+
+            <div class="form-block-title">
+                Buyer-broker compensation
+            </div>
+
+            <p class="form-block-copy">
+                Will your recommendation include offering compensation
+                to a buyer’s brokerage?
+            </p>
+
+
+            <div class="form-choice-grid">
+
+                <label class="form-choice">
+
+                    <input
+                        type="radio"
+                        name="buyer_broker_authorized"
+                        value="yes"
+                        <?= $draft['buyer_broker_authorized'] === 'yes'
+                            ? 'checked'
+                            : '' ?>
+                    >
+
+                    <span class="form-choice-card">
+
+                        <strong>
+                            Yes
+                        </strong>
+
+                        <small>
+                            Include a buyer-broker compensation amount.
+                        </small>
+
+                    </span>
+
+                </label>
+
+
+                <label class="form-choice">
+
+                    <input
+                        type="radio"
+                        name="buyer_broker_authorized"
+                        value="no"
+                        <?= $draft['buyer_broker_authorized'] === 'no'
+                            ? 'checked'
+                            : '' ?>
+                    >
+
+                    <span class="form-choice-card">
+
+                        <strong>
+                            No
+                        </strong>
+
+                        <small>
+                            Do not include buyer-broker compensation.
+                        </small>
+
+                    </span>
+
+                </label>
+
+            </div>
+
+
+            <div
+                class="buyer-comp-details"
+                id="buyer-comp-details"
+            >
+
+                <div
+                    class="form-field"
+                    style="margin-top:24px;"
+                >
+
+                    <label>
+                        Amount to offer
+                    </label>
+
+                </div>
+
+
+                <div
+                    class="form-segmented"
+                    style="margin-top:10px;"
+                >
+
+                    <label class="form-segment-option">
+
+                        <input
+                            type="radio"
+                            name="buyer_broker_fee_type"
+                            value="percent"
+                            <?= $draft['buyer_broker_fee_type'] === 'percent'
+                                ? 'checked'
+                                : '' ?>
+                        >
+
+                        <span>
+                            Percentage
+                        </span>
+
+                    </label>
+
+
+                    <label class="form-segment-option">
+
+                        <input
+                            type="radio"
+                            name="buyer_broker_fee_type"
+                            value="amount"
+                            <?= $draft['buyer_broker_fee_type'] === 'amount'
+                                ? 'checked'
+                                : '' ?>
+                        >
+
+                        <span>
+                            Dollar amount
+                        </span>
+
+                    </label>
+
+                </div>
+
+
+                <div class="form-value-row">
+
+                    <div
+                        class="form-value"
+                        id="buyer-fee-wrap"
+                    >
+
+                        <span
+                            class="form-value-prefix"
+                            id="buyer-dollar"
+                        >
+                            $
+                        </span>
+
+                        <input
+                            id="buyer_broker_fee_value"
+                            name="buyer_broker_fee_value"
+                            type="text"
+                            inputmode="decimal"
+                            value="<?= h($draft['buyer_broker_fee_value']) ?>"
+                            autocomplete="off"
+                        >
+
+                        <span
+                            class="form-value-unit"
+                            id="buyer-percent"
+                        >
+                            %
+                        </span>
+
+                    </div>
+
+                </div>
+
+
+                <?php if (isset($errors['buyer_broker_fee_value'])): ?>
+
+                    <div class="form-field-error">
+                        <?= h($errors['buyer_broker_fee_value']) ?>
+                    </div>
+
+                <?php endif; ?>
+
+            </div>
+
+        </section>
+
+    </div>
+
+
+    <div class="form-actions">
+
+        <a
+            class="form-button-secondary"
+            href="/app/form_prepare.php?form=<?= h($formId) ?>&step=1"
+        >
+            ← Back
+        </a>
+
+        <button
+            class="form-button-primary"
+            type="submit"
+        >
+            Continue →
+        </button>
+
+    </div>
+
+</form>
+
+
+<?php elseif ($step === 3): ?>
+
+<form
+    class="form-panel"
+    method="post"
+    action="/app/form_prepare.php?form=<?= h($formId) ?>&step=3"
+>
+
+    <div class="form-section-heading">
+
+        <h2>
+            Protection period
+        </h2>
+
+        <p>
+            How long is the protection period after the listing ends?
+        </p>
+
+    </div>
+
+
+    <section class="form-block">
+
+        <div class="form-block-title">
+            Choose the period
+        </div>
+
+        <p class="form-block-copy">
+            Select the number of days that will appear in the agreement.
+        </p>
+
+
+        <div class="form-choice-grid form-choice-grid-three">
+
+            <label class="form-choice">
+
+                <input
+                    type="radio"
+                    name="protection_period_choice"
+                    value="30"
+                    <?= $draft['protection_period_choice'] === '30'
+                        ? 'checked'
+                        : '' ?>
+                >
+
+                <span class="form-choice-card form-choice-card-compact">
+
+                    <strong>
+                        30 days
+                    </strong>
+
+                    <small>
+                        Thirty days after the listing ends.
+                    </small>
+
+                </span>
+
+            </label>
+
+
+            <label class="form-choice">
+
+                <input
+                    type="radio"
+                    name="protection_period_choice"
+                    value="60"
+                    <?= $draft['protection_period_choice'] === '60'
+                        ? 'checked'
+                        : '' ?>
+                >
+
+                <span class="form-choice-card form-choice-card-compact">
+
+                    <strong>
+                        60 days
+                    </strong>
+
+                    <small>
+                        Sixty days after the listing ends.
+                    </small>
+
+                </span>
+
+            </label>
+
+
+            <label class="form-choice">
+
+                <input
+                    type="radio"
+                    name="protection_period_choice"
+                    value="custom"
+                    <?= $draft['protection_period_choice'] === 'custom'
+                        ? 'checked'
+                        : '' ?>
+                >
+
+                <span class="form-choice-card form-choice-card-compact">
+
+                    <strong>
+                        Custom
+                    </strong>
+
+                    <small>
+                        Enter a different number of days.
+                    </small>
+
+                </span>
+
+            </label>
+
+        </div>
+
+
+        <div
+            class="form-conditional protection-custom"
+            id="protection-custom"
+        >
+
+            <div class="form-field">
+
+                <label for="protection_period_custom">
+                    Number of days
+                </label>
+
+                <div class="form-value">
+
+                    <input
+                        id="protection_period_custom"
+                        name="protection_period_custom"
+                        type="text"
+                        inputmode="numeric"
+                        value="<?= h(
+                            $draft['protection_period_choice'] === 'custom'
+                                ? $draft['protection_period_days']
+                                : ''
+                        ) ?>"
+                        autocomplete="off"
+                    >
+
+                    <span class="form-value-unit">
+                        days
+                    </span>
+
+                </div>
+
+
+                <?php if (isset($errors['protection_period_custom'])): ?>
+
+                    <div class="form-field-error">
+                        <?= h($errors['protection_period_custom']) ?>
+                    </div>
+
+                <?php endif; ?>
+
+            </div>
+
+        </div>
+
+    </section>
+
+
+    <div class="form-actions">
+
+        <a
+            class="form-button-secondary"
+            href="/app/form_prepare.php?form=<?= h($formId) ?>&step=2"
+        >
+            ← Back
+        </a>
+
+        <button
+            class="form-button-primary"
+            type="submit"
+        >
+            Continue →
+        </button>
+
+    </div>
+
+</form>
+
+
+<?php elseif ($step === 4): ?>
+
+<form
+    class="form-panel"
+    method="post"
+    action="/app/form_prepare.php?form=<?= h($formId) ?>&step=4"
+>
+
+    <div class="form-section-heading">
+
+        <h2>
+            Final Details
+        </h2>
+
+        <p>
+            Add anything else that needs to appear in the agreement.
+        </p>
+
+    </div>
+
+
+    <section class="form-block">
+
+        <div class="form-block-title">
+            Showing instructions
+        </div>
+
+        <p class="form-block-copy">
+            Are there any special instructions for showing the property?
+        </p>
+
+
+        <div class="form-choice-grid">
+
+            <label class="form-choice">
+
+                <input
+                    type="radio"
+                    name="showing_instruction_choice"
+                    value="standard"
+                    <?= $draft['showing_instruction_choice'] === 'standard'
+                        ? 'checked'
+                        : '' ?>
+                >
+
+                <span class="form-choice-card">
+
+                    <strong>
+                        No special instructions
+                    </strong>
+
+                    <small>
+                        Use the normal showing and access process.
+                    </small>
+
+                </span>
+
+            </label>
+
+
+            <label class="form-choice">
+
+                <input
+                    type="radio"
+                    name="showing_instruction_choice"
+                    value="custom"
+                    <?= $draft['showing_instruction_choice'] === 'custom'
+                        ? 'checked'
+                        : '' ?>
+                >
+
+                <span class="form-choice-card">
+
+                    <strong>
+                        Add instructions
+                    </strong>
+
+                    <small>
+                        Include special instructions for access or showings.
+                    </small>
+
+                </span>
+
+            </label>
+
+        </div>
+
+
+        <div
+            class="form-conditional showing-custom"
+            id="showing-custom"
+        >
+
+            <div class="form-field">
+
+                <label for="showing_instructions">
+                    Special showing instructions
+                </label>
+
+                <textarea
+                    id="showing_instructions"
+                    name="showing_instructions"
+                    placeholder="Example: Please give seller at least 2 hours notice before showings."
+                ><?= h($draft['showing_instructions']) ?></textarea>
+
+            </div>
+
+        </div>
+
+    </section>
+
+
+    <section class="form-block">
+
+        <div class="form-block-title">
+            Other Terms, Conditions, or Special Instructions
+        </div>
+
+        <p class="form-block-copy">
+            Leave this blank if there are no additional terms.
+        </p>
+
+
+        <div class="form-field">
+
+            <label for="other_terms">
+                Other terms
+            </label>
+
+            <textarea
+                id="other_terms"
+                name="other_terms"
+                placeholder="Enter any additional terms, conditions, or special instructions."
+            ><?= h($draft['other_terms']) ?></textarea>
+
+        </div>
+
+    </section>
+
+
+    <div class="form-actions">
+
+        <a
+            class="form-button-secondary"
+            href="/app/form_prepare.php?form=<?= h($formId) ?>&step=3"
+        >
+            ← Back
+        </a>
+
+        <button
+            class="form-button-primary"
+            type="submit"
+        >
+            Done — Review & Sign →
+        </button>
+
+    </div>
 
 </form>
 
