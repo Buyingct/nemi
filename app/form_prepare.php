@@ -401,6 +401,136 @@ if (
 
 /*
 |--------------------------------------------------------------------------
+| SEND TO CLIENT
+|--------------------------------------------------------------------------
+*/
+
+if (
+    $_SERVER['REQUEST_METHOD'] === 'POST'
+    &&
+    $step === 'client'
+    &&
+    (
+        $_POST['action']
+        ?? ''
+    ) === 'send_to_client'
+) {
+
+    /*
+    |--------------------------------------------------------------------------
+    | REALTOR MUST SIGN FIRST
+    |--------------------------------------------------------------------------
+    */
+
+    if (
+        trim(
+            (string)(
+                $draft['agent_signature']
+                ?? ''
+            )
+        ) === ''
+    ) {
+
+        header(
+            'Location: /app/form_prepare.php'
+            . '?form=exclusive_right_to_sell'
+            . '&step=review'
+        );
+
+        exit;
+    }
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | DETERMINE RECIPIENT
+    |--------------------------------------------------------------------------
+    |
+    | Seller 1 first.
+    | Seller 2 is the fallback, matching the agreement-level
+    | contact behavior already used by this form.
+    |--------------------------------------------------------------------------
+    */
+
+    $recipientEmail =
+        trim(
+            (string)(
+                $draft['seller_1_email']
+                ?? ''
+            )
+        );
+
+    if ($recipientEmail === '') {
+
+        $recipientEmail =
+            trim(
+                (string)(
+                    $draft['seller_2_email']
+                    ?? ''
+                )
+            );
+    }
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | VALIDATE
+    |--------------------------------------------------------------------------
+    */
+
+    if (
+        $recipientEmail === ''
+        ||
+        !filter_var(
+            $recipientEmail,
+            FILTER_VALIDATE_EMAIL
+        )
+    ) {
+
+        header(
+            'Location: /app/form_prepare.php'
+            . '?form=exclusive_right_to_sell'
+            . '&step=1'
+            . '&email_required=1'
+        );
+
+        exit;
+    }
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | RECORD INTENT
+    |--------------------------------------------------------------------------
+    |
+    | We are deliberately NOT emailing yet.
+    |
+    | Next we will replace this temporary state with a persistent
+    | agreement/signing record and secure client token.
+    |--------------------------------------------------------------------------
+    */
+
+    $draft['client_recipient_email'] =
+        $recipientEmail;
+
+    $draft['client_send_ready'] =
+        true;
+
+    $_SESSION[$draftKey] =
+        $draft;
+
+
+    header(
+        'Location: /app/form_prepare.php'
+        . '?form=exclusive_right_to_sell'
+        . '&step=client'
+        . '&send_ready=1'
+    );
+
+    exit;
+}
+/*
+|--------------------------------------------------------------------------
 | SAVE CURRENT STEP
 |--------------------------------------------------------------------------
 */
@@ -2025,24 +2155,67 @@ body{
             </a>
 
 
-            <a
-                class="form-choice"
-                href="#"
-            >
+          <?php if ($agreementSellerEmail !== ''): ?>
 
-                <span class="form-choice-card">
+    <form
+        method="post"
+        action="/app/form_prepare.php?form=<?= h($formId) ?>&step=client"
+        class="form-choice"
+    >
 
-                    <strong>
-                        Send to my client
-                    </strong>
+        <input
+            type="hidden"
+            name="action"
+            value="send_to_client"
+        >
 
-                    <small>
-                        Send the agreement for your client to review and sign.
-                    </small>
+        <button
+            type="submit"
+            class="form-choice-card"
+            style="
+                width:100%;
+                height:100%;
+                text-align:left;
+                cursor:pointer;
+                font:inherit;
+            "
+        >
 
-                </span>
+            <strong>
+                Send to my client
+            </strong>
 
-            </a>
+            <small>
+                <?= h($agreementSellerEmail) ?>
+            </small>
+
+        </button>
+
+    </form>
+
+<?php else: ?>
+
+    <a
+        class="form-choice"
+        href="/app/form_prepare.php?form=<?= h($formId) ?>&step=1"
+    >
+
+        <span class="form-choice-card">
+
+            <strong>
+                Add seller email
+            </strong>
+
+            <small>
+                Nemi needs an email before this agreement can be sent.
+            </small>
+
+        </span>
+
+    </a>
+
+<?php endif; ?>  
+
 
 
         </div>
