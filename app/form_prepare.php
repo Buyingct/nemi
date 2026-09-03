@@ -295,12 +295,22 @@ $draft = array_replace(
 
 $stepParam = (string)($_GET['step'] ?? '1');
 
-$step = $stepParam === 'review'
-    ? 'review'
-    : max(
-        1,
-        (int)$stepParam
-    );
+if (
+    $stepParam === 'review'
+    ||
+    $stepParam === 'client'
+) {
+
+    $step = $stepParam;
+
+} else {
+
+    $step =
+        max(
+            1,
+            (int)$stepParam
+        );
+}
 
 
 
@@ -1971,6 +1981,109 @@ body{
         <div class="form-field-error">
             <?= h($errors['seller_1']) ?>
         </div>
+
+        <?php elseif ($step === 'client'): ?>
+
+
+<div class="form-panel">
+
+    <div class="form-section-heading">
+
+        <h2>
+            Ready for your client
+        </h2>
+
+        <p>
+            Choose how you want to review or deliver this agreement.
+        </p>
+
+    </div>
+
+
+    <section class="form-block">
+
+        <div class="form-choice-grid">
+
+
+            <a
+                class="form-choice"
+                href="#"
+            >
+
+                <span class="form-choice-card">
+
+                    <strong>
+                        Review it together
+                    </strong>
+
+                    <small>
+                        Present the agreement with your client in Guided View.
+                    </small>
+
+                </span>
+
+            </a>
+
+
+            <a
+                class="form-choice"
+                href="#"
+            >
+
+                <span class="form-choice-card">
+
+                    <strong>
+                        Send to my client
+                    </strong>
+
+                    <small>
+                        Send the agreement for your client to review and sign.
+                    </small>
+
+                </span>
+
+            </a>
+
+
+        </div>
+
+    </section>
+
+
+    <section class="form-block">
+
+        <div class="form-block-title">
+            Signed Realtor copy
+        </div>
+
+        <p class="form-block-copy">
+            Your signature has been added to the agreement.
+        </p>
+
+
+        <a
+            class="form-button-secondary"
+            href="/app/form_pdf.php?form=exclusive_right_to_sell&version=signed"
+            target="_blank"
+        >
+            View signed PDF
+        </a>
+
+    </section>
+
+
+    <div class="form-actions">
+
+        <a
+            class="form-button-secondary"
+            href="/app/form_prepare.php?form=<?= h($formId) ?>&step=review"
+        >
+            ← Back to review
+        </a>
+
+    </div>
+
+</div>
 
     <?php endif; ?>
 
@@ -3913,13 +4026,17 @@ body{
 
     <div class="form-actions">
 
-        <a
-            class="form-button-secondary"
-            href="/app/form_prepare.php?form=<?= h($formId) ?>&step=4"
-        >
-            ← Back
-        </a>
+       <div class="form-actions">
 
+    <a
+        class="form-button-secondary"
+        href="/app/form_prepare.php?form=<?= h($formId) ?>&step=4"
+    >
+        ← Back
+    </a>
+
+
+    <?php if ($draft['agent_signature'] === ''): ?>
 
         <button
             class="form-button-primary"
@@ -3929,7 +4046,18 @@ body{
             Sign before sending
         </button>
 
-    </div>
+    <?php else: ?>
+
+        <a
+            class="form-button-primary"
+            href="/app/form_prepare.php?form=<?= h($formId) ?>&step=client"
+        >
+            Continue to Client →
+        </a>
+
+    <?php endif; ?>
+
+</div>
 
 
 </div>
